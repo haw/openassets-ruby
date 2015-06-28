@@ -28,5 +28,14 @@ module OpenAssets
       script = OA_VERSION_BYTE.to_s(16) + script # add version byte to script hash
       encode_base58(script + checksum(script)) # add checksum & encode
     end
+
+    # LEB128 encode
+    def encode_leb128(value)
+      d7=->n{(n>>7)==0 ? [n] : d7[n>>7]+[127 & n]}
+      msb=->a{a0=a[0].to_s(16);[(a[0]< 16 ? "0"+a0 : a0)]+a[1..-1].map{|x|(x|128).to_s(16)}}
+      leb128=->n{msb[d7[n]].reverse.join}
+      leb128[value]
+    end
+
   end
 end
