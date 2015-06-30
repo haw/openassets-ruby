@@ -20,17 +20,16 @@ module OpenAssets
       end
 
       # Serialize the marker output into a Open Assets Payload buffer.
-      # @return [bytes] The serialized payload.
+      # @return [String] The serialized payload.
       def to_payload
         payload = [OAP_MARKER, VERSION]
-        require 'pp'
-        payload << Bitcoin::Protocol.pack_var_int(@asset_quantities.length)
-        @asset_quantities.map{|q|
-          payload << encode_leb128(q)
-        }
-        payload << Bitcoin::Protocol.pack_var_int(@metadata.length).to_s
-        payload << @metadata
-        payload
+        payload << Bitcoin::Protocol.pack_var_int(@asset_quantities.length).unpack("H*")
+        @asset_quantities.map{|q|payload << encode_leb128(q)}
+        payload << Bitcoin::Protocol.pack_var_int(@metadata.length).unpack("H*")
+        tmp = []
+        @metadata.bytes{|b| tmp << b.to_s(16)}
+        payload << tmp.join
+        payload.join
       end
 
       # Deserialize the marker output payload.
