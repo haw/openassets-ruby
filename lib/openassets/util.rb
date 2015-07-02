@@ -1,6 +1,6 @@
 module OpenAssets
   module Util
-    include ::Bitcoin::Util
+    extend ::Bitcoin::Util
 
     # namespace of Open Asset
     OA_NAMESPACE = 19
@@ -35,6 +35,18 @@ module OpenAssets
       msb=->a{a0=a[0].to_s(16);[(a[0]< 16 ? "0"+a0 : a0)]+a[1..-1].map{|x|(x|128).to_s(16)}}
       leb128=->n{msb[d7[n]].reverse.join}
       leb128[value]
+    end
+
+    # LEB128 decode
+    def decode_leb128(value)
+      mbs = to_bytes(value).map{|x|(x.to_i(16)>=128 ? x : x+"|")}.join.split('|')
+      num=->a{(a.size==1 ? a[0] : (num[a[0..-2]]<<7)|a[-1])}
+      r7=->n{to_bytes(n).map{|x|(x.to_i(16))&127}}
+      mbs.map{|x|num[r7[x].reverse]}
+    end
+
+    def to_bytes(string)
+      string.each_char.each_slice(2).map{|v|v.join}
     end
 
   end
