@@ -1,6 +1,7 @@
 module OpenAssets
   module Util
     extend ::Bitcoin::Util
+    include ::Bitcoin::Util
 
     # namespace of Open Asset
     OA_NAMESPACE = 19
