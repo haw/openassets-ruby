@@ -9,7 +9,7 @@ module OpenAssets
       attr_accessor :asset_quantity
       attr_accessor :output_type
 
-      def initialize(value, script, asset_id, asset_quantity = 0, output_type)
+      def initialize(value, script, asset_id, asset_quantity = 0, output_type = OutputType::UNCOLORED)
         raise ArgumentError, "invalid output_type : #{output_type}" unless OutputType.all.include?(output_type)
         raise ArgumentError, "invalid asset_quantity asset_quantity should be unsignd integer. " unless asset_quantity.between?(0, MarkerOutput::MAX_ASSET_QUANTITY)
         @value = value
