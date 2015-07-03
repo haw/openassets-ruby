@@ -5,6 +5,8 @@ module OpenAssets
       include OpenAssets::Util
       extend OpenAssets::Util
 
+      MAX_ASSET_QUANTITY = 2 ** 63 -1
+
       # A tag indicating thath this transaction is an Open Assets transaction.
       OAP_MARKER = "4f41"
       # The major revision number of the Open Assets Protocol.(1=0x0100)

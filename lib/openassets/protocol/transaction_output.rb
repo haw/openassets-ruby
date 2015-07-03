@@ -11,6 +11,7 @@ module OpenAssets
 
       def initialize(value, script, asset_id, asset_quantity = 0, output_type)
         raise ArgumentError, "invalid output_type : #{output_type}" unless OutputType.all.include?(output_type)
+        raise ArgumentError, "invalid asset_quantity asset_quantity should be unsignd integer. " unless asset_quantity.between?(0, MarkerOutput::MAX_ASSET_QUANTITY)
         @value = value
         @script = script
         @asset_id = asset_id
