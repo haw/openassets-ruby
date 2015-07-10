@@ -48,6 +48,15 @@ module OpenAssets
         new(asset_quantities, metadata)
       end
 
+      # Parses an output and returns the payload if the output matches the right pattern for a marker output,
+      # @param [Bitcoin::Script] output_script: The output script to be parsed.
+      # @return [ByteArray] The marker output payload if the output fits the pattern, nil otherwise.
+      def self.parse_script(output_script)
+        data = output_script.get_op_return_data
+        date if data.nil?
+        data.start_with?(OAP_MARKER) ? data : nil
+      end
+
       private
       def self.parse_asset_qty(payload)
         bytes = to_bytes(payload)
