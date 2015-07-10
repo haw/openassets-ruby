@@ -53,7 +53,7 @@ module OpenAssets
       # @return [ByteArray] The marker output payload if the output fits the pattern, nil otherwise.
       def self.parse_script(output_script)
         data = output_script.get_op_return_data
-        date if data.nil?
+        return date if data.nil?
         data.start_with?(OAP_MARKER) ? data : nil
       end
 
