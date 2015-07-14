@@ -24,4 +24,9 @@ describe OpenAssets::Protocol::MarkerOutput do
     expect(payload).to eq("4f41010002014400")
   end
 
+  it "build script" do
+    script = OpenAssets::Protocol::MarkerOutput.new([10000], "u=https://cpr.sm/5YgSU1Pg-q").build_script
+    expect(script.to_string).to eq("OP_RETURN 4f41010001904e1b753d68747470733a2f2f6370722e736d2f35596753553150672d71")
+  end
+
 end

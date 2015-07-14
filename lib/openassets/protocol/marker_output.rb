@@ -57,6 +57,12 @@ module OpenAssets
         data.start_with?(OAP_MARKER) ? data : nil
       end
 
+      # Creates an output script containing an OP_RETURN and a PUSHDATA from payload.
+      # @return [Bitcoin::Script] the output script.
+      def build_script
+        Bitcoin::Script.from_string("OP_RETURN #{to_payload}")
+      end
+
       private
       def self.parse_asset_qty(payload)
         bytes = to_bytes(payload)
