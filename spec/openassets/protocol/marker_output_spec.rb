@@ -17,10 +17,10 @@ describe OpenAssets::Protocol::MarkerOutput do
 
   it "parse output_script" do
     # OP_RETURN deadbeef (normal bitcoin op_return)
-    no_payload = OpenAssets::Protocol::MarkerOutput.parse_script(Bitcoin::Script.new(["6a04deadbeef"].pack("H*")))
+    no_payload = OpenAssets::Protocol::MarkerOutput.parse_script(Bitcoin::Script.new(["6a04deadbeef"].pack("H*")).to_payload)
     expect(no_payload).to be_nil
     # OP_RETURN 4f41010002014400 (colored coin marker output)
-    payload = OpenAssets::Protocol::MarkerOutput.parse_script(Bitcoin::Script.new(["6a084f41010002014400"].pack("H*")))
+    payload = OpenAssets::Protocol::MarkerOutput.parse_script(Bitcoin::Script.new(["6a084f41010002014400"].pack("H*")).to_payload)
     expect(payload).to eq("4f41010002014400")
   end
 
