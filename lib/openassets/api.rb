@@ -2,29 +2,36 @@ module OpenAssets
 
   class Api
 
-    attr_accessor :config
+    attr_reader :config
+    attr_reader :provider
 
     def initialize(config = nil)
+      @config = {:network => 'mainnet',
+                 :provider => 'bitcoind',
+                 :rpc => { :host => 'localhost', :port => 8332 , :user => '', :password => '', :schema => 'https'}}
       if config
-        @config = config
+        @config.update(config)
+      end
+      puts @config[:rpc]
+      if @config[:provider] == 'bitcoind'
+        @provider = Provider::BitcoinCoreProvider.new(@config[:rpc])
       else
-        @config = {:network => 'mainnet'}
+        raise StandardError, 'specified unsupported provider.'
       end
     end
-
 
     def is_testnet?
       @config[:network] == 'testnet'
     end
 
-    private
-    def config=(config)
-      if Hash === config
-        @config = config
-      else
-        raise ArgumentError, 'configuration object must be a hash.'
-      end
+    # get UTXO for colored coins.
+    # @param [String] address Obtain the balance of this address only, or all addresses if unspecified.
+    def list_unspent(address = nil)
+      result = []
+      puts "listunpent = #{@provider.list_unspent}"
+      result
     end
+
   end
 
 end

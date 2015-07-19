@@ -4,6 +4,6 @@ module OpenAssets
     class ApiError < StandardError
 
     end
-    
+
   end
 end

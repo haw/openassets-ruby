@@ -6,5 +6,6 @@ module OpenAssets
   autoload :VERSION, 'openassets/version'
   autoload :Util, 'openassets/util'
   autoload :Api, 'openassets/api'
+  autoload :Provider, 'openassets/provider'
 
 end
