@@ -2,6 +2,8 @@ module OpenAssets
 
   class Api
 
+    include OpenAssets::Util
+
     attr_reader :config
     attr_reader :provider
 
@@ -19,6 +21,10 @@ module OpenAssets
       end
     end
 
+    def provider
+      @provider
+    end
+
     def is_testnet?
       @config[:network] == 'testnet'
     end
@@ -27,7 +33,19 @@ module OpenAssets
     # @param [String] address Obtain the balance of this address only, or all addresses if unspecified.
     def list_unspent(address = nil)
       result = []
-      puts "listunpent = #{@provider.list_unspent}"
+      unspents = provider.list_unspent(address)
+      unspents.each do |unspent|
+        result << {
+          'txid' => unspent['txid'],
+          'vout' =>  unspent['vout'],
+          'address' =>  unspent['address'],
+          'oa_address' => address_to_oa_address(unspent['address']),
+          'script' => unspent['scriptPubKey'],
+          'amount' => unspent['amount'],
+          'confirmations' => unspent['confirmations'],
+          'asset_id' => nil,
+          'asset_quantity' => '0'}
+      end
       result
     end
 
