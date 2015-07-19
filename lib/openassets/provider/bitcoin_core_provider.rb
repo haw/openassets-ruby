@@ -25,7 +25,6 @@ module OpenAssets
         url = "#{@config[:schema]}://"
         url.concat "#{@config[:user]}:#{@config[:password]}@"
         url.concat "#{@config[:host]}:#{@config[:port]}"
-        puts url
         url
       end
 
@@ -35,7 +34,6 @@ module OpenAssets
           :params => params,
           :id => 'jsonrpc'
         }
-        puts data
         RestClient.post(server_url, data.to_json, content_type: :json) do |respdata, request, result|
           response = JSON.parse(respdata)
           raise ApiError, response['error'] if response['error']
