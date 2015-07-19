@@ -43,8 +43,8 @@ module OpenAssets
           'script' => unspent['scriptPubKey'],
           'amount' => unspent['amount'],
           'confirmations' => unspent['confirmations'],
-          'asset_id' => nil,
-          'asset_quantity' => '0'}
+          'asset_id' => nil, #TODO
+          'asset_quantity' => '0'} #TODO
       end
       result
     end
