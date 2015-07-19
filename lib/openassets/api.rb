@@ -31,7 +31,7 @@ module OpenAssets
 
     # get UTXO for colored coins.
     # @param [String] address Obtain the balance of this address only, or all addresses if unspecified.
-    def list_unspent(address = nil)
+    def list_unspent(address = [])
       result = []
       unspents = provider.list_unspent(address)
       unspents.each do |unspent|

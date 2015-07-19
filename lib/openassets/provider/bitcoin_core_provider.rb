@@ -30,7 +30,6 @@ module OpenAssets
       end
 
       def request(command, *params)
-        puts params.nil?
         data = {
           :method => command,
           :params => params,
