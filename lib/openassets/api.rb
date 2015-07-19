@@ -12,7 +12,6 @@ module OpenAssets
       if config
         @config.update(config)
       end
-      puts @config[:rpc]
       if @config[:provider] == 'bitcoind'
         @provider = Provider::BitcoinCoreProvider.new(@config[:rpc])
       else
