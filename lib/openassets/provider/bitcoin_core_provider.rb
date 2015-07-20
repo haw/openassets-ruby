@@ -23,9 +23,13 @@ module OpenAssets
       # Get raw transaction.
       # @param [String] transaction_hash The transaction hash.
       # @param [String] verbose Whether to get the serialized or decoded transaction. 0: serialized transaction (Default). 1: decode transaction.
-      # @return [String] (if verbose=0)—the serialized transaction. (if verbose=1)—the decoded transaction
+      # @return [String] (if verbose=0)—the serialized transaction. (if verbose=1)—the decoded transaction. (if transaction not found)—nil.
       def get_transaction(transaction_hash, verbose = 0)
+        begin
         request('getrawtransaction', transaction_hash, verbose)
+        rescue OpenAssets::Provider::ApiError => e
+          nil
+        end
       end
 
       private
