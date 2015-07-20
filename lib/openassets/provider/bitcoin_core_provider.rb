@@ -20,6 +20,14 @@ module OpenAssets
         request('listunspent', min, max, addresses)
       end
 
+      # Get raw transaction.
+      # @param [String] transaction_hash The transaction hash.
+      # @param [String] verbose Whether to get the serialized or decoded transaction. 0: serialized transaction (Default). 1: decode transaction.
+      # @return [String] (if verbose=0)—the serialized transaction. (if verbose=1)—the decoded transaction
+      def get_transaction(transaction_hash, verbose = 0)
+        request('getrawtransaction', transaction_hash, verbose)
+      end
+
       private
       def server_url
         url = "#{@config[:schema]}://"
