@@ -26,10 +26,31 @@ module OpenAssets
       # @return [String] (if verbose=0)—the serialized transaction. (if verbose=1)—the decoded transaction. (if transaction not found)—nil.
       def get_transaction(transaction_hash, verbose = 0)
         begin
-        request('getrawtransaction', transaction_hash, verbose)
+          request('getrawtransaction', transaction_hash, verbose)
         rescue OpenAssets::Provider::ApiError => e
           nil
         end
+      end
+
+      # Convert decode tx string to Bitcion::Protocol::Tx
+      def decode_tx_to_btc_tx(tx)
+        hash = {
+          'version' => tx['version'],
+          'lock_time' => tx['locktime'],
+          'hex' => tx['hex'],
+          'txid' => tx['txid'],
+          'blockhash' => tx['blockhash'],
+          'confirmations' => tx['confirmations'],
+          'time' => tx['time'],
+          'blocktime' => tx['blocktime'],
+          'in' => tx['vin'].map{|input|
+            {'output_index' => input['vout'], 'previous_transaction_hash' => input['txid'], 'coinbase' => input['coinbase'],
+             'scriptSig' => input['scriptSig']['asm'], 'sequence' => input['sequence']}},
+          'out' => tx['vout'].map{|out|
+            {'amount' => out['value'], 'scriptPubKey' => out['scriptPubKey']['asm']}
+          }
+        }
+        Bitcoin::Protocol::Tx.from_hash(hash)
       end
 
       private

@@ -14,7 +14,7 @@ module OpenAssets
       # @param [String] asset_id The asset ID of the output.
       # @param [Integer] asset_quantity The asset quantity of the output.
       # @param [OpenAssets::Transaction::OutPutType] output_type The type of the output.
-      def initialize(value, script, asset_id, asset_quantity = 0, output_type = OutputType::UNCOLORED)
+      def initialize(value, script, asset_id = nil, asset_quantity = 0, output_type = OutputType::UNCOLORED)
         raise ArgumentError, "invalid output_type : #{output_type}" unless OutputType.all.include?(output_type)
         raise ArgumentError, "invalid asset_quantity asset_quantity should be unsignd integer. " unless asset_quantity.between?(0, MarkerOutput::MAX_ASSET_QUANTITY)
         @value = value
