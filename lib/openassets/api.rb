@@ -47,7 +47,7 @@ module OpenAssets
           'script' => out.output.script,
           'amount' => out.output.value,
           'confirmations' => "",
-          'asset_id' => out.output.asset_id.nil? ? 0 : out.output.asset_id,
+          'asset_id' => out.output.asset_id,
           'asset_quantity' => out.output.asset_quantity.to_s
         }
       }
