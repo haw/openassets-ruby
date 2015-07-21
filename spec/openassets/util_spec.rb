@@ -19,7 +19,7 @@ describe OpenAssets::Util do
     expect(util.encode_leb128(300)).to eq('ac02')
   end
   
-  it 'script to address convert' do
-
+  it 'satoshi to coin' do
+    expect(util.satoshi_to_coin(100000)).to eq('0.00100000')
   end
 end

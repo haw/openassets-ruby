@@ -50,8 +50,10 @@ module OpenAssets
       string.each_char.each_slice(2).map{|v|v.join}
     end
 
-    def script_to_address(script)
-
+    # Convert satoshi to coin.
+    # @param [Integer] satoshi The amount of satoshi unit.
+    def satoshi_to_coin(satoshi)
+      "%.8f" % (satoshi / 100000000.0)
     end
 
   end
