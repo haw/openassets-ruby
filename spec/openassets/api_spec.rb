@@ -55,4 +55,13 @@ describe OpenAssets::Api do
     expect(list[1][:address]).to eq(OA_UNSPENT[1][:address])
   end
 
+  it 'get_balance' do
+    btc_provider_mock = double('BitcoinCoreProvider Mock')
+    api = OpenAssets::Api.new
+    allow(btc_provider_mock).to receive(:list_unspent).and_return(BTC_UNSPENT)
+    allow(btc_provider_mock).to receive(:get_transaction).and_return(RAW_TRANSACTION)
+    allow(api).to receive(:provider).and_return(btc_provider_mock)
+    balance = api.get_balance
+  end
+
 end

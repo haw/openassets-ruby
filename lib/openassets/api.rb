@@ -8,8 +8,10 @@ module OpenAssets
 
     attr_reader :config
     attr_reader :provider
+    attr_reader :cache
 
     def initialize(config = nil)
+      @cache = {}
       @config = {:network => 'mainnet',
                  :provider => 'bitcoind',
                  :dust_limit => 600,
@@ -53,6 +55,13 @@ module OpenAssets
       }
     end
 
+    # Returns the balance in both bitcoin and colored coin assets for all of the addresses available in your Bitcoin Core wallet.
+    # @param [String] address The open assets address. if unspecified nil.
+    def get_balance(address = nil)
+      outputs = get_unspent_outputs(address.nil? ? [] : [address])
+
+    end
+
     # Creates a transaction for issuing an asset.
     # @param[String] from The open asset address to issue the asset from.
     # @param[Integer] amount The amount of asset units to issue.
@@ -72,19 +81,23 @@ module OpenAssets
     # @return [Array[OpenAssets::Transaction::SpendableOutput]] The array of unspent outputs.
     def get_unspent_outputs(addresses)
       unspent = provider.list_unspent(addresses)
-      unspent.map{|item|
+      result = unspent.map{|item|
         OpenAssets::Transaction::SpendableOutput.new(
           OpenAssets::Transaction::OutPoint.new(item['txid'], item['vout']),
           get_output(item['txid'], item['vout'])
         )
       }
+      result
     end
 
     def get_output(txid, output_index)
+      cached_output = @cache[txid + output_index.to_s]
+      return cached_output if cached_output
       decode_tx = provider.get_transaction(txid, 0)
       raise OpenAssets::Transaction::TransactionBuildError, "txid #{txid} could not be retrieved." if decode_tx.nil?
       tx = Bitcoin::Protocol::Tx.new([decode_tx].pack("H*"))
       colored_outputs = get_color_transaction(tx)
+      colored_outputs.each_with_index { |o, index | @cache[txid + index.to_s] = o}
       colored_outputs[output_index]
     end
 
@@ -135,7 +148,7 @@ module OpenAssets
       input_enum = inputs.each
       input_units_left = 0
       for i in marker_output_index + 1 .. outputs.length
-        output_asset_quantity = i <= asset_quantities.length ? asset_quantities[i-1] : 0
+        output_asset_quantity = (i <= asset_quantities.length) ? asset_quantities[i-1] : 0
         output_units_left = output_asset_quantity
         asset_id = nil
         while output_units_left > 0
@@ -147,15 +160,15 @@ module OpenAssets
               return nil
             end
           end
-          if current_input.asset_id.nil?
+          unless current_input.asset_id.nil?
             progress = [input_units_left, output_units_left].min
             output_units_left -= progress
             input_units_left -= progress
-            if asset_id.ni?
+            if asset_id.nil?
               # This is the first input to map to this output
               asset_id = current_input.asset_id
             elsif asset_id != current_input.asset_id
-             return nil
+              return nil
             end
           end
         end
