@@ -52,9 +52,20 @@ module OpenAssets
 
     # Convert satoshi to coin.
     # @param [Integer] satoshi The amount of satoshi unit.
+    # @return [String] The amount of coin.
     def satoshi_to_coin(satoshi)
       "%.8f" % (satoshi / 100000000.0)
     end
 
+    # Get address from script.
+    # @param [Bitcoin::Script] script The output script.
+    # @return [String] The Bitcoin address. if the script dose not contains address, return nil.
+    def script_to_address(script)
+      return script.get_pubkey_address    if script.is_pubkey?
+      return script.get_hash160_address   if script.is_hash160?
+      return script.get_multisig_addresses  if script.is_multisig?
+      return script.get_p2sh_address      if script.is_p2sh?
+      nil
+    end
   end
 end
