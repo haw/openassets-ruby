@@ -9,6 +9,8 @@ module OpenAssets
       # The actual output object.
       attr_accessor :output
 
+      attr_accessor :confirmations
+
       # @param [OpenAssets::Transaction::OutPoint] out_point
       # @param [OpenAssets::Protocol::TransactionOutput] output
       def initialize(out_point, output)
