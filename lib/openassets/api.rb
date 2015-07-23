@@ -40,15 +40,16 @@ module OpenAssets
     def list_unspent(address = [])
       outputs = get_unspent_outputs(address)
       outputs.map {|out|
-        script = out.output.script.get_pubkey_address
+        address = script_to_address(out.output.script)
+        script = out.output.script.to_payload.unpack("H*")[0]
         {
           'txid' => out.out_point.hash,
           'vout' =>  out.out_point.index,
-          'address' =>  script,
-          'oa_address' => address_to_oa_address(script),
-          'script' => out.output.script,
-          'amount' => out.output.value,
-          'confirmations' => "",
+          'address' =>  address,
+          'oa_address' => address.nil? ? nil : address_to_oa_address(address),
+          'script' => script,
+          'amount' => satoshi_to_coin(out.output.value),
+          'confirmations' => out.confirmations,
           'asset_id' => out.output.asset_id,
           'asset_quantity' => out.output.asset_quantity.to_s
         }
@@ -82,10 +83,11 @@ module OpenAssets
     def get_unspent_outputs(addresses)
       unspent = provider.list_unspent(addresses)
       result = unspent.map{|item|
-        OpenAssets::Transaction::SpendableOutput.new(
-          OpenAssets::Transaction::OutPoint.new(item['txid'], item['vout']),
-          get_output(item['txid'], item['vout'])
-        )
+        output_result = get_output(item['txid'], item['vout'])
+        output = OpenAssets::Transaction::SpendableOutput.new(
+          OpenAssets::Transaction::OutPoint.new(item['txid'], item['vout']), output_result)
+        output.confirmations = item['confirmations']
+        output
       }
       result
     end
@@ -123,13 +125,13 @@ module OpenAssets
     # @param [Array[Bitcoin::Protocol::TxOUt]] outputs The outputs of the transaction.
     # @param [Array[Integer]] asset_quantities The list of asset quantities of the outputs.
     def compute_asset_ids(inputs, marker_output_index, outputs, asset_quantities)
-      return nil if asset_quantities.length > outputs.length || inputs.length == 0
+      return nil if asset_quantities.length > outputs.length - 1 || inputs.length == 0
       result = []
 
       # Add the issuance outputs
-      issuance_asset_id = generate_asset_id(inputs[0].script.to_string)
+      issuance_asset_id = pubkey_hash_to_asset_id(inputs[0].script.get_hash160)
 
-      for i in 0..marker_output_index
+      for i in (0..marker_output_index-1)
         value = outputs[i].value
         script = outputs[i].parsed_script
         if i < asset_quantities.length && asset_quantities[i] > 0
@@ -147,11 +149,13 @@ module OpenAssets
       # Add the transfer outputs
       input_enum = inputs.each
       input_units_left = 0
-      for i in marker_output_index + 1 .. outputs.length
+      index = 0
+      for i in (marker_output_index + 1)..(outputs.length-1)
         output_asset_quantity = (i <= asset_quantities.length) ? asset_quantities[i-1] : 0
         output_units_left = output_asset_quantity
         asset_id = nil
         while output_units_left > 0
+          index += 1
           if input_units_left == 0
             begin
             current_input = input_enum.next
@@ -172,7 +176,8 @@ module OpenAssets
             end
           end
         end
-        result << OpenAssets::Protocol::TransactionOutput.new(outputs[i-1].value, outputs[i-1].parsed_script, asset_id, output_asset_quantity, OpenAssets::Protocol::OutputType::TRANSFER)
+        result << OpenAssets::Protocol::TransactionOutput.new(outputs[i].value, outputs[i].parsed_script,
+                                                              asset_id, output_asset_quantity, OpenAssets::Protocol::OutputType::TRANSFER)
       end
       result
     end

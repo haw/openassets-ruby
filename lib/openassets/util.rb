@@ -21,7 +21,10 @@ module OpenAssets
 
     # generate asset ID from public key.
     def generate_asset_id(pub_key)
-      hash = hash160(pub_key)
+      pubkey_hash_to_asset_id(hash160(pub_key))
+    end
+
+    def pubkey_hash_to_asset_id(hash)
       # gen P2PKH script hash
       # P2PKH script = OP_DUP OP_HASH160 <PubKeyHash> OP_EQUALVERIFY OP_CHECKSIG
       # （76=OP_DUP, a9=OP_HASH160, 14=Bytes to push, 88=OP_EQUALVERIFY, ac=OP_CHECKSIG）
