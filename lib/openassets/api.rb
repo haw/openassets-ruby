@@ -63,8 +63,8 @@ module OpenAssets
       colored_outputs = outputs.map{|o|o.output}
       sorted_outputs = colored_outputs.sort_by { |o|o.script.to_string}
       groups = sorted_outputs.group_by{|o| o.script.to_string}
-      groups.map{|k, v|
-        address = script_to_address(v[0].script)
+      result = groups.map{|k, v|
+        btc_address = script_to_address(v[0].script)
         sorted_script_outputs = v.sort_by{|o|o.asset_id unless o.asset_id}
         group_assets = sorted_script_outputs.group_by{|o|o.asset_id}.select{|k,v| !k.nil?}
         assets = group_assets.map{|asset_id, outputs|
@@ -74,12 +74,13 @@ module OpenAssets
           }
         }
         {
-            'address' => address,
-            'oa_address' => address.nil? ? nil : address_to_oa_address(address),
+            'address' => btc_address,
+            'oa_address' => btc_address.nil? ? nil : address_to_oa_address(btc_address),
             'value' => satoshi_to_coin(v.inject(0) { |sum, o|sum +  o.value}),
             'assets' => assets
         }
       }
+      address.nil? ? result : result.select{|r|r['oa_address'] == address}
     end
 
     # Creates a transaction for issuing an asset.

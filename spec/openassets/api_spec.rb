@@ -66,6 +66,13 @@ describe OpenAssets::Api do
           expect(a['quantity']).to eq((OA_BALANCE[index][:assets][i][:quantity]))
         }
       }
+      balances = subject.get_balance('akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6')
+      expect(balances.length).to eq(1)
+      balance = balances[0]
+      expect(balance['oa_address']).to eq('akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6')
+      expect(balance['assets'][0]['quantity']).to eq('24')
+
+      expect(subject.get_balance('akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t8').length).to eq(0)
     end
 
   end
