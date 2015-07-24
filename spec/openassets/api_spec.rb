@@ -50,6 +50,12 @@ describe OpenAssets::Api do
         expect(result['address']).to eq(OA_UNSPENT[index]['address'])
         expect(result['asset_quantity']).to eq(OA_UNSPENT[index]['asset_quantity'])
       }
+
+      list = subject.list_unspent(['akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6'])
+      expect(list.length).to eq(3)
+      list.each{|r|expect(r['oa_address']).to eq('akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6')}
+
+      expect(subject.list_unspent(['akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t8']).length).to eq(0)
     end
 
     it 'get_balance' do

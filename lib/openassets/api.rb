@@ -35,11 +35,11 @@ module OpenAssets
     end
 
     # get UTXO for colored coins.
-    # @param [Array] address Obtain the balance of this address only, or all addresses if unspecified.
+    # @param [Array] address Obtain the balance of this open assets address only, or all addresses if unspecified.
     # @return [Array] Return array of the unspent information Hash.
-    def list_unspent(address = [])
-      outputs = get_unspent_outputs(address)
-      outputs.map {|out|
+    def list_unspent(oa_address = [])
+      outputs = get_unspent_outputs([])
+      result = outputs.map {|out|
         address = script_to_address(out.output.script)
         script = out.output.script.to_payload.unpack("H*")[0]
         {
@@ -54,6 +54,7 @@ module OpenAssets
           'asset_quantity' => out.output.asset_quantity.to_s
         }
       }
+      oa_address.empty? ? result : result.select{|r|oa_address.include?(r['oa_address'])}
     end
 
     # Returns the balance in both bitcoin and colored coin assets for all of the addresses available in your Bitcoin Core wallet.
