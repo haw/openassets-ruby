@@ -19,7 +19,7 @@ api = OpenAssets::Api.new({:network => 'mainnet',
 Currently openassets-ruby support the following API.   
 (The other API is in development. ex, issue_asset, send_asset)
 
-* list_unspent  
+* **list_unspent**  
 Returns an array of unspent transaction outputs, augmented with the asset ID and quantity of each output.
   ```ruby
   # get all unspent outputs in the wallet.
@@ -29,7 +29,7 @@ Returns an array of unspent transaction outputs, augmented with the asset ID and
   api.list_unspent(['akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6'])
   ``` 
 
-* get_balance  
+* **get_balance**  
 Returns the balance in both bitcoin and colored coin assets for all of the addresses available in your Bitcoin Core wallet.
   ```ruby
   # get all balance in the wallet.
