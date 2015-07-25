@@ -10,6 +10,8 @@ module OpenAssets
     OA_VERSION_BYTE = 23
 
     # convert bitcoin address to open assets address
+    # @param [String] btc_address The Bitcoin address.
+    # @return [String] The Open Assets Address.
     def address_to_oa_address(btc_address)
       btc_hex = decode_base58(btc_address)
       btc_hex = '0' +btc_hex if btc_hex.size==47
@@ -17,6 +19,16 @@ module OpenAssets
       named_addr = OA_NAMESPACE.to_s(16) + address
       oa_checksum = checksum(named_addr)
       encode_base58(named_addr + oa_checksum)
+    end
+
+    # convert opena assets address to bitcoin address
+    # @param [String] oa_address The Open Assets Address.
+    # @return [String] The Bitcoin address.
+    def oa_address_to_address(oa_address)
+      decode_address = decode_base58(oa_address)
+      btc_addr = decode_address[2..-9]
+      btc_checksum = checksum(btc_addr)
+      encode_base58(btc_addr + btc_checksum)
     end
 
     # generate asset ID from public key.
