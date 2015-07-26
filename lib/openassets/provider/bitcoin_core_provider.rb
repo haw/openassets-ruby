@@ -32,6 +32,12 @@ module OpenAssets
         end
       end
 
+      # Signs a transaction in the serialized transaction format using private keys.
+      def sign_transaction(tx)
+        request('signrawtransaction', tx)
+      end
+
+      private
       # Convert decode tx string to Bitcion::Protocol::Tx
       def decode_tx_to_btc_tx(tx)
         hash = {

@@ -2,6 +2,8 @@ require 'spec_helper'
 
 describe OpenAssets::Api do
 
+  include OpenAssets::Util
+
   it 'load configuration' do
     api = OpenAssets::Api.new
     expect(api.is_testnet?).to be false
@@ -81,6 +83,36 @@ describe OpenAssets::Api do
       expect(subject.get_balance('akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t8').length).to eq(0)
     end
 
+    it 'issue_asset' do
+      address = 'akEJwzkzEFau4t2wjbXoMs7MwtZkB8xixmH'
+      issue_asset = subject.issue_asset(
+        address, 150, 'u=https://goo.gl/bmVEuw', address, nil,  mode: 'unsigned')
+      tx = issue_asset
+      expect(tx.ver).to eq(1)
+      expect(tx.lock_time).to eq(0)
+      expect(tx.inputs.length).to eq(1)
+      expect(tx.inputs[0].prev_out).to eq('21b093ec41244898a50e1f97cb80fd98d7714c7235e0a4a30d7d0c6fb6a6ce8a')
+      expect(tx.inputs[0].prev_out_index).to eq(1)
+      expect(tx.outputs.length).to eq(3)
+      # issue output
+      expect(tx.outputs[0].value).to eq(600)
+      # expect(tx.outputs[0].parsed_script.to_string).to eq(3)
+      # marker output
+      marker_output_payload = OpenAssets::Protocol::MarkerOutput.parse_script(tx.outputs[1].pk_script)
+      marker_output = OpenAssets::Protocol::MarkerOutput.deserialize_payload(marker_output_payload)
+      expect(tx.outputs[1].value).to eq(0)
+      expect(marker_output.asset_quantities).to eq([150])
+      expect(marker_output.metadata).to eq('u=https://goo.gl/bmVEuw')
+      # bitcoin change
+      expect(tx.outputs[2].value).to eq(89400) # prev_out value: 100000 - issue dust: 600 - default_fees: 10000 = 89400
+      # expect(tx.outputs[2].parsed_script.to_string).to eq(3)
+    end
+
+  end
+
+  def filter_btc_unspent(btc_address = nil)
+    return BTC_UNSPENT if btc_address.nil?
+    BTC_UNSPENT.select{|u|u['address'] == btc_address}
   end
 
   BTC_UNSPENT = [

@@ -14,7 +14,7 @@ module OpenAssets
       @cache = {}
       @config = {:network => 'mainnet',
                  :provider => 'bitcoind',
-                 :dust_limit => 600,
+                 :dust_limit => 600, :default_fees => 10000,
                  :rpc => { :host => 'localhost', :port => 8332 , :user => '', :password => '', :schema => 'https'}}
       if config
         @config.update(config)
@@ -35,7 +35,7 @@ module OpenAssets
     end
 
     # get UTXO for colored coins.
-    # @param [Array] address Obtain the balance of this open assets address only, or all addresses if unspecified.
+    # @param [Array] oa_address Obtain the balance of this open assets address only, or all addresses if unspecified.
     # @return [Array] Return array of the unspent information Hash.
     def list_unspent(oa_address = [])
       outputs = get_unspent_outputs([])
@@ -60,7 +60,7 @@ module OpenAssets
     # Returns the balance in both bitcoin and colored coin assets for all of the addresses available in your Bitcoin Core wallet.
     # @param [String] address The open assets address. if unspecified nil.
     def get_balance(address = nil)
-      outputs = get_unspent_outputs(address.nil? ? [] : [address])
+      outputs = get_unspent_outputs(address.nil? ? [] : [oa_address_to_address(address)])
       colored_outputs = outputs.map{|o|o.output}
       sorted_outputs = colored_outputs.sort_by { |o|o.script.to_string}
       groups = sorted_outputs.group_by{|o| o.script.to_string}
@@ -90,18 +90,26 @@ module OpenAssets
     # @param[String] to The open asset address to send the asset to; if unspecified, the assets are sent back to the issuing address.
     # @param[String] metadata The metadata to embed in the transaction. The asset definition pointer defined by this metadata.
     # @param[Integer] fees The fess in satoshis for the transaction.
-    def issue_asset(from, amount, to = nil, metadata = nil, fees = nil)
-      to = from if to.ni?
+    # @param[String] mode Specify the following mode.
+    # 'broadcast' (default) for signing and broadcasting the transaction,
+    # 'signed' for signing the transaction without broadcasting,
+    # 'unsigned' for getting the raw unsigned transaction without broadcasting"""='broadcast'
+    def issue_asset(from, amount, metadata = nil, to = nil, fees = nil, mode = 'broadcast')
+      to = from if to.nil?
       builder = OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
-      result = get_unspent_outputs(from)
-      # issue_param = OpenAssets::Transaction::TransferParameters.new(result, )
+      colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
+      issue_param = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount)
+      tx = builder.issue_asset(issue_param, metadata, fees.nil? ? @config[:default_fees]: fees)
+      tx = process_transaction(tx, mode)
+      tx
     end
 
     private
     # Get unspent outputs.
-    # @param [Array] addresses The array of address.
+    # @param [Array] addresses The array of Bitcoin address.
     # @return [Array[OpenAssets::Transaction::SpendableOutput]] The array of unspent outputs.
     def get_unspent_outputs(addresses)
+      validate_address(addresses)
       unspent = provider.list_unspent(addresses)
       result = unspent.map{|item|
         output_result = get_output(item['txid'], item['vout'])
@@ -203,6 +211,26 @@ module OpenAssets
       result
     end
 
+    # validate bitcoin address
+    def validate_address(addresses)
+      addresses.each{|a|
+        raise ArgumentError, "#{a} is invalid bitcoin address. " unless valid_address?(a)
+      }
+    end
+
+    def process_transaction(tx, mode)
+      if mode == 'broadcast' || mode == 'signed'
+        # sign the transaction
+        puts tx.to_hash
+        puts tx.to_json
+        tx_hash = tx.hash_from_payload(tx.to_payload)
+        puts "tx hash = #{tx_hash}"
+        signed_tx = provider.sign_transaction(tx_hash)
+        puts signed_tx
+      else
+        tx
+      end
+    end
 
   end
 
