@@ -7,5 +7,5 @@ module OpenAssets
   autoload :Util, 'openassets/util'
   autoload :Api, 'openassets/api'
   autoload :Provider, 'openassets/provider'
-
+  autoload :Error, 'openassets/error'
 end
