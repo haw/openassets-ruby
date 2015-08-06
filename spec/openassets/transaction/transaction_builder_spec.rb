@@ -26,7 +26,7 @@ describe OpenAssets::Transaction::TransactionBuilder do
     # Asset issued
     out0 = result.out[0]
     expect(out0.value).to eq(10)
-    expect(Bitcoin::Script.new(out0.pk_script).to_string).to eq('a161b0218824d71dafa05c41811ff3e6cf0c7445')
+    expect(Bitcoin::Script.new(out0.pk_script).to_string).to eq('OP_DUP OP_HASH160 a161b0218824d71dafa05c41811ff3e6cf0c7445 OP_EQUALVERIFY OP_CHECKSIG')
     # Marker output
     out1 = result.out[1]
     payload = OpenAssets::Protocol::MarkerOutput.parse_script(out1.pk_script)
@@ -37,7 +37,7 @@ describe OpenAssets::Transaction::TransactionBuilder do
     # Bitcoin change
     out2 = result.out[2]
     expect(out2.value).to eq(10)
-    expect(Bitcoin::Script.new(out2.pk_script).to_string).to eq('a161b0218824d71dafa05c41811ff3e6cf0c7445')
+    expect(Bitcoin::Script.new(out2.pk_script).to_string).to eq('OP_DUP OP_HASH160 a161b0218824d71dafa05c41811ff3e6cf0c7445 OP_EQUALVERIFY OP_CHECKSIG')
   end
 
   it 'collect uncolored outputs' do

@@ -60,7 +60,8 @@ module OpenAssets
       # @param [String] script the output script.
       # @return [Bitcoin::Protocol::TxOut] colored output
       def create_colored_output(script)
-        Bitcoin::Protocol::TxOut.new(@amount, Bitcoin::Script.from_string(script).to_payload)
+        Bitcoin::Protocol::TxOut.new(@amount,
+                                     Bitcoin::Script.new(Bitcoin::Script.to_hash160_script(script)).to_payload)
       end
 
       # create marker output.
@@ -78,7 +79,7 @@ module OpenAssets
       # @return [Bitcoin::Protocol::TxOut] an uncolored output.
       def create_uncolored_output(script, value)
         raise DustOutputError if value < @amount
-        Bitcoin::Protocol::TxOut.new(value, Bitcoin::Script.from_string(script).to_payload)
+        Bitcoin::Protocol::TxOut.new(value, Bitcoin::Script.new(Bitcoin::Script.to_hash160_script(script)).to_payload)
       end
 
     end
