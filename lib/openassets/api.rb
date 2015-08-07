@@ -214,11 +214,11 @@ module OpenAssets
     def process_transaction(tx, mode)
       if mode == 'broadcast' || mode == 'signed'
         # sign the transaction
-        puts tx.to_json
-        puts tx.to_payload.bth
         signed_tx = provider.sign_transaction(tx.to_payload.bth)
-        raise OpenAssets::Error, 'Could not sign the transaction.' unless signed_tx['complete']
-        puts signed_tx
+        if mode == 'broadcast'
+          puts provider.send_transaction(signed_tx.to_payload.bth)
+        end
+        signed_tx
       else
         tx
       end
