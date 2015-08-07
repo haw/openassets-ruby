@@ -33,8 +33,12 @@ module OpenAssets
       end
 
       # Signs a transaction in the serialized transaction format using private keys.
+      # @param [String] tx The serialized format transaction.
+      # @return [Bitcoin::Protocol::Tx] The signed transaction.
       def sign_transaction(tx)
-        request('signrawtransaction', tx)
+        signed_tx = request('signrawtransaction', tx)
+        raise OpenAssets::Error, 'Could not sign the transaction.' unless signed_tx['complete']
+        Bitcoin::Protocol::Tx.new(signed_tx['hex'].htb)
       end
 
       private
