@@ -16,11 +16,11 @@ describe OpenAssets::Transaction::TransactionBuilder do
     expect(result.in.length).to eq(2)
     expect(result.out.length).to eq(3)
     in0 = result.in[0]
-    expect(in0.prev_out).to eq('8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8221')
+    expect(in0.prev_out.reverse_hth).to eq('8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8221')
     expect(in0.prev_out_index).to eq(1)
     expect(in0.script_sig).to eq('source')
     in1 = result.in[1]
-    expect(in1.prev_out).to eq('8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8222')
+    expect(in1.prev_out.reverse_hth).to eq('8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8222')
     expect(in1.prev_out_index).to eq(2)
     expect(in1.script_sig).to eq('source')
     # Asset issued

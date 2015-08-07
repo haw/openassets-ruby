@@ -22,8 +22,9 @@ module OpenAssets
         tx = Bitcoin::Protocol::Tx.new
         inputs.each { |spendable|
           script_sig = spendable.output.script.to_binary
-          tx.add_in(Bitcoin::Protocol::TxIn.new(spendable.out_point.hash, spendable.out_point.index,
-                                                script_sig.bytesize, script_sig))
+          tx_in = Bitcoin::Protocol::TxIn.from_hex_hash(spendable.out_point.hash, spendable.out_point.index)
+          tx_in.script_sig = script_sig
+          tx.add_in(tx_in)
         }
         issue_address = oa_address_to_address(issue_spec.to_script)
         from_address = oa_address_to_address(issue_spec.change_script)
