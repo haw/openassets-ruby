@@ -21,7 +21,7 @@ module OpenAssets
       encode_base58(named_addr + oa_checksum)
     end
 
-    # convert opena assets address to bitcoin address
+    # convert open assets address to bitcoin address
     # @param [String] oa_address The Open Assets Address.
     # @return [String] The Bitcoin address.
     def oa_address_to_address(oa_address)
@@ -81,6 +81,13 @@ module OpenAssets
       return script.get_multisig_addresses  if script.is_multisig?
       return script.get_p2sh_address      if script.is_p2sh?
       nil
+    end
+
+    # validate bitcoin address
+    def validate_address(addresses)
+      addresses.each{|a|
+        raise ArgumentError, "#{a} is invalid bitcoin address. " unless valid_address?(a)
+      }
     end
   end
 end

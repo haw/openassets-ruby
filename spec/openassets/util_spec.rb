@@ -5,12 +5,11 @@ describe OpenAssets::Util do
   let(:test_class) {Struct.new(:util) {include OpenAssets::Util}}
   let(:util) {test_class.new}
 
-  it 'convert open assets address' do
-    expect(util.address_to_oa_address('1MFW7BTwiNbAkmVz4SzAMQXboKYKGSzkq2')).to eq('akXDPMMHHBrUrd1fM756M1GSB8viVAwMyBk')
-  end
-
-  it 'convert bitcoin address' do
-    expect(util.oa_address_to_address('akXDPMMHHBrUrd1fM756M1GSB8viVAwMyBk')).to eq('1MFW7BTwiNbAkmVz4SzAMQXboKYKGSzkq2')
+  it 'convert address ' do
+    btc_address = '1F2AQr6oqNtcJQ6p9SiCLQTrHuM9en44H8'
+    oa_address = 'akQz3f1v9JrnJAeGBC4pNzGNRdWXKan4U6E'
+    expect(util.address_to_oa_address(btc_address)).to eq(oa_address)
+    expect(util.oa_address_to_address(oa_address)).to eq(btc_address)
   end
 
   it 'generate asset ID from public key' do

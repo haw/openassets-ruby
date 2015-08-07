@@ -2,6 +2,7 @@ module OpenAssets
   module Transaction
 
     class TransactionBuilder
+      include OpenAssets::Util
 
       # The minimum allowed output value.
       attr_accessor :amount
@@ -24,9 +25,12 @@ module OpenAssets
           tx.add_in(Bitcoin::Protocol::TxIn.new(spendable.out_point.hash, spendable.out_point.index,
                                                 script_sig.bytesize, script_sig))
         }
-        tx.add_out(create_colored_output(issue_spec.to_script))
+        issue_address = oa_address_to_address(issue_spec.to_script)
+        from_address = oa_address_to_address(issue_spec.change_script)
+        validate_address([issue_address, from_address])
+        tx.add_out(create_colored_output(issue_address))
         tx.add_out(create_marker_output([issue_spec.amount], metadata))
-        tx.add_out(create_uncolored_output(issue_spec.change_script, total_amount - @amount - fees))
+        tx.add_out(create_uncolored_output(from_address, total_amount - @amount - fees))
         tx
       end
 
@@ -57,11 +61,12 @@ module OpenAssets
 
       private
       # create colored output.
-      # @param [String] script the output script.
+      # @param [String] address The Bitcoin address.
       # @return [Bitcoin::Protocol::TxOut] colored output
-      def create_colored_output(script)
+      def create_colored_output(address)
+        hash160 = Bitcoin.hash160_from_address(address)
         Bitcoin::Protocol::TxOut.new(@amount,
-                                     Bitcoin::Script.new(Bitcoin::Script.to_hash160_script(script)).to_payload)
+                                     Bitcoin::Script.new(Bitcoin::Script.to_hash160_script(hash160)).to_payload)
       end
 
       # create marker output.
@@ -74,12 +79,13 @@ module OpenAssets
       end
 
       # create an uncolored output.
-      # @param [String] script: the output script.
+      # @param [String] address: The Bitcoin address.
       # @param [Integer] value: The satoshi value of the output.
       # @return [Bitcoin::Protocol::TxOut] an uncolored output.
-      def create_uncolored_output(script, value)
+      def create_uncolored_output(address, value)
         raise DustOutputError if value < @amount
-        Bitcoin::Protocol::TxOut.new(value, Bitcoin::Script.new(Bitcoin::Script.to_hash160_script(script)).to_payload)
+        hash160 = Bitcoin.hash160_from_address(address)
+        Bitcoin::Protocol::TxOut.new(value, Bitcoin::Script.new(Bitcoin::Script.to_hash160_script(hash160)).to_payload)
       end
 
     end

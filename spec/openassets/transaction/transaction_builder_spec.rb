@@ -10,8 +10,8 @@ describe OpenAssets::Transaction::TransactionBuilder do
     target = OpenAssets::Transaction::TransactionBuilder.new(10)
     spec = OpenAssets::Transaction::TransferParameters.new(
         unspent_outputs,
-        'a161b0218824d71dafa05c41811ff3e6cf0c7445',
-        'a161b0218824d71dafa05c41811ff3e6cf0c7445', 1000)
+        'akD71LJfDrVkPUg7dSZq6acdeDqgmHjrc2Q',
+        'akD71LJfDrVkPUg7dSZq6acdeDqgmHjrc2Q', 1000)
     result = target.issue_asset(spec, 'metadata', 5)
     expect(result.in.length).to eq(2)
     expect(result.out.length).to eq(3)
@@ -26,7 +26,7 @@ describe OpenAssets::Transaction::TransactionBuilder do
     # Asset issued
     out0 = result.out[0]
     expect(out0.value).to eq(10)
-    expect(Bitcoin::Script.new(out0.pk_script).to_string).to eq('OP_DUP OP_HASH160 a161b0218824d71dafa05c41811ff3e6cf0c7445 OP_EQUALVERIFY OP_CHECKSIG')
+    expect(Bitcoin::Script.new(out0.pk_script).to_string).to eq('OP_DUP OP_HASH160 17797f19075a56e7d4fc23f2ea5c17020fd3b93d OP_EQUALVERIFY OP_CHECKSIG')
     # Marker output
     out1 = result.out[1]
     payload = OpenAssets::Protocol::MarkerOutput.parse_script(out1.pk_script)
@@ -37,7 +37,7 @@ describe OpenAssets::Transaction::TransactionBuilder do
     # Bitcoin change
     out2 = result.out[2]
     expect(out2.value).to eq(10)
-    expect(Bitcoin::Script.new(out2.pk_script).to_string).to eq('OP_DUP OP_HASH160 a161b0218824d71dafa05c41811ff3e6cf0c7445 OP_EQUALVERIFY OP_CHECKSIG')
+    expect(Bitcoin::Script.new(out2.pk_script).to_string).to eq('OP_DUP OP_HASH160 17797f19075a56e7d4fc23f2ea5c17020fd3b93d OP_EQUALVERIFY OP_CHECKSIG')
   end
 
   it 'collect uncolored outputs' do
@@ -63,8 +63,8 @@ describe OpenAssets::Transaction::TransactionBuilder do
 
   it 'create uncolored ouput' do
     target = OpenAssets::Transaction::TransactionBuilder.new(10)
-    expect{target.send(:create_uncolored_output, 'metadadta', 9)}.to raise_error(OpenAssets::Transaction::DustOutputError)
-    expect(target.send(:create_uncolored_output, 'metadadta', 11)).to be_a(Bitcoin::Protocol::TxOut)
+    expect{target.send(:create_uncolored_output, '1F2AQr6oqNtcJQ6p9SiCLQTrHuM9en44H8', 9)}.to raise_error(OpenAssets::Transaction::DustOutputError)
+    expect(target.send(:create_uncolored_output, '1F2AQr6oqNtcJQ6p9SiCLQTrHuM9en44H8', 11)).to be_a(Bitcoin::Protocol::TxOut)
   end
 
   # generate outputs
