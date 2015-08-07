@@ -96,7 +96,7 @@ describe OpenAssets::Api do
       expect(tx.outputs.length).to eq(3)
       # issue output
       expect(tx.outputs[0].value).to eq(600)
-      # expect(tx.outputs[0].parsed_script.to_string).to eq(3)
+      expect(tx.outputs[0].parsed_script.to_string).to eq('OP_DUP OP_HASH160 24b3d405bc60bd9628691fe28bb00f6800e14806 OP_EQUALVERIFY OP_CHECKSIG')
       # marker output
       marker_output_payload = OpenAssets::Protocol::MarkerOutput.parse_script(tx.outputs[1].pk_script)
       marker_output = OpenAssets::Protocol::MarkerOutput.deserialize_payload(marker_output_payload)
@@ -105,7 +105,7 @@ describe OpenAssets::Api do
       expect(marker_output.metadata).to eq('u=https://goo.gl/bmVEuw')
       # bitcoin change
       expect(tx.outputs[2].value).to eq(89400) # prev_out value: 100000 - issue dust: 600 - default_fees: 10000 = 89400
-      # expect(tx.outputs[2].parsed_script.to_string).to eq(3)
+      expect(tx.outputs[2].parsed_script.to_string).to eq('OP_DUP OP_HASH160 24b3d405bc60bd9628691fe28bb00f6800e14806 OP_EQUALVERIFY OP_CHECKSIG')
     end
 
   end

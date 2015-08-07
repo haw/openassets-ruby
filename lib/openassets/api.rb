@@ -41,7 +41,7 @@ module OpenAssets
       outputs = get_unspent_outputs([])
       result = outputs.map {|out|
         address = script_to_address(out.output.script)
-        script = out.output.script.to_payload.unpack("H*")[0]
+        script = out.output.script.to_payload.bth
         {
           'txid' => out.out_point.hash,
           'vout' =>  out.out_point.index,
@@ -104,7 +104,6 @@ module OpenAssets
       tx
     end
 
-    private
     # Get unspent outputs.
     # @param [Array] addresses The array of Bitcoin address.
     # @return [Array[OpenAssets::Transaction::SpendableOutput]] The array of unspent outputs.
@@ -126,7 +125,7 @@ module OpenAssets
       return cached_output if cached_output
       decode_tx = provider.get_transaction(txid, 0)
       raise OpenAssets::Transaction::TransactionBuildError, "txid #{txid} could not be retrieved." if decode_tx.nil?
-      tx = Bitcoin::Protocol::Tx.new([decode_tx].pack("H*"))
+      tx = Bitcoin::Protocol::Tx.new(decode_tx.htb)
       colored_outputs = get_color_transaction(tx)
       colored_outputs.each_with_index { |o, index | @cache[txid + index.to_s] = o}
       colored_outputs[output_index]
@@ -149,6 +148,7 @@ module OpenAssets
       tx.outputs.map{|out| OpenAssets::Protocol::TransactionOutput.new(out.value, out.parsed_script, nil, 0, OpenAssets::Protocol::OutputType::UNCOLORED)}
     end
 
+    private
     # @param [Array[OpenAssets::Protocol::TransactionOutput] inputs The outputs referenced by the inputs of the transaction.
     # @param [Integer] marker_output_index The position of the marker output in the transaction.
     # @param [Array[Bitcoin::Protocol::TxOUt]] outputs The outputs of the transaction.
@@ -211,21 +211,13 @@ module OpenAssets
       result
     end
 
-    # validate bitcoin address
-    def validate_address(addresses)
-      addresses.each{|a|
-        raise ArgumentError, "#{a} is invalid bitcoin address. " unless valid_address?(a)
-      }
-    end
-
     def process_transaction(tx, mode)
       if mode == 'broadcast' || mode == 'signed'
         # sign the transaction
-        puts tx.to_hash
         puts tx.to_json
-        tx_hash = tx.hash_from_payload(tx.to_payload)
-        puts "tx hash = #{tx_hash}"
-        signed_tx = provider.sign_transaction(tx_hash)
+        puts tx.to_payload.bth
+        signed_tx = provider.sign_transaction(tx.to_payload.bth)
+        raise OpenAssets::Error, 'Could not sign the transaction.' unless signed_tx['complete']
         puts signed_tx
       else
         tx
