@@ -1,6 +1,12 @@
 # openassets-ruby
 The implementation of the Open Assets Protocol for Ruby.
 
+## Install
+
+```ruby
+gem install openassets-ruby              
+```
+
 ## Configuration
 
 Initialize the connection information to the Bitcoin Core server.
