@@ -17,10 +17,10 @@ api = OpenAssets::Api.new({:network => 'mainnet',
 ## API
 
 Currently openassets-ruby support the following API.   
-(The other API is in development. ex, issue_asset, send_asset)
+(The other API is in development. ex, send_asset)
 
 * **list_unspent**  
-Returns an array of unspent transaction outputs, augmented with the asset ID and quantity of each output.
+Returns an array of unspent transaction outputs, argument with the asset ID and quantity of each output.
   ```ruby
   # get all unspent outputs in the wallet.
   api.list_unspent
@@ -37,6 +37,17 @@ Returns the balance in both bitcoin and colored coin assets for all of the addre
   
   # specify the open asset address.
   api.get_balance('akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6')
+  ``` 
+  
+* **issue_asset**  
+Creates a transaction for issuing an asset.
+  ```ruby
+  # issue asset
+  # api.issue_asset(<issuer open asset address>, <issuing asset quantity>, <metadata>, <to open asset address>, <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>, <mode=('broadcast', 'signed', 'unsigned')>)
+
+  # example
+  address = 'akEJwzkzEFau4t2wjbXoMs7MwtZkB8xixmH'
+  api.issue_asset(address, 150, 'u=https://goo.gl/bmVEuw', address, nil, 'broadcast')
   ``` 
 
 ## License
