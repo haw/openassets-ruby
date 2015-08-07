@@ -41,6 +41,13 @@ module OpenAssets
         Bitcoin::Protocol::Tx.new(signed_tx['hex'].htb)
       end
 
+      # Validates a transaction and broadcasts it to the peer-to-peer network.
+      # @param [String] tx The serialized format transaction.
+      # @return [String] The TXID or error message.
+      def send_transaction(tx)
+        request('sendrawtransaction', tx)
+      end
+
       private
       # Convert decode tx string to Bitcion::Protocol::Tx
       def decode_tx_to_btc_tx(tx)
