@@ -6,6 +6,7 @@ module OpenAssets
     autoload :OutPoint, 'openassets/transaction/out_point'
     autoload :TransactionBuildError, 'openassets/transaction/transaction_build_error'
     autoload :InsufficientFundsError, 'openassets/transaction/insufficient_funds_error'
+    autoload :InsufficientAssetQuantityError, 'openassets/transaction/insufficient_asset_quantity_error'
     autoload :DustOutputError, 'openassets/transaction/dust_output_error'
   end
 end

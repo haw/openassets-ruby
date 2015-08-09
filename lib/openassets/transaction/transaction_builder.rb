@@ -11,11 +11,11 @@ module OpenAssets
         @amount = amount
       end
 
-      # issue asset.
+      # Creates a transaction for issuing an asset.
       # @param [TransferParameters] issue_spec The parameters of the issuance.
       # @param [bytes] metadata The metadata to be embedded in the transaction.
       # @param [Integer] fees The fees to include in the transaction.
-      # @return An unsigned transaction for issuing asset.
+      # @return[Bitcoin:Protocol:Tx] An unsigned transaction for issuing asset.
       def issue_asset(issue_spec, metadata, fees)
         inputs, total_amount =
             TransactionBuilder.collect_uncolored_outputs(issue_spec.unspent_outputs, 2 * @amount + fees)
@@ -35,7 +35,13 @@ module OpenAssets
         tx
       end
 
-      def transfer_assets
+      # Creates a transaction for sending an asset.
+      # @param[String] asset_id The ID of the asset being sent.
+      # @param[OpenAssets::Transaction::TransferParameters] transfer_spec The parameters of the asset being transferred.
+      # @param[String] btc_change_script The script where to send bitcoin change, if any.
+      # @param[Integer] fees The fees to include in the transaction.
+      # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
+      def transfer_assets(asset_id, transfer_spec, btc_change_script, fees)
 
       end
 
@@ -58,6 +64,24 @@ module OpenAssets
           return results, total_amount if total_amount >= amount
         end
         raise InsufficientFundsError
+      end
+
+      # Returns a list of colored outputs for the specified quantity.
+      # @param[Array[OpenAssets::Transaction::SpendableOutput]] unspent_outputs
+      # @param[String] asset_id The ID of the asset to collect.
+      # @param[Integer] asset_quantity The asset quantity to collect.
+      # @return[Array[OpenAssets::Transaction::SpendableOutput], int] A list of outputs, and the total asset quantity collected.
+      def self.collect_colored_outputs(unspent_outputs, asset_id, asset_quantity)
+        total_amount = 0
+        result = []
+        unspent_outputs.each do |output|
+          if output.output.asset_id == asset_id
+            result << output
+            total_amount += output.output.asset_quantity
+          end
+          return result, total_amount if total_amount >= asset_quantity
+        end
+        raise InsufficientAssetQuantityError
       end
 
       private
