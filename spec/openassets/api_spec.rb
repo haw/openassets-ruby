@@ -107,6 +107,10 @@ describe OpenAssets::Api do
       expect(tx.outputs[2].parsed_script.to_string).to eq('OP_DUP OP_HASH160 24b3d405bc60bd9628691fe28bb00f6800e14806 OP_EQUALVERIFY OP_CHECKSIG')
     end
 
+    it 'send_asset' do
+
+    end
+
   end
 
   def filter_btc_unspent(btc_address = nil)

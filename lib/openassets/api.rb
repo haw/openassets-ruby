@@ -104,6 +104,24 @@ module OpenAssets
       tx
     end
 
+    # Creates a transaction for sending an asset from an address to another.
+    # @param[String] from The open asset address to send the asset from.
+    # @param[String] asset_id The asset ID identifying the asset to send.
+    # @param[Integer] amount The amount of asset units to send.
+    # @param[String] to The open asset address to send the asset to.
+    # @param[Integer] fees The fess in satoshis for the transaction.
+    # @param[String] mode 'broadcast' (default) for signing and broadcasting the transaction,
+    # 'signed' for signing the transaction without broadcasting,
+    # 'unsigned' for getting the raw unsigned transaction without broadcasting"""='broadcast'
+    def send_asset(from, asset_id, amount, to, fees = nil, mode = 'broadcast')
+      builder = OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
+      colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
+      send_param = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount)
+      tx = builder.transfer_assets(send_param,)
+      tx = process_transaction(tx, mode)
+      tx
+    end
+
     # Get unspent outputs.
     # @param [Array] addresses The array of Bitcoin address.
     # @return [Array[OpenAssets::Transaction::SpendableOutput]] The array of unspent outputs.
