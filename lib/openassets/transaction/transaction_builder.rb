@@ -42,7 +42,21 @@ module OpenAssets
       # @param[Integer] fees The fees to include in the transaction.
       # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
       def transfer_assets(asset_id, transfer_spec, btc_change_script, fees)
+        btc_transfer_spec = OpenAssets::Transaction::TransferParameters.new(transfer_spec.unspent_outputs, nil, transfer_spec.change_script, 0)
+        outputs = []
+        asset_quantities = []
+        colored_outputs, total_amount = TransactionBuilder.collect_colored_outputs(transfer_spec.unspent_outputs, asset_id, transfer_spec.amount)
+        inputs = colored_outputs
+        outputs << create_colored_output(oa_address_to_address(transfer_spec.to_script))
+        asset_quantities << transfer_spec.amount
+        if total_amount > transfer_spec.amount
+          outputs << create_colored_output(oa_address_to_address(transfer_spec.change_script))
+          asset_quantities << (total_amount - transfer_spec.amount)
+        end
+        btc_excess = inputs.inject(0) { |sum, i| sum + i.output.value } - outputs.inject(0){|sum, o| sum + o.output.value}
+        if btc_excess < btc_transfer_spec.amount + fees
 
+        end
       end
 
       def transfer_btc
