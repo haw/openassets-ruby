@@ -23,7 +23,6 @@ api = OpenAssets::Api.new({:network => 'mainnet',
 ## API
 
 Currently openassets-ruby support the following API.   
-(The other API is in development. ex, send_asset)
 
 * **list_unspent**  
 Returns an array of unspent transaction outputs, argument with the asset ID and quantity of each output.
