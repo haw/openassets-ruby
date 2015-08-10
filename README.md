@@ -55,7 +55,18 @@ Creates a transaction for issuing an asset.
   address = 'akEJwzkzEFau4t2wjbXoMs7MwtZkB8xixmH'
   api.issue_asset(address, 150, 'u=https://goo.gl/bmVEuw', address, nil, 'broadcast')
   ``` 
+* **send_asset**  
+Creates a transaction for sending an asset from the open asset address to another.
+  ```ruby
+  # send asset
+  # api.send_asset(<from open asset address>, <asset ID>, <asset quantity>, <to open asset address>, <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>, <mode=('broadcast', 'signed', 'unsigned')>)
 
+  # example
+  from = 'akXDPMMHHBrUrd1fM756M1GSB8viVAwMyBk'
+  to = 'akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6'
+  api.send_asset(from, 'AWo3R89p5REmoSyMWB8AeUmud8456bRxZL', 100, to, 10000, 'broadcast')
+  ``` 
+  
 ## License
 
 The MIT License (MIT)
