@@ -42,21 +42,52 @@ module OpenAssets
       # @param[Integer] fees The fees to include in the transaction.
       # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
       def transfer_assets(asset_id, transfer_spec, btc_change_script, fees)
-        btc_transfer_spec = OpenAssets::Transaction::TransferParameters.new(transfer_spec.unspent_outputs, nil, transfer_spec.change_script, 0)
+        btc_transfer_spec = OpenAssets::Transaction::TransferParameters.new(transfer_spec.unspent_outputs, nil, btc_change_script, 0)
         outputs = []
         asset_quantities = []
-        colored_outputs, total_amount = TransactionBuilder.collect_colored_outputs(transfer_spec.unspent_outputs, asset_id, transfer_spec.amount)
-        inputs = colored_outputs
+        inputs, total_amount = TransactionBuilder.collect_colored_outputs(transfer_spec.unspent_outputs, asset_id, transfer_spec.amount)
+
+        # add asset transfer outpu
         outputs << create_colored_output(oa_address_to_address(transfer_spec.to_script))
         asset_quantities << transfer_spec.amount
+
+        # add the rest of the asset to the origin address
         if total_amount > transfer_spec.amount
           outputs << create_colored_output(oa_address_to_address(transfer_spec.change_script))
           asset_quantities << (total_amount - transfer_spec.amount)
         end
-        btc_excess = inputs.inject(0) { |sum, i| sum + i.output.value } - outputs.inject(0){|sum, o| sum + o.output.value}
-        if btc_excess < btc_transfer_spec.amount + fees
 
+        btc_excess = inputs.inject(0) { |sum, i| sum + i.output.value } - outputs.inject(0){|sum, o| sum + o.value}
+        if btc_excess < btc_transfer_spec.amount + fees
+          uncolored_outputs, uncolored_amount =
+              TransactionBuilder.collect_uncolored_outputs(btc_transfer_spec.unspent_outputs, btc_transfer_spec.amount + fees - btc_excess)
+          inputs << uncolored_outputs
+          btc_excess += uncolored_amount
         end
+
+        change = btc_excess - btc_transfer_spec.amount - fees
+        if change > 0
+          outputs << create_uncolored_output(oa_address_to_address(btc_transfer_spec.change_script), change)
+        end
+
+        if btc_transfer_spec.amount > 0
+          outputs << create_uncolored_output(oa_address_to_address(btc_transfer_spec.to_script), btc_transfer_spec.amount)
+        end
+
+        # add marker output to outputs first.
+        unless asset_quantities.empty?
+          outputs.unshift(create_marker_output(asset_quantities))
+        end
+
+        tx = Bitcoin::Protocol::Tx.new
+        inputs.flatten.each{|i|
+          script_sig = i.output.script.to_binary
+          tx_in = Bitcoin::Protocol::TxIn.from_hex_hash(i.out_point.hash, i.out_point.index)
+          tx_in.script_sig = script_sig
+          tx.add_in(tx_in)
+        }
+        outputs.each{|o|tx.add_out(o)}
+        tx
       end
 
       def transfer_btc
@@ -112,7 +143,7 @@ module OpenAssets
       # @param [Array] asset_quantities asset_quantity array.
       # @param [String] metadata
       # @return [Bitcoin::Protocol::TxOut] the marker output.
-      def create_marker_output(asset_quantities, metadata)
+      def create_marker_output(asset_quantities, metadata = '')
         script = OpenAssets::Protocol::MarkerOutput.new(asset_quantities, metadata).build_script
         Bitcoin::Protocol::TxOut.new(0, script.to_payload)
       end

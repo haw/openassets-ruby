@@ -17,7 +17,7 @@ module OpenAssets
 
       # @param [Array] asset_quantities The asset quantity array
       # @param [String] metadata The metadata in the marker output.
-      def initialize(asset_quantities, metadata)
+      def initialize(asset_quantities, metadata = '')
         @asset_quantities = asset_quantities
         @metadata = metadata
       end
