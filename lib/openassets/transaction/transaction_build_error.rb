@@ -1,7 +1,7 @@
 module OpenAssets
   module Transaction
 
-    class TransactionBuildError < StandardError
+    class TransactionBuildError < OpenAssets::Error
 
     end
 

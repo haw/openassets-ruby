@@ -11,6 +11,7 @@ describe OpenAssets::Api do
     expect(api.config[:rpc][:port]).to eq(8332)
     api = OpenAssets::Api.new(JSON.parse(File.read("#{File.dirname(__FILE__)}/../test-config.json"), {:symbolize_names => true}))
     expect(api.is_testnet?).to be true
+    expect{OpenAssets::Api.new({:provider => 'hoge'})}.to raise_error(OpenAssets::Error)
   end
 
   context 'use provider' do
