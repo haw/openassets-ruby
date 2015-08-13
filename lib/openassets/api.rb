@@ -22,7 +22,7 @@ module OpenAssets
       if @config[:provider] == 'bitcoind'
         @provider = Provider::BitcoinCoreProvider.new(@config[:rpc])
       else
-        raise StandardError, 'specified unsupported provider.'
+        raise OpenAssets::Error, 'specified unsupported provider.'
       end
     end
 

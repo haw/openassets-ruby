@@ -1,7 +1,7 @@
 module OpenAssets
   module Provider
 
-    class ApiError < StandardError
+    class ApiError < OpenAssets::Error
 
     end
 
