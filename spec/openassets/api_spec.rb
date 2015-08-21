@@ -35,6 +35,7 @@ describe OpenAssets::Api do
         expect(result['oa_address']).to eq(OA_UNSPENT[index]['oa_address'])
         expect(result['address']).to eq(OA_UNSPENT[index]['address'])
         expect(result['asset_quantity']).to eq(OA_UNSPENT[index]['asset_quantity'])
+        expect(result['account']).to eq(get_account(result['address']))
       }
 
       list = subject.list_unspent(['akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6'])
@@ -50,6 +51,7 @@ describe OpenAssets::Api do
       balances.each_with_index { |balance, index|
         expect(balance['oa_address']).to eq(OA_BALANCE[index][:oa_address])
         expect(balance['address']).to eq(OA_BALANCE[index][:address])
+        expect(balance['account']).to eq(get_account(balance['address']))
         expect(balance['value']).to eq(OA_BALANCE[index][:value])
         assets = balance['assets']
         expect(assets.length).to eq(OA_BALANCE[index][:assets].length)
@@ -141,6 +143,10 @@ describe OpenAssets::Api do
   def filter_btc_unspent(btc_address = nil)
     return BTC_UNSPENT if btc_address.nil?
     BTC_UNSPENT.select{|u|u['address'] == btc_address}
+  end
+
+  def get_account(btc_address)
+    BTC_UNSPENT.select{|u|u['address'] == btc_address}.first['account']
   end
 
   def setup_tx_load_mock(btc_provider_mock)

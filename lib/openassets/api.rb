@@ -51,7 +51,8 @@ module OpenAssets
           'amount' => satoshi_to_coin(out.output.value),
           'confirmations' => out.confirmations,
           'asset_id' => out.output.asset_id,
-          'asset_quantity' => out.output.asset_quantity.to_s
+          'account' => out.output.account,
+          'asset_quantity' => out.output.asset_quantity.to_s,
         }
       }
       oa_address.empty? ? result : result.select{|r|oa_address.include?(r['oa_address'])}
@@ -78,7 +79,8 @@ module OpenAssets
             'address' => btc_address,
             'oa_address' => btc_address.nil? ? nil : address_to_oa_address(btc_address),
             'value' => satoshi_to_coin(v.inject(0) { |sum, o|sum +  o.value}),
-            'assets' => assets
+            'assets' => assets,
+            'account' => v[0].account
         }
       }
       address.nil? ? result : result.select{|r|r['oa_address'] == address}
@@ -133,6 +135,7 @@ module OpenAssets
       unspent = provider.list_unspent(addresses)
       result = unspent.map{|item|
         output_result = get_output(item['txid'], item['vout'])
+        output_result.account = item['account']
         output = OpenAssets::Transaction::SpendableOutput.new(
           OpenAssets::Transaction::OutPoint.new(item['txid'], item['vout']), output_result)
         output.confirmations = item['confirmations']

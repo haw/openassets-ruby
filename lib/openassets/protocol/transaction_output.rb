@@ -9,6 +9,8 @@ module OpenAssets
       attr_accessor :asset_quantity
       attr_accessor :output_type
 
+      attr_accessor :account
+
       # @param [Integer] value The satoshi value of the output.
       # @param [Bitcoin::Script] script The script controlling redemption of the output.
       # @param [String] asset_id The asset ID of the output.
