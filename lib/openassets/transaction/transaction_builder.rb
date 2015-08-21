@@ -16,7 +16,7 @@ module OpenAssets
       # @param [bytes] metadata The metadata to be embedded in the transaction.
       # @param [Integer] fees The fees to include in the transaction.
       # @return[Bitcoin:Protocol:Tx] An unsigned transaction for issuing asset.
-      def issue_asset(issue_spec, metadata, fees, output_qty)
+      def issue_asset(issue_spec, metadata, fees, output_qty = 1)
         inputs, total_amount =
             TransactionBuilder.collect_uncolored_outputs(issue_spec.unspent_outputs, 2 * @amount + fees)
         tx = Bitcoin::Protocol::Tx.new
