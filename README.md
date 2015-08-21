@@ -48,12 +48,15 @@ Returns the balance in both bitcoin and colored coin assets for all of the addre
 Creates a transaction for issuing an asset.
   ```ruby
   # issue asset
-  # api.issue_asset(<issuer open asset address>, <issuing asset quantity>, <metadata>, <to open asset address>, <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>, <mode=('broadcast', 'signed', 'unsigned')>)
+  # api.issue_asset(<issuer open asset address>, <issuing asset quantity>, <metadata>, <to open asset address>, <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>, <mode=('broadcast', 'signed', 'unsigned')>, <output_qty default value is 1.>)
 
   # example
   address = 'akEJwzkzEFau4t2wjbXoMs7MwtZkB8xixmH'
   api.issue_asset(address, 150, 'u=https://goo.gl/bmVEuw', address, nil, 'broadcast')
   ``` 
+If specified output_qty, the issue output is divided by the number of output_qty.   
+Ex, amount = 125 and output_qty = 2, the marker output asset quantity is [62, 63] and issue TxOut is two.
+
 * **send_asset**  
 Creates a transaction for sending an asset from the open asset address to another.
   ```ruby

@@ -94,12 +94,15 @@ module OpenAssets
     # 'broadcast' (default) for signing and broadcasting the transaction,
     # 'signed' for signing the transaction without broadcasting,
     # 'unsigned' for getting the raw unsigned transaction without broadcasting"""='broadcast'
-    def issue_asset(from, amount, metadata = nil, to = nil, fees = nil, mode = 'broadcast')
+    # @param[Integer] output_qty The number of divides the issue output. Default value is 1.
+    # Ex. amount = 125 and output_qty = 2, asset quantity = [62, 63] and issue TxOut is two.
+    # @return[Bitcoin::Protocol::Tx] The Bitcoin::Protocol::Tx object.
+    def issue_asset(from, amount, metadata = nil, to = nil, fees = nil, mode = 'broadcast', output_qty = 1)
       to = from if to.nil?
       builder = OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
       colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
       issue_param = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount)
-      tx = builder.issue_asset(issue_param, metadata, fees.nil? ? @config[:default_fees]: fees)
+      tx = builder.issue_asset(issue_param, metadata, fees.nil? ? @config[:default_fees]: fees, output_qty)
       tx = process_transaction(tx, mode)
       tx
     end

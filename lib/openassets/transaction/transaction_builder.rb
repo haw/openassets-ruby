@@ -16,7 +16,7 @@ module OpenAssets
       # @param [bytes] metadata The metadata to be embedded in the transaction.
       # @param [Integer] fees The fees to include in the transaction.
       # @return[Bitcoin:Protocol:Tx] An unsigned transaction for issuing asset.
-      def issue_asset(issue_spec, metadata, fees)
+      def issue_asset(issue_spec, metadata, fees, output_qty)
         inputs, total_amount =
             TransactionBuilder.collect_uncolored_outputs(issue_spec.unspent_outputs, 2 * @amount + fees)
         tx = Bitcoin::Protocol::Tx.new
@@ -29,8 +29,16 @@ module OpenAssets
         issue_address = oa_address_to_address(issue_spec.to_script)
         from_address = oa_address_to_address(issue_spec.change_script)
         validate_address([issue_address, from_address])
-        tx.add_out(create_colored_output(issue_address))
-        tx.add_out(create_marker_output([issue_spec.amount], metadata))
+        asset_quantities =[]
+        output_qty.times {|index|
+          if index == output_qty - 1
+            asset_quantities[index] = issue_spec.amount / output_qty + issue_spec.amount % output_qty
+          else
+            asset_quantities[index] = issue_spec.amount / output_qty
+          end
+          tx.add_out(create_colored_output(issue_address))
+        }
+        tx.add_out(create_marker_output(asset_quantities, metadata))
         tx.add_out(create_uncolored_output(from_address, total_amount - @amount - fees))
         tx
       end
