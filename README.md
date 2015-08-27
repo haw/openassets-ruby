@@ -69,6 +69,21 @@ Creates a transaction for sending an asset from the open asset address to anothe
   api.send_asset(from, 'AWo3R89p5REmoSyMWB8AeUmud8456bRxZL', 100, to, 10000, 'broadcast')
   ``` 
   
+* **send_bitcoin**  
+Creates a transaction for sending bitcoins from an address to another.
+  ```ruby
+  # send bitcoin
+  # api.send_bitcoin(<from btc address>, <amount (satoshi)>, <to btc address>, <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>, <mode=('broadcast', 'signed', 'unsigned')>, <output_qty default value is 1.>)
+
+  # example
+  from = '14M4kbAtn71P1nnNYuhBDFTNYxa19t1XP6'
+  to = '1MFW7BTwiNbAkmVz4SzAMQXboKYKGSzkq2'
+  api.send_bitcoin(from, 60000, to)
+  ``` 
+
+If specified output_qty, the send output is divided by the number of output_qty.   
+Ex, amount = 60000 and output_qty = 2, send TxOut is two (each value is 30000, 30000) and change TxOut one.
+
 ## License
 
 The MIT License (MIT)
