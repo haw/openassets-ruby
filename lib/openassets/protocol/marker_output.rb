@@ -28,6 +28,7 @@ module OpenAssets
         payload = [OAP_MARKER, VERSION]
         payload << Bitcoin::Protocol.pack_var_int(@asset_quantities.length).unpack("H*")
         @asset_quantities.map{|q|payload << encode_leb128(q)}
+        @metadata ||= ''
         payload << Bitcoin::Protocol.pack_var_int(@metadata.length).unpack("H*")
         tmp = []
         @metadata.bytes{|b| tmp << b.to_s(16)}

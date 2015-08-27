@@ -95,6 +95,18 @@ describe OpenAssets::Api do
       expect(tx.outputs[3].parsed_script.to_string).to eq('OP_DUP OP_HASH160 24b3d405bc60bd9628691fe28bb00f6800e14806 OP_EQUALVERIFY OP_CHECKSIG')
     end
 
+    it 'issue_asset metadata nil' do
+      address = 'akEJwzkzEFau4t2wjbXoMs7MwtZkB8xixmH'
+      tx = subject.issue_asset(address, 125, nil, address, nil, 'unsigned')
+      expect(tx.inputs.length).to eq(1)
+      expect(tx.outputs.length).to eq(3)
+      marker_output_payload = OpenAssets::Protocol::MarkerOutput.parse_script(tx.outputs[1].pk_script)
+      marker_output = OpenAssets::Protocol::MarkerOutput.deserialize_payload(marker_output_payload)
+      expect(tx.outputs[1].value).to eq(0)
+      expect(marker_output.asset_quantities).to eq([125])
+      expect(marker_output.metadata).to eq('')
+    end
+
   end
 
   context 'use provider send asset' do
