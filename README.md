@@ -80,7 +80,6 @@ Creates a transaction for sending bitcoins from an address to another.
   to = '1MFW7BTwiNbAkmVz4SzAMQXboKYKGSzkq2'
   api.send_bitcoin(from, 60000, to)
   ``` 
-
 If specified output_qty, the send output is divided by the number of output_qty.   
 Ex, amount = 60000 and output_qty = 2, send TxOut is two (each value is 30000, 30000) and change TxOut one.
 
