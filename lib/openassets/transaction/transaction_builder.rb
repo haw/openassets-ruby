@@ -65,6 +65,7 @@ module OpenAssets
           asset_quantities << (total_amount - transfer_spec.amount)
         end
 
+        # btc_excess = inputs(colored) total satoshi - outputs(transfer) total satoshi
         btc_excess = inputs.inject(0) { |sum, i| sum + i.output.value } - outputs.inject(0){|sum, o| sum + o.value}
         if btc_excess < btc_transfer_spec.amount + fees
           uncolored_outputs, uncolored_amount =
