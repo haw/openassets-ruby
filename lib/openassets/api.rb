@@ -118,6 +118,7 @@ module OpenAssets
     # @param[String] mode 'broadcast' (default) for signing and broadcasting the transaction,
     # 'signed' for signing the transaction without broadcasting,
     # 'unsigned' for getting the raw unsigned transaction without broadcasting"""='broadcast'
+    # @return[Bitcoin::Protocol:Tx] The resulting transaction.
     def send_asset(from, asset_id, amount, to, fees = nil, mode = 'broadcast')
       builder = OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
       colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
@@ -125,6 +126,26 @@ module OpenAssets
       tx = builder.transfer_assets(asset_id, send_param, from, fees.nil? ? @config[:default_fees]: fees)
       tx = process_transaction(tx, mode)
       tx
+    end
+
+    # Creates a transaction for sending bitcoins from an address to another.
+    # @param[String] from The address to send the bitcoins from.
+    # @param[Integer] amount The amount of satoshis to send.
+    # @param[String] to The address to send the bitcoins to.
+    # @param[Integer] fees The fess in satoshis for the transaction.
+    # @param[String] mode 'broadcast' (default) for signing and broadcasting the transaction,
+    # 'signed' for signing the transaction without broadcasting,
+    # 'unsigned' for getting the raw unsigned transaction without broadcasting"""='broadcast'
+    # @param [Integer] output_qty The number of divides the issue output. Default value is 1.
+    # Ex. amount = 125 and output_qty = 2, asset quantity = [62, 63] and issue TxOut is two.
+    # @return[Bitcoin::Protocol:Tx] The resulting transaction.
+    def send_bitcoin(from, amount, to, fees = nil, mode = 'broadcast', output_qty = 1)
+      validate_address([from, to])
+      builder = OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
+      colored_outputs = get_unspent_outputs([from])
+      send_param = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount)
+      tx = builder.transfer_btc(send_param, fees.nil? ? @config[:default_fees]: fees, output_qty)
+      process_transaction(tx, mode)
     end
 
     # Get unspent outputs.

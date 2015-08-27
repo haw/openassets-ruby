@@ -50,57 +50,17 @@ module OpenAssets
       # @param[Integer] fees The fees to include in the transaction.
       # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
       def transfer_assets(asset_id, transfer_spec, btc_change_script, fees)
-        btc_transfer_spec = OpenAssets::Transaction::TransferParameters.new(transfer_spec.unspent_outputs, nil, btc_change_script, 0)
-        outputs = []
-        asset_quantities = []
-        inputs, total_amount = TransactionBuilder.collect_colored_outputs(transfer_spec.unspent_outputs, asset_id, transfer_spec.amount)
-
-        # add asset transfer outpu
-        outputs << create_colored_output(oa_address_to_address(transfer_spec.to_script))
-        asset_quantities << transfer_spec.amount
-
-        # add the rest of the asset to the origin address
-        if total_amount > transfer_spec.amount
-          outputs << create_colored_output(oa_address_to_address(transfer_spec.change_script))
-          asset_quantities << (total_amount - transfer_spec.amount)
-        end
-
-        # btc_excess = inputs(colored) total satoshi - outputs(transfer) total satoshi
-        btc_excess = inputs.inject(0) { |sum, i| sum + i.output.value } - outputs.inject(0){|sum, o| sum + o.value}
-        if btc_excess < btc_transfer_spec.amount + fees
-          uncolored_outputs, uncolored_amount =
-              TransactionBuilder.collect_uncolored_outputs(btc_transfer_spec.unspent_outputs, btc_transfer_spec.amount + fees - btc_excess)
-          inputs << uncolored_outputs
-          btc_excess += uncolored_amount
-        end
-
-        change = btc_excess - btc_transfer_spec.amount - fees
-        if change > 0
-          outputs << create_uncolored_output(oa_address_to_address(btc_transfer_spec.change_script), change)
-        end
-
-        if btc_transfer_spec.amount > 0
-          outputs << create_uncolored_output(oa_address_to_address(btc_transfer_spec.to_script), btc_transfer_spec.amount)
-        end
-
-        # add marker output to outputs first.
-        unless asset_quantities.empty?
-          outputs.unshift(create_marker_output(asset_quantities))
-        end
-
-        tx = Bitcoin::Protocol::Tx.new
-        inputs.flatten.each{|i|
-          script_sig = i.output.script.to_binary
-          tx_in = Bitcoin::Protocol::TxIn.from_hex_hash(i.out_point.hash, i.out_point.index)
-          tx_in.script_sig = script_sig
-          tx.add_in(tx_in)
-        }
-        outputs.each{|o|tx.add_out(o)}
-        tx
+        btc_transfer_spec = OpenAssets::Transaction::TransferParameters.new(
+            transfer_spec.unspent_outputs, nil, oa_address_to_address(btc_change_script), 0)
+        transfer([[asset_id, transfer_spec]], btc_transfer_spec, fees)
       end
 
-      def transfer_btc
-
+      # Creates a transaction for sending bitcoins.
+      # @param[OpenAssets::Transaction::TransferParameters] btc_transfer_spec The parameters of the bitcoins being transferred.
+      # @param[Integer] fees The fees to include in the transaction.
+      # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
+      def transfer_btc(btc_transfer_spec, fees, output_qty = 1)
+        transfer([], btc_transfer_spec, fees, output_qty)
       end
 
       # collect uncolored outputs in unspent outputs(contains colored output).
@@ -165,6 +125,66 @@ module OpenAssets
         raise DustOutputError if value < @amount
         hash160 = Bitcoin.hash160_from_address(address)
         Bitcoin::Protocol::TxOut.new(value, Bitcoin::Script.new(Bitcoin::Script.to_hash160_script(hash160)).to_payload)
+      end
+
+      def transfer(asset_transfer_specs, btc_transfer_spec, fees, btc_output_qty = 1)
+        inputs = []
+        outputs = []
+        asset_quantities = []
+        asset_transfer_specs.each{|asset_id, transfer_spec|
+          colored_outputs, total_amount = TransactionBuilder.collect_colored_outputs(transfer_spec.unspent_outputs, asset_id, transfer_spec.amount)
+          inputs = inputs + colored_outputs
+
+          # add asset transfer output
+          outputs << create_colored_output(oa_address_to_address(transfer_spec.to_script))
+          asset_quantities << transfer_spec.amount
+
+          # add the rest of the asset to the origin address
+          if total_amount > transfer_spec.amount
+            outputs << create_colored_output(oa_address_to_address(transfer_spec.change_script))
+            asset_quantities << (total_amount - transfer_spec.amount)
+          end
+        }
+
+        # btc_excess = inputs(colored) total satoshi - outputs(transfer) total satoshi
+        btc_excess = inputs.inject(0) { |sum, i| sum + i.output.value } - outputs.inject(0){|sum, o| sum + o.value}
+        if btc_excess < btc_transfer_spec.amount + fees
+          uncolored_outputs, uncolored_amount =
+              TransactionBuilder.collect_uncolored_outputs(btc_transfer_spec.unspent_outputs, btc_transfer_spec.amount + fees - btc_excess)
+          inputs << uncolored_outputs
+          btc_excess += uncolored_amount
+        end
+
+        otsuri = btc_excess - btc_transfer_spec.amount - fees
+        if otsuri > 0
+          outputs << create_uncolored_output(btc_transfer_spec.change_script, otsuri)
+        end
+
+        if btc_transfer_spec.amount > 0
+          btc_output_qty.times {|index|
+            if index == btc_output_qty - 1
+              amount = btc_transfer_spec.amount / btc_output_qty + btc_transfer_spec.amount % btc_output_qty
+            else
+              amount = btc_transfer_spec.amount / btc_output_qty
+            end
+            outputs << create_uncolored_output(btc_transfer_spec.to_script, amount)
+          }
+        end
+
+        # add marker output to outputs first.
+        unless asset_quantities.empty?
+          outputs.unshift(create_marker_output(asset_quantities))
+        end
+
+        tx = Bitcoin::Protocol::Tx.new
+        inputs.flatten.each{|i|
+          script_sig = i.output.script.to_binary
+          tx_in = Bitcoin::Protocol::TxIn.from_hex_hash(i.out_point.hash, i.out_point.index)
+          tx_in.script_sig = script_sig
+          tx.add_in(tx_in)
+        }
+        outputs.each{|o|tx.add_out(o)}
+        tx
       end
 
     end
