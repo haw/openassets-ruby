@@ -54,7 +54,7 @@ Creates a transaction for issuing an asset.
   address = 'akEJwzkzEFau4t2wjbXoMs7MwtZkB8xixmH'
   api.issue_asset(address, 150, 'u=https://goo.gl/bmVEuw', address, nil, 'broadcast')
   ``` 
-If specified output_qty, the issue output is divided by the number of output_qty.   
+If specified ``output_qty``, the issue output is divided by the number of output_qty.   
 Ex, amount = 125 and output_qty = 2, the marker output asset quantity is [62, 63] and issue TxOut is two.
 
 * **send_asset**  
@@ -70,7 +70,8 @@ Creates a transaction for sending an asset from the open asset address to anothe
   ``` 
   
 * **send_bitcoin**  
-Creates a transaction for sending bitcoins from an address to another.
+Creates a transaction for sending bitcoins from an address to another.  
+This transaction inputs use only uncolored outputs.
   ```ruby
   # send bitcoin
   # api.send_bitcoin(<from btc address>, <amount (satoshi)>, <to btc address>, <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>, <mode=('broadcast', 'signed', 'unsigned')>, <output_qty default value is 1.>)
@@ -80,7 +81,7 @@ Creates a transaction for sending bitcoins from an address to another.
   to = '1MFW7BTwiNbAkmVz4SzAMQXboKYKGSzkq2'
   api.send_bitcoin(from, 60000, to)
   ``` 
-If specified output_qty, the send output is divided by the number of output_qty.   
+If specified ``output_qty``, the send output is divided by the number of output_qty.   
 Ex, amount = 60000 and output_qty = 2, send TxOut is two (each value is 30000, 30000) and change TxOut one.
 
 ## License
