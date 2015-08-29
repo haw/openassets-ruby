@@ -61,13 +61,15 @@ Ex, amount = 125 and output_qty = 2, the marker output asset quantity is [62, 63
 Creates a transaction for sending an asset from the open asset address to another.
   ```ruby
   # send asset
-  # api.send_asset(<from open asset address>, <asset ID>, <asset quantity>, <to open asset address>, <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>, <mode=('broadcast', 'signed', 'unsigned')>)
+  # api.send_asset(<from open asset address>, <asset ID>, <asset quantity>, <to open asset address>, <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>, <mode=('broadcast', 'signed', 'unsigned')>, <output_qty default value is 1.>)
 
   # example
   from = 'akXDPMMHHBrUrd1fM756M1GSB8viVAwMyBk'
   to = 'akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6'
   api.send_asset(from, 'AWo3R89p5REmoSyMWB8AeUmud8456bRxZL', 100, to, 10000, 'broadcast')
   ``` 
+If specified ``output_qty``, the send output is divided by the number of output_qty.   
+Ex, asset holding amount = 200, and send  amount = 125 and output_qty = 2, the marker output asset quantity is [62, 63, 75] and send TxOut is three. The last of the asset quantity is change asset output.
   
 * **send_bitcoin**  
 Creates a transaction for sending bitcoins from an address to another.  
