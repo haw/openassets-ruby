@@ -136,8 +136,15 @@ module OpenAssets
           inputs = inputs + colored_outputs
 
           # add asset transfer output
-          outputs << create_colored_output(oa_address_to_address(transfer_spec.to_script))
-          asset_quantities << transfer_spec.amount
+          transfer_spec.output_qty.times{|index|
+            if index == transfer_spec.output_qty - 1
+              amount = transfer_spec.amount / transfer_spec.output_qty + transfer_spec.amount % transfer_spec.output_qty
+            else
+              amount = transfer_spec.amount / transfer_spec.output_qty
+            end
+            outputs << create_colored_output(oa_address_to_address(transfer_spec.to_script))
+            asset_quantities << amount
+          }
 
           # add the rest of the asset to the origin address
           if total_amount > transfer_spec.amount

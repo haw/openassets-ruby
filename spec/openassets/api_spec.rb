@@ -149,6 +149,26 @@ describe OpenAssets::Api do
       # bitcoin rest
       expect(tx.outputs[3].value).to eq(16400)
       expect(tx.outputs[3].parsed_script.to_string).to eq('OP_DUP OP_HASH160 b7218fe503cd18555255e5b13d4f07f3fd00d0c9 OP_EQUALVERIFY OP_CHECKSIG')
+
+      # split output_qty
+      tx = subject.send_asset(from, asset_id, 10, to, 10000, 'unsigned', 3)
+      expect(tx.outputs.length).to eq(6)
+      marker_output_payload = OpenAssets::Protocol::MarkerOutput.parse_script(tx.outputs[0].pk_script)
+      marker_output = OpenAssets::Protocol::MarkerOutput.deserialize_payload(marker_output_payload)
+      expect(tx.outputs[0].value).to eq(0)
+      expect(marker_output.asset_quantities).to eq([3, 3, 4, 14])
+      expect(tx.outputs[1].value).to eq(600)
+      expect(tx.outputs[1].parsed_script.to_string).to eq('OP_DUP OP_HASH160 84a14fd7c4c522d59158f91f78c250278f66a899 OP_EQUALVERIFY OP_CHECKSIG')
+      expect(tx.outputs[2].value).to eq(600)
+      expect(tx.outputs[2].parsed_script.to_string).to eq('OP_DUP OP_HASH160 84a14fd7c4c522d59158f91f78c250278f66a899 OP_EQUALVERIFY OP_CHECKSIG')
+      expect(tx.outputs[3].value).to eq(600)
+      expect(tx.outputs[3].parsed_script.to_string).to eq('OP_DUP OP_HASH160 84a14fd7c4c522d59158f91f78c250278f66a899 OP_EQUALVERIFY OP_CHECKSIG')
+      expect(tx.outputs[4].value).to eq(600)
+      expect(tx.outputs[4].parsed_script.to_string).to eq('OP_DUP OP_HASH160 b7218fe503cd18555255e5b13d4f07f3fd00d0c9 OP_EQUALVERIFY OP_CHECKSIG')
+      # bitcoin rest
+      expect(tx.outputs[5].value).to eq(15200)
+      expect(tx.outputs[5].parsed_script.to_string).to eq('OP_DUP OP_HASH160 b7218fe503cd18555255e5b13d4f07f3fd00d0c9 OP_EQUALVERIFY OP_CHECKSIG')
+
     end
 
     it 'send_bitcoin' do
