@@ -103,8 +103,8 @@ module OpenAssets
       to = from if to.nil?
       builder = OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
       colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
-      issue_param = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount)
-      tx = builder.issue_asset(issue_param, metadata, fees.nil? ? @config[:default_fees]: fees, output_qty)
+      issue_param = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount, output_qty)
+      tx = builder.issue_asset(issue_param, metadata, fees.nil? ? @config[:default_fees]: fees)
       tx = process_transaction(tx, mode)
       tx
     end
@@ -119,11 +119,11 @@ module OpenAssets
     # 'signed' for signing the transaction without broadcasting,
     # 'unsigned' for getting the raw unsigned transaction without broadcasting"""='broadcast'
     # @return[Bitcoin::Protocol:Tx] The resulting transaction.
-    def send_asset(from, asset_id, amount, to, fees = nil, mode = 'broadcast')
+    def send_asset(from, asset_id, amount, to, fees = nil, mode = 'broadcast', output_qty = 1)
       builder = OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
       colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
-      send_param = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount)
-      tx = builder.transfer_assets(asset_id, send_param, from, fees.nil? ? @config[:default_fees]: fees)
+      asset_transfer_spec = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount, output_qty)
+      tx = builder.transfer_assets(asset_id, asset_transfer_spec, from, fees.nil? ? @config[:default_fees]: fees)
       tx = process_transaction(tx, mode)
       tx
     end
@@ -143,8 +143,8 @@ module OpenAssets
       validate_address([from, to])
       builder = OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
       colored_outputs = get_unspent_outputs([from])
-      send_param = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount)
-      tx = builder.transfer_btc(send_param, fees.nil? ? @config[:default_fees]: fees, output_qty)
+      btc_transfer_spec = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount, output_qty)
+      tx = builder.transfer_btc(btc_transfer_spec, fees.nil? ? @config[:default_fees]: fees)
       process_transaction(tx, mode)
     end
 

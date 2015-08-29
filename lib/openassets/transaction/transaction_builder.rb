@@ -16,7 +16,7 @@ module OpenAssets
       # @param [bytes] metadata The metadata to be embedded in the transaction.
       # @param [Integer] fees The fees to include in the transaction.
       # @return[Bitcoin:Protocol:Tx] An unsigned transaction for issuing asset.
-      def issue_asset(issue_spec, metadata, fees, output_qty = 1)
+      def issue_asset(issue_spec, metadata, fees)
         inputs, total_amount =
             TransactionBuilder.collect_uncolored_outputs(issue_spec.unspent_outputs, 2 * @amount + fees)
         tx = Bitcoin::Protocol::Tx.new
@@ -30,11 +30,11 @@ module OpenAssets
         from_address = oa_address_to_address(issue_spec.change_script)
         validate_address([issue_address, from_address])
         asset_quantities =[]
-        output_qty.times {|index|
-          if index == output_qty - 1
-            asset_quantities[index] = issue_spec.amount / output_qty + issue_spec.amount % output_qty
+        issue_spec.output_qty.times {|index|
+          if index == issue_spec.output_qty - 1
+            asset_quantities[index] = issue_spec.amount / issue_spec.output_qty + issue_spec.amount % issue_spec.output_qty
           else
-            asset_quantities[index] = issue_spec.amount / output_qty
+            asset_quantities[index] = issue_spec.amount / issue_spec.output_qty
           end
           tx.add_out(create_colored_output(issue_address))
         }
@@ -45,22 +45,22 @@ module OpenAssets
 
       # Creates a transaction for sending an asset.
       # @param[String] asset_id The ID of the asset being sent.
-      # @param[OpenAssets::Transaction::TransferParameters] transfer_spec The parameters of the asset being transferred.
+      # @param[OpenAssets::Transaction::TransferParameters] asset_transfer_spec The parameters of the asset being transferred.
       # @param[String] btc_change_script The script where to send bitcoin change, if any.
       # @param[Integer] fees The fees to include in the transaction.
       # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
-      def transfer_assets(asset_id, transfer_spec, btc_change_script, fees)
+      def transfer_assets(asset_id, asset_transfer_spec, btc_change_script, fees)
         btc_transfer_spec = OpenAssets::Transaction::TransferParameters.new(
-            transfer_spec.unspent_outputs, nil, oa_address_to_address(btc_change_script), 0)
-        transfer([[asset_id, transfer_spec]], btc_transfer_spec, fees)
+            asset_transfer_spec.unspent_outputs, nil, oa_address_to_address(btc_change_script), 0)
+        transfer([[asset_id, asset_transfer_spec]], btc_transfer_spec, fees)
       end
 
       # Creates a transaction for sending bitcoins.
       # @param[OpenAssets::Transaction::TransferParameters] btc_transfer_spec The parameters of the bitcoins being transferred.
       # @param[Integer] fees The fees to include in the transaction.
       # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
-      def transfer_btc(btc_transfer_spec, fees, output_qty = 1)
-        transfer([], btc_transfer_spec, fees, output_qty)
+      def transfer_btc(btc_transfer_spec, fees)
+        transfer([], btc_transfer_spec, fees)
       end
 
       # collect uncolored outputs in unspent outputs(contains colored output).
@@ -127,7 +127,7 @@ module OpenAssets
         Bitcoin::Protocol::TxOut.new(value, Bitcoin::Script.new(Bitcoin::Script.to_hash160_script(hash160)).to_payload)
       end
 
-      def transfer(asset_transfer_specs, btc_transfer_spec, fees, btc_output_qty = 1)
+      def transfer(asset_transfer_specs, btc_transfer_spec, fees)
         inputs = []
         outputs = []
         asset_quantities = []
@@ -161,11 +161,11 @@ module OpenAssets
         end
 
         if btc_transfer_spec.amount > 0
-          btc_output_qty.times {|index|
-            if index == btc_output_qty - 1
-              amount = btc_transfer_spec.amount / btc_output_qty + btc_transfer_spec.amount % btc_output_qty
+          btc_transfer_spec.output_qty.times {|index|
+            if index == btc_transfer_spec.output_qty - 1
+              amount = btc_transfer_spec.amount / btc_transfer_spec.output_qty + btc_transfer_spec.amount % btc_transfer_spec.output_qty
             else
-              amount = btc_transfer_spec.amount / btc_output_qty
+              amount = btc_transfer_spec.amount / btc_transfer_spec.output_qty
             end
             outputs << create_uncolored_output(btc_transfer_spec.to_script, amount)
           }
