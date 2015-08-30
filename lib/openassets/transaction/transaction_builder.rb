@@ -30,12 +30,8 @@ module OpenAssets
         from_address = oa_address_to_address(issue_spec.change_script)
         validate_address([issue_address, from_address])
         asset_quantities =[]
-        issue_spec.output_qty.times {|index|
-          if index == issue_spec.output_qty - 1
-            asset_quantities[index] = issue_spec.amount / issue_spec.output_qty + issue_spec.amount % issue_spec.output_qty
-          else
-            asset_quantities[index] = issue_spec.amount / issue_spec.output_qty
-          end
+        issue_spec.split_output_amount.each{|amount|
+          asset_quantities << amount
           tx.add_out(create_colored_output(issue_address))
         }
         tx.add_out(create_marker_output(asset_quantities, metadata))
@@ -136,12 +132,7 @@ module OpenAssets
           inputs = inputs + colored_outputs
 
           # add asset transfer output
-          transfer_spec.output_qty.times{|index|
-            if index == transfer_spec.output_qty - 1
-              amount = transfer_spec.amount / transfer_spec.output_qty + transfer_spec.amount % transfer_spec.output_qty
-            else
-              amount = transfer_spec.amount / transfer_spec.output_qty
-            end
+          transfer_spec.split_output_amount.each {|amount|
             outputs << create_colored_output(oa_address_to_address(transfer_spec.to_script))
             asset_quantities << amount
           }
@@ -168,12 +159,7 @@ module OpenAssets
         end
 
         if btc_transfer_spec.amount > 0
-          btc_transfer_spec.output_qty.times {|index|
-            if index == btc_transfer_spec.output_qty - 1
-              amount = btc_transfer_spec.amount / btc_transfer_spec.output_qty + btc_transfer_spec.amount % btc_transfer_spec.output_qty
-            else
-              amount = btc_transfer_spec.amount / btc_transfer_spec.output_qty
-            end
+          btc_transfer_spec.split_output_amount.each {|amount|
             outputs << create_uncolored_output(btc_transfer_spec.to_script, amount)
           }
         end

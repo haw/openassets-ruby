@@ -23,6 +23,18 @@ module OpenAssets
         @output_qty = output_qty
       end
 
+      def split_output_amount
+        split_amounts = []
+        output_qty.times{|index|
+          if index == output_qty - 1
+            value = amount / output_qty + amount % output_qty
+          else
+            value = amount / output_qty
+          end
+          split_amounts << value
+        }
+        split_amounts
+      end
     end
 
   end
