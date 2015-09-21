@@ -45,7 +45,7 @@ module OpenAssets
         list = to_bytes(payload).map{|x|(x.to_i(16)>=128 ? x : x+"|")}.join.split('|')[0..(asset_quantity - 1)].join
         asset_quantities = decode_leb128(list)
         meta = to_bytes(payload[list.size..-1])
-        metadata = meta[1..-1].map{|x|x.to_i(16).chr}.join
+        metadata =  meta.empty? ? '' : meta[1..-1].map{|x|x.to_i(16).chr}.join
         new(asset_quantities, metadata)
       end
 
