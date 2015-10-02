@@ -31,4 +31,12 @@ describe OpenAssets::Protocol::MarkerOutput do
     expect(script.to_string).to eq('OP_RETURN 4f41010001904e1b753d68747470733a2f2f6370722e736d2f35596753553150672d71')
   end
 
+  it 'metadata to json' do
+    marker_output = OpenAssets::Protocol::MarkerOutput.
+        deserialize_payload('4f41010001904e1b753d68747470733a2f2f6370722e736d2f35596753553150672d71')
+    json = marker_output.metadata_to_json
+    expect(json['divisibility']).to eq(1)
+    expect(marker_output.metadata).to eq('u=https://cpr.sm/5YgSU1Pg-q')
+  end
+
 end

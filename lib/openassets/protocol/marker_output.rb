@@ -1,3 +1,4 @@
+require 'rest-client'
 module OpenAssets
   module Protocol
 
@@ -34,6 +35,14 @@ module OpenAssets
         @metadata.bytes{|b| tmp << b.to_s(16)}
         payload << tmp.join
         payload.join
+      end
+
+      # if metadata include asset definition pointer, parse asset definition file.
+      def metadata_to_json
+        if metadata.nil? || !metadata.start_with?('u=')
+          return nil
+        end
+        JSON.parse(RestClient.get metadata.slice(2..-1), :accept => :json)
       end
 
       # Deserialize the marker output payload.
