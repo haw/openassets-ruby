@@ -32,7 +32,37 @@ Returns an array of unspent transaction outputs, argument with the asset ID and 
   
   # specify th open asset address.
   api.list_unspent(['akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6'])
+  
+  > [
+      {
+        "txid": "1610a1f62597a3ea36e09e78354be22d2a958c1a38ed9e5d3f1c2811ee82dc37",
+        "vout": 1,
+        "address": "1HhJs3JgbiyxC8ktfi6nU4wTqVmrMtCVkG",
+        "oa_address": "akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6",
+        "script": "76a914b7218fe503cd18555255e5b13d4f07f3fd00d0c988ac",
+        "amount": "0.00000600",
+        "confirmations": 8338,
+        "asset_id": "AWo3R89p5REmoSyMWB8AeUmud8456bRxZL",
+        "account": "openassets-ruby",
+        "asset_quantity": "67",
+        "asset_amount": "6.7"
+      },
+      ...
   ``` 
+  Output items are as follows.
+  
+  |Item|description|
+  |:---|:---|
+  |txid|The TXID of the transaction containing the output.|
+  |address| A P2PKH or P2SH address.|
+  |oa_address|The Open Asset address.|
+  |script|The output script.|
+  |amount|The Bitcoin amount.|
+  |confirmations|A score indicating the number of blocks on the best block chain that would need to be modified to remove or modify a particular transaction. |
+  |asset_id|The asset ID is a 160 bits hash, used to uniquely identify the asset stored on the output.|
+  |account|The name of an account.|
+  |asset_quantity|The asset quantity is an unsigned integer representing how many units of that asset are stored on the output.|
+  |asset_amount| The asset amount is the value obtained by converting the asset quantity to the unit of divisibility that are defined in the Asset definition file. |  
 
 * **get_balance**  
 Returns the balance in both bitcoin and colored coin assets for all of the addresses available in your Bitcoin Core wallet.
@@ -42,7 +72,38 @@ Returns the balance in both bitcoin and colored coin assets for all of the addre
   
   # specify the open asset address.
   api.get_balance('akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6')
+  > [
+      {
+        "address": "1HhJs3JgbiyxC8ktfi6nU4wTqVmrMtCVkG",
+        "oa_address": "akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6",
+        "value": "0.00018200",
+        "assets": [
+          {
+            "asset_id": "AWo3R89p5REmoSyMWB8AeUmud8456bRxZL",
+            "quantity": "81",
+            "amount": "20.7"
+          },
+          {
+            "asset_id": "AJk2Gx5V67S2wNuwTK5hef3TpHunfbjcmX",
+            "quantity": "67",
+            "amount": "6.7"
+          }
+        ],
+        "account": "openassets-ruby"
+      },
   ``` 
+  Output items are as follows.
+  
+  |Item|description|
+  |:---|:---|
+  |address| A P2PKH or P2SH address.|
+  |oa_address|The Open Asset address.|
+  |value|The Bitcoin amount.|
+  |assets|The array of the assets.|
+  |asset_id|The asset ID is a 160 bits hash, used to uniquely identify the asset stored on the output.|
+  |asset_quantity|The asset quantity is an unsigned integer representing how many units of that asset are stored on the output.|
+  |asset_amount| The asset amount is the value obtained by converting the asset quantity to the unit of divisibility that are defined in the Asset definition file. |  
+  |account|The name of an account.|
   
 * **issue_asset**  
 Creates a transaction for issuing an asset.
