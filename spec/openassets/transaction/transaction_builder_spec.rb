@@ -88,6 +88,21 @@ describe OpenAssets::Transaction::TransactionBuilder do
     }.to raise_error(OpenAssets::Transaction::InsufficientAssetQuantityError)
   end
 
+  it 'metadata parse' do
+    output = OpenAssets::Protocol::TransactionOutput.new(
+        100, Bitcoin::Script.new('hoge'), 'ALn3aK1fSuG27N96UGYB1kUYUpGKRhBuBC', 200, OpenAssets::Protocol::OutputType::ISSUANCE)
+    expect(output.asset_definition_url).to eq('')
+    output = OpenAssets::Protocol::TransactionOutput.new(
+        100, Bitcoin::Script.new('hoge'), 'ALn3aK1fSuG27N96UGYB1kUYUpGKRhBuBC', 200, OpenAssets::Protocol::OutputType::ISSUANCE, 'hoge')
+    expect(output.asset_definition_url).to eq('Invalid metadata format.')
+    output = OpenAssets::Protocol::TransactionOutput.new(
+        100, Bitcoin::Script.new('hoge'), 'ALn3aK1fSuG27N96UGYB1kUYUpGKRhBuBC', 200, OpenAssets::Protocol::OutputType::ISSUANCE, 'u=http://goo.gl/fS4mEj')
+    expect(output.asset_definition_url).to eq('The asset definition is invalid. http://goo.gl/fS4mEj')
+    output = OpenAssets::Protocol::TransactionOutput.new(
+        100, Bitcoin::Script.new('hoge'), 'AJk2Gx5V67S2wNuwTK5hef3TpHunfbjcmX', 200, OpenAssets::Protocol::OutputType::ISSUANCE, 'u=http://goo.gl/fS4mEj')
+    expect(output.asset_definition_url).to eq('http://goo.gl/fS4mEj')
+  end
+
   # generate outputs
   # @param [Array[Array]] definitions definition array format = [value, output_script, asset_id, asset_quantity]
   def gen_outputs(definitions)

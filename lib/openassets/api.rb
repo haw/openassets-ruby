@@ -214,12 +214,12 @@ module OpenAssets
         script = outputs[i].parsed_script
         if i < asset_quantities.length && asset_quantities[i] > 0
           payload = OpenAssets::Protocol::MarkerOutput.parse_script(marker_output.parsed_script.to_payload)
-          asset_definition = OpenAssets::Protocol::MarkerOutput.deserialize_payload(payload).metadata_to_json
-          if asset_definition.nil?
+          metadata = OpenAssets::Protocol::MarkerOutput.deserialize_payload(payload).metadata
+          if metadata.nil?
             output = OpenAssets::Protocol::TransactionOutput.new(value, script, issuance_asset_id, asset_quantities[i], OpenAssets::Protocol::OutputType::ISSUANCE)
           else
             output = OpenAssets::Protocol::TransactionOutput.new(
-                value, script, issuance_asset_id, asset_quantities[i], OpenAssets::Protocol::OutputType::ISSUANCE, asset_definition['divisibility'])
+                value, script, issuance_asset_id, asset_quantities[i], OpenAssets::Protocol::OutputType::ISSUANCE, metadata)
           end
         else
           output = OpenAssets::Protocol::TransactionOutput.new(value, script, nil, 0, OpenAssets::Protocol::OutputType::ISSUANCE)
@@ -238,7 +238,7 @@ module OpenAssets
         output_asset_quantity = (i <= asset_quantities.length) ? asset_quantities[i-1] : 0
         output_units_left = output_asset_quantity
         asset_id = nil
-        divisibility = 0
+        metadata = nil
         while output_units_left > 0
           index += 1
           if input_units_left == 0
@@ -256,14 +256,14 @@ module OpenAssets
             if asset_id.nil?
               # This is the first input to map to this output
               asset_id = current_input.asset_id
-              divisibility = current_input.divisibility
+              metadata = current_input.metadata
             elsif asset_id != current_input.asset_id
               return nil
             end
           end
         end
         result << OpenAssets::Protocol::TransactionOutput.new(outputs[i].value, outputs[i].parsed_script,
-                                                              asset_id, output_asset_quantity, OpenAssets::Protocol::OutputType::TRANSFER, divisibility)
+                                                              asset_id, output_asset_quantity, OpenAssets::Protocol::OutputType::TRANSFER, metadata)
       end
       result
     end
