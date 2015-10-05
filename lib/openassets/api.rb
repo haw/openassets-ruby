@@ -53,6 +53,7 @@ module OpenAssets
           'asset_id' => out.output.asset_id,
           'account' => out.output.account,
           'asset_quantity' => out.output.asset_quantity.to_s,
+          'asset_amount' => out.output.asset_amount.to_s
         }
       }
       oa_address.empty? ? result : result.select{|r|oa_address.include?(r['oa_address'])}
@@ -72,7 +73,8 @@ module OpenAssets
         assets = group_assets.map{|asset_id, outputs|
           {
               'asset_id' => asset_id,
-              'quantity' => outputs.inject(0) { |sum, o| sum + o.asset_quantity }.to_s
+              'quantity' => outputs.inject(0) { |sum, o| sum + o.asset_quantity }.to_s,
+              'amount' => outputs.inject(0) { |sum, o| sum + o.asset_amount }.to_s,
           }
         }
         {
@@ -197,10 +199,12 @@ module OpenAssets
     # @param [Array[OpenAssets::Protocol::TransactionOutput] inputs The outputs referenced by the inputs of the transaction.
     # @param [Integer] marker_output_index The position of the marker output in the transaction.
     # @param [Array[Bitcoin::Protocol::TxOUt]] outputs The outputs of the transaction.
-    # @param [Array[Integer]] asset_quantities The list of asset quantities of the outputs.
+    # @param [Array[OpenAssets::Protocol::TransactionOutput]] asset_quantities The list of asset quantities of the outputs.
     def compute_asset_ids(inputs, marker_output_index, outputs, asset_quantities)
       return nil if asset_quantities.length > outputs.length - 1 || inputs.length == 0
       result = []
+
+      marker_output = outputs[marker_output_index]
 
       # Add the issuance outputs
       issuance_asset_id = pubkey_hash_to_asset_id(inputs[0].script.get_hash160)
@@ -209,7 +213,14 @@ module OpenAssets
         value = outputs[i].value
         script = outputs[i].parsed_script
         if i < asset_quantities.length && asset_quantities[i] > 0
-          output = OpenAssets::Protocol::TransactionOutput.new(value, script, issuance_asset_id, asset_quantities[i], OpenAssets::Protocol::OutputType::ISSUANCE)
+          payload = OpenAssets::Protocol::MarkerOutput.parse_script(marker_output.parsed_script.to_payload)
+          asset_definition = OpenAssets::Protocol::MarkerOutput.deserialize_payload(payload).metadata_to_json
+          if asset_definition.nil?
+            output = OpenAssets::Protocol::TransactionOutput.new(value, script, issuance_asset_id, asset_quantities[i], OpenAssets::Protocol::OutputType::ISSUANCE)
+          else
+            output = OpenAssets::Protocol::TransactionOutput.new(
+                value, script, issuance_asset_id, asset_quantities[i], OpenAssets::Protocol::OutputType::ISSUANCE, asset_definition['divisibility'])
+          end
         else
           output = OpenAssets::Protocol::TransactionOutput.new(value, script, nil, 0, OpenAssets::Protocol::OutputType::ISSUANCE)
         end
@@ -217,7 +228,6 @@ module OpenAssets
       end
 
       # Add the marker output
-      marker_output = outputs[marker_output_index]
       result << OpenAssets::Protocol::TransactionOutput.new(marker_output.value, marker_output.parsed_script, nil, 0, OpenAssets::Protocol::OutputType::MARKER_OUTPUT)
 
       # Add the transfer outputs
@@ -228,6 +238,7 @@ module OpenAssets
         output_asset_quantity = (i <= asset_quantities.length) ? asset_quantities[i-1] : 0
         output_units_left = output_asset_quantity
         asset_id = nil
+        divisibility = 0
         while output_units_left > 0
           index += 1
           if input_units_left == 0
@@ -245,13 +256,14 @@ module OpenAssets
             if asset_id.nil?
               # This is the first input to map to this output
               asset_id = current_input.asset_id
+              divisibility = current_input.divisibility
             elsif asset_id != current_input.asset_id
               return nil
             end
           end
         end
         result << OpenAssets::Protocol::TransactionOutput.new(outputs[i].value, outputs[i].parsed_script,
-                                                              asset_id, output_asset_quantity, OpenAssets::Protocol::OutputType::TRANSFER)
+                                                              asset_id, output_asset_quantity, OpenAssets::Protocol::OutputType::TRANSFER, divisibility)
       end
       result
     end
