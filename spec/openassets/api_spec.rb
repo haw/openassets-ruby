@@ -221,6 +221,7 @@ describe OpenAssets::Api do
       expect(unspent[0]['asset_id']).to eq('AJk2Gx5V67S2wNuwTK5hef3TpHunfbjcmX')
       expect(unspent[0]['asset_quantity']).to eq('1433')
       expect(unspent[0]['asset_amount']).to eq('143.3')
+      expect(unspent[0]['asset_definition_url']).to eq('http://goo.gl/fS4mEj')
     end
 
     it 'get_balance' do
@@ -230,6 +231,7 @@ describe OpenAssets::Api do
       expect(balance[0]['assets'][0]['asset_id']).to eq('AJk2Gx5V67S2wNuwTK5hef3TpHunfbjcmX')
       expect(balance[0]['assets'][0]['quantity']).to eq('1433')
       expect(balance[0]['assets'][0]['amount']).to eq('143.3')
+      expect(balance[0]['assets'][0]['asset_definition_url']).to eq('http://goo.gl/fS4mEj')
     end
   end
 

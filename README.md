@@ -45,7 +45,8 @@ Returns an array of unspent transaction outputs, argument with the asset ID and 
         "asset_id": "AWo3R89p5REmoSyMWB8AeUmud8456bRxZL",
         "account": "openassets-ruby",
         "asset_quantity": "67",
-        "asset_amount": "6.7"
+        "asset_amount": "6.7",
+        "asset_definition_url": "http://goo.gl/fS4mEj"
       },
       ...
   ``` 
@@ -63,6 +64,7 @@ Returns an array of unspent transaction outputs, argument with the asset ID and 
   |account|The name of an account.|
   |asset_quantity|The asset quantity is an unsigned integer representing how many units of that asset are stored on the output.|
   |asset_amount| The asset amount is the value obtained by converting the asset quantity to the unit of divisibility that are defined in the Asset definition file. |  
+  |asset_definition_url|The url of asset definition file.|
 
 * **get_balance**  
 Returns the balance in both bitcoin and colored coin assets for all of the addresses available in your Bitcoin Core wallet.
@@ -81,12 +83,14 @@ Returns the balance in both bitcoin and colored coin assets for all of the addre
           {
             "asset_id": "AWo3R89p5REmoSyMWB8AeUmud8456bRxZL",
             "quantity": "81",
-            "amount": "20.7"
+            "amount": "20.7",
+            "asset_definition_url": "http://goo.gl/fS4mEj"
           },
           {
             "asset_id": "AJk2Gx5V67S2wNuwTK5hef3TpHunfbjcmX",
             "quantity": "67",
-            "amount": "6.7"
+            "amount": "6.7",
+            "asset_definition_url": ""
           }
         ],
         "account": "openassets-ruby"
@@ -103,6 +107,7 @@ Returns the balance in both bitcoin and colored coin assets for all of the addre
   |asset_id|The asset ID is a 160 bits hash, used to uniquely identify the asset stored on the output.|
   |asset_quantity|The asset quantity is an unsigned integer representing how many units of that asset are stored on the output.|
   |asset_amount| The asset amount is the value obtained by converting the asset quantity to the unit of divisibility that are defined in the Asset definition file. |  
+  |asset_definition_url|The url of asset definition file.|
   |account|The name of an account.|
   
 * **issue_asset**  

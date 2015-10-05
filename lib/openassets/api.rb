@@ -53,7 +53,8 @@ module OpenAssets
           'asset_id' => out.output.asset_id,
           'account' => out.output.account,
           'asset_quantity' => out.output.asset_quantity.to_s,
-          'asset_amount' => out.output.asset_amount.to_s
+          'asset_amount' => out.output.asset_amount.to_s,
+          'asset_definition_url' => out.output.asset_definition_url
         }
       }
       oa_address.empty? ? result : result.select{|r|oa_address.include?(r['oa_address'])}
@@ -75,6 +76,7 @@ module OpenAssets
               'asset_id' => asset_id,
               'quantity' => outputs.inject(0) { |sum, o| sum + o.asset_quantity }.to_s,
               'amount' => outputs.inject(0) { |sum, o| sum + o.asset_amount }.to_s,
+              'asset_definition_url' => outputs[0].asset_definition_url
           }
         }
         {
