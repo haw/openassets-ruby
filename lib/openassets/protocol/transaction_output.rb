@@ -43,12 +43,9 @@ module OpenAssets
 
       # get divisibility defined by asset definition file.
       def divisibility
+        return 0 unless @valid_asset_definition
         json = metadata_to_json
-        if json.nil? || json.length == 0
-          return 0
-        else
-          return json['divisibility']
-        end
+        (json.nil? || json.length == 0) ? 0 : json['divisibility']
       end
 
       # get Asset definition url that is included metadata.
