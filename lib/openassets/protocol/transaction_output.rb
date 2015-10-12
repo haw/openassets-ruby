@@ -14,7 +14,7 @@ module OpenAssets
       attr_accessor :account
       attr_accessor :metadata
       attr_accessor :asset_definition_url
-      attr_accessor :valid_asset_definition
+      attr_accessor :asset_definition
 
 
       # @param [Integer] value The satoshi value of the output.
@@ -43,45 +43,37 @@ module OpenAssets
 
       # get divisibility defined by asset definition file.
       def divisibility
-        return 0 unless @valid_asset_definition
-        json = metadata_to_json
-        (json.nil? || json.length == 0) ? 0 : json['divisibility']
+        return 0 unless valid_asset_definition?
+        @asset_definition.divisibility
       end
 
       # get Asset definition url that is included metadata.
       private
       def load_asset_definition_url
-        @valid_asset_definition = true
         @asset_definition_url = ''
         return if @metadata.nil? || @metadata.length == 0
         if @metadata.start_with?('u=')
-          json = metadata_to_json
-          if json['asset_ids'].include?(@asset_id)
+          @asset_definition = AssetDefinition.parse_url(metadata_url)
+          if @asset_definition.include_asset_id?(@asset_id)
             @asset_definition_url = metadata_url
           else
             @asset_definition_url = "The asset definition is invalid. #{metadata_url}"
-            @valid_asset_definition = false
           end
         else
           @asset_definition_url = 'Invalid metadata format.'
-          @valid_asset_definition = false
         end
       end
 
       private
-      def metadata_to_json
-        url = metadata_url
-        if url.nil?
-          ''
-        else
-          JSON.parse(RestClient.get url, :accept => :json)
-        end
-      end
 
       def metadata_url
         unless @metadata.nil?
            @metadata.slice(2..-1)
         end
+      end
+
+      def valid_asset_definition?
+        !@asset_definition.nil? && @asset_definition.include_asset_id?(@asset_id)
       end
     end
 
