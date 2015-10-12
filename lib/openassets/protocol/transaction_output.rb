@@ -1,5 +1,3 @@
-require 'rest-client'
-
 module OpenAssets
   module Protocol
 
