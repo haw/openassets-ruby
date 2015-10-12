@@ -34,7 +34,7 @@ EOF
     expect(definition.description_mime).to eq('text/x-markdown; charset=UTF-8')
     expect(definition.type).to eq('Currency')
     expect(definition.divisibility).to eq(1)
-    expect(definition.link_to_website).to eq(false)
+    expect(definition.link_to_website).to be false
     expect(definition.icon_url).to be_nil
     expect(definition.image_url).to be_nil
     expect(definition.version).to eq('1.0')
@@ -52,10 +52,17 @@ EOF
     expect(definition.description_mime).to eq('text/x-markdown; charset=UTF-8')
     expect(definition.type).to eq('Currency')
     expect(definition.divisibility).to eq(0)
-    expect(definition.link_to_website).to eq(false)
+    expect(definition.link_to_website).to be false
     expect(definition.icon_url).to be_nil
     expect(definition.image_url).to be_nil
     expect(definition.version).to eq('1.0')
+  end
+
+  it 'include asset id' do
+    definition = OpenAssets::Protocol::AssetDefinition.parse_json(json)
+    expect(definition.include_asset_id?('AboLrT5sHA1epmW2CL7UPqQ1AwwhomK8Si')).to be false
+    expect(definition.include_asset_id?('AJk2Gx5V67S2wNuwTK5hef3TpHunfbjcmX')).to be true
+
   end
 
 end

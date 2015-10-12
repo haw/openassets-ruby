@@ -47,6 +47,11 @@ module OpenAssets
         parse_json(RestClient.get url, :accept => :json)
       end
 
+      def include_asset_id?(asset_id)
+        return false if asset_ids.nil? || asset_ids.empty?
+        asset_ids.include?(asset_id)
+      end
+
     end
 
   end
