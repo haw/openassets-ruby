@@ -58,6 +58,10 @@ EOF
     expect(definition.version).to eq('1.0')
   end
 
+  it '404 url' do
+    expect(OpenAssets::Protocol::AssetDefinition.parse_url('https://github.com/haw-itn/openassets-ruby/hoge')).to be nil
+  end
+
   it 'include asset id' do
     definition = OpenAssets::Protocol::AssetDefinition.parse_json(json)
     expect(definition.include_asset_id?('AboLrT5sHA1epmW2CL7UPqQ1AwwhomK8Si')).to be false

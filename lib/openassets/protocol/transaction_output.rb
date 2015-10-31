@@ -52,7 +52,7 @@ module OpenAssets
         return if @metadata.nil? || @metadata.length == 0
         if @metadata.start_with?('u=')
           @asset_definition = AssetDefinition.parse_url(metadata_url)
-          if @asset_definition.include_asset_id?(@asset_id)
+          if valid_asset_definition?
             @asset_definition_url = metadata_url
           else
             @asset_definition_url = "The asset definition is invalid. #{metadata_url}"

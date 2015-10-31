@@ -44,7 +44,11 @@ module OpenAssets
       # Parse the JSON obtained from the URL, and create a AssetDefinition object.
       # @param[String] url The URL of Asset Definition.
       def self.parse_url(url)
-        parse_json(RestClient.get url, :accept => :json)
+        begin
+          parse_json(RestClient.get url, :accept => :json)
+        rescue => e
+          nil
+        end
       end
 
       def include_asset_id?(asset_id)
