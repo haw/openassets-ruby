@@ -76,8 +76,8 @@ describe OpenAssets::Api do
       expect(tx.ver).to eq(1)
       expect(tx.lock_time).to eq(0)
       expect(tx.inputs.length).to eq(1)
-      expect(tx.inputs[0].prev_out.reverse_hth).to eq('21b093ec41244898a50e1f97cb80fd98d7714c7235e0a4a30d7d0c6fb6a6ce8a')
-      expect(tx.inputs[0].prev_out_index).to eq(1)
+      expect(tx.inputs[0].prev_out.reverse_hth).to eq('92ecb6c38bfefc3b6ff8b48a2dd14ece823d37c02adbeeeeede5a801e4926ece')
+      expect(tx.inputs[0].prev_out_index).to eq(2)
       expect(tx.outputs.length).to eq(4)
       # issue output
       expect(tx.outputs[0].value).to eq(600)
@@ -91,7 +91,7 @@ describe OpenAssets::Api do
       expect(marker_output.asset_quantities).to eq([62, 63])
       expect(marker_output.metadata).to eq('u=https://goo.gl/bmVEuw')
       # bitcoin change
-      expect(tx.outputs[3].value).to eq(89400) # prev_out value: 100000 - issue dust: 600 - default_fees: 10000 = 89400
+      expect(tx.outputs[3].value).to eq(15800)
       expect(tx.outputs[3].parsed_script.to_string).to eq('OP_DUP OP_HASH160 24b3d405bc60bd9628691fe28bb00f6800e14806 OP_EQUALVERIFY OP_CHECKSIG')
     end
 
