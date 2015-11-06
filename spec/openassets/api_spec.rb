@@ -596,43 +596,43 @@ describe OpenAssets::Api do
 
   OA_BALANCE = [
       {
-          "oa_address": "akEJwzkzEFau4t2wjbXoMs7MwtZkB8xixmH",
-          "assets": [
+          :oa_address => "akEJwzkzEFau4t2wjbXoMs7MwtZkB8xixmH",
+          :assets => [
               {
-                  "asset_id": "AWo3R89p5REmoSyMWB8AeUmud8456bRxZL",
-                  "quantity": "8"
+                  :asset_id => "AWo3R89p5REmoSyMWB8AeUmud8456bRxZL",
+                  :quantity => "8"
               }
           ],
-          "address": "14M4kbAtn71P1nnNYuhBDFTNYxa19t1XP6",
-          "value": "0.00104800"
+          :address => "14M4kbAtn71P1nnNYuhBDFTNYxa19t1XP6",
+          :value => "0.00104800"
       },
       {
-          "oa_address": "akP4AgdxY5zsfSxM6Jach3YQGZE7vM1o8si",
-          "assets": [],
-          "address": "1D6HSU9CcWyyaiBjFxWWPgVhDcwkMMn4jk",
-          "value": "0.00216502"
+          :oa_address => "akP4AgdxY5zsfSxM6Jach3YQGZE7vM1o8si",
+          :assets => [],
+          :address => "1D6HSU9CcWyyaiBjFxWWPgVhDcwkMMn4jk",
+          :value => "0.00216502"
       },
       {
-          "oa_address": "akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6",
-          "assets": [
+          :oa_address => "akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6",
+          :assets => [
               {
-                  "asset_id": "AWo3R89p5REmoSyMWB8AeUmud8456bRxZL",
-                  "quantity": "24"
+                  :asset_id => "AWo3R89p5REmoSyMWB8AeUmud8456bRxZL",
+                  :quantity => "24"
               }
           ],
-          "address": "1HhJs3JgbiyxC8ktfi6nU4wTqVmrMtCVkG",
-          "value": "0.00027600"
+          :address => "1HhJs3JgbiyxC8ktfi6nU4wTqVmrMtCVkG",
+          :value => "0.00027600"
       },
       {
-          "oa_address": "akXDPMMHHBrUrd1fM756M1GSB8viVAwMyBk",
-          "assets": [
+          :oa_address => "akXDPMMHHBrUrd1fM756M1GSB8viVAwMyBk",
+          :assets => [
               {
-                  "asset_id": "AWo3R89p5REmoSyMWB8AeUmud8456bRxZL",
-                  "quantity": "68"
+                  :asset_id => "AWo3R89p5REmoSyMWB8AeUmud8456bRxZL",
+                  :quantity => "68"
               }
           ],
-          "address": "1MFW7BTwiNbAkmVz4SzAMQXboKYKGSzkq2",
-          "value": "0.00458200"
+          :address => "1MFW7BTwiNbAkmVz4SzAMQXboKYKGSzkq2",
+          :value => "0.00458200"
       }
   ]
 
