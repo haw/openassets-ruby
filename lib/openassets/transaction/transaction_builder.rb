@@ -146,9 +146,9 @@ module OpenAssets
 
         # btc_excess = inputs(colored) total satoshi - outputs(transfer) total satoshi
         btc_excess = inputs.inject(0) { |sum, i| sum + i.output.value } - outputs.inject(0){|sum, o| sum + o.value}
-        if btc_excess < btc_transfer_spec.amount + fees + @amount
+        if btc_excess < btc_transfer_spec.amount + fees
           uncolored_outputs, uncolored_amount =
-              TransactionBuilder.collect_uncolored_outputs(btc_transfer_spec.unspent_outputs, btc_transfer_spec.amount + fees + @amount - btc_excess)
+              TransactionBuilder.collect_uncolored_outputs(btc_transfer_spec.unspent_outputs, btc_transfer_spec.amount + fees - btc_excess)
           inputs << uncolored_outputs
           btc_excess += uncolored_amount
         end
