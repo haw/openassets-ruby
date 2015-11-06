@@ -88,6 +88,38 @@ describe OpenAssets::Transaction::TransactionBuilder do
     }.to raise_error(OpenAssets::Transaction::InsufficientAssetQuantityError)
   end
 
+  it 'otsuri needs collect btc' do
+    # Bitcoinのおつりが dust_limit = 600 より少ない場合に、不足分のBitcoinのUTXOを集める
+    from = 'akXDPMMHHBrUrd1fM756M1GSB8viVAwMyBk'
+    to = 'AVQ1hnBhEyaNPk6sS2kpmav2YkyXqrwoUT'
+    unspent_outputs = gen_outputs(
+        [[600, 'source', 'AVQ1hnBhEyaNPk6sS2kpmav2YkyXqrwoUT', 50, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8220'],
+         [600, 'source', 'ALn3aK1fSuG27N96UGYB1kUYUpGKRhBuBC', 10, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8221'],
+         [600, 'source', 'AVQ1hnBhEyaNPk6sS2kpmav2YkyXqrwoUT', 50, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8222'],
+         [10700, 'source', nil, 0, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8222'],
+         [800, 'source', nil, 0, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8223']])
+    builder = OpenAssets::Transaction::TransactionBuilder.new(600)
+    spec = OpenAssets::Transaction::TransferParameters.new(unspent_outputs,'akD71LJfDrVkPUg7dSZq6acdeDqgmHjrc2Q', from, 66, 2)
+    # 作成されるアウトプット
+    # アセット分割送付のアウトプット２つ
+    # アセットのおつりのアウトプット１つ
+    # BTCのおつりのアウトプット１つ（おつり額＝ 600*2 - 600*3 - 手数料(10000) = -10600）
+    # おつり額がマイナスなので、uncoloredなUTXを収集＝10700
+    # おつり再計算＝100
+    # おつり額がdust_limitより低いので再度UTXO収集
+    # marker output
+    tx = builder.transfer_assets(to, spec, from, 10000)
+    expect(tx.in.length).to eq(4)
+    expect(tx.out.length).to eq(5)
+    payload = OpenAssets::Protocol::MarkerOutput.parse_script(tx.out[0].pk_script)
+    marker_output = OpenAssets::Protocol::MarkerOutput.deserialize_payload(payload)
+    expect(marker_output.asset_quantities).to eq([33, 33, 34])
+    expect(tx.out[1].value).to eq(600)
+    expect(tx.out[2].value).to eq(600)
+    expect(tx.out[3].value).to eq(600)
+    expect(tx.out[4].value).to eq(900)
+  end
+
   # generate outputs
   # @param [Array[Array]] definitions definition array format = [value, output_script, asset_id, asset_quantity]
   def gen_outputs(definitions)

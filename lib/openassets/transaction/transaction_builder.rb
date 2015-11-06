@@ -145,15 +145,24 @@ module OpenAssets
         }
 
         # btc_excess = inputs(colored) total satoshi - outputs(transfer) total satoshi
+        utxo = btc_transfer_spec.unspent_outputs.dup
         btc_excess = inputs.inject(0) { |sum, i| sum + i.output.value } - outputs.inject(0){|sum, o| sum + o.value}
         if btc_excess < btc_transfer_spec.amount + fees
           uncolored_outputs, uncolored_amount =
-              TransactionBuilder.collect_uncolored_outputs(btc_transfer_spec.unspent_outputs, btc_transfer_spec.amount + fees - btc_excess)
+              TransactionBuilder.collect_uncolored_outputs(utxo, btc_transfer_spec.amount + fees - btc_excess)
+          utxo = utxo - uncolored_outputs
           inputs << uncolored_outputs
           btc_excess += uncolored_amount
         end
 
         otsuri = btc_excess - btc_transfer_spec.amount - fees
+        if otsuri > 0 && otsuri < @amount
+          uncolored_outputs, uncolored_amount =
+              TransactionBuilder.collect_uncolored_outputs(utxo, @amount - otsuri)
+          inputs << uncolored_outputs
+          otsuri += uncolored_amount
+        end
+
         if otsuri > 0
           outputs << create_uncolored_output(btc_transfer_spec.change_script, otsuri)
         end
