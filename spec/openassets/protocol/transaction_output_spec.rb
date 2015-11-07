@@ -1,5 +1,5 @@
 require 'spec_helper'
-
+require 'rest-client'
 describe OpenAssets::Protocol::TransactionOutput do
 
   it "initialize" do
@@ -38,4 +38,13 @@ describe OpenAssets::Protocol::TransactionOutput do
     expect(output.asset_definition_url).to eq('http://goo.gl/fS4mEj')
   end
 
+  it 'asset definition cache' do
+    expect(RestClient).to receive(:get).twice
+    OpenAssets::Protocol::TransactionOutput.new(
+        100, Bitcoin::Script.new('hoge'), 'AJk2Gx5V67S2wNuwTK5hef3TpHunfbjcmX', 200, OpenAssets::Protocol::OutputType::ISSUANCE, 'u=http://goo.gl/fS4mEjhoge')
+    OpenAssets::Protocol::TransactionOutput.new(
+        100, Bitcoin::Script.new('hoge'), 'AJk2Gx5V67S2wNuwTK5hef3TpHunfbjcmX', 200, OpenAssets::Protocol::OutputType::ISSUANCE, 'u=http://goo.gl/fS4mEjk')
+    OpenAssets::Protocol::TransactionOutput.new(
+        100, Bitcoin::Script.new('hoge'), 'AJk2Gx5V67S2wNuwTK5hef3TpHunfbjcmX', 200, OpenAssets::Protocol::OutputType::ISSUANCE, 'u=http://goo.gl/fS4mEjhoge')
+  end
 end

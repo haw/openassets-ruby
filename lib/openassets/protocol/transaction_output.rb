@@ -3,6 +3,7 @@ module OpenAssets
 
     # Represents a transaction output and its asset ID and asset quantity.
     class TransactionOutput
+
       attr_accessor :value
       attr_accessor :script
       attr_accessor :asset_id
@@ -45,13 +46,16 @@ module OpenAssets
         @asset_definition.divisibility
       end
 
-      # get Asset definition url that is included metadata.
       private
+
+      @@definition_cache = {}
+
+      # get Asset definition url that is included metadata.
       def load_asset_definition_url
         @asset_definition_url = ''
         return if @metadata.nil? || @metadata.length == 0
         if @metadata.start_with?('u=')
-          @asset_definition = AssetDefinition.parse_url(metadata_url)
+          @asset_definition = load_asset_definition(metadata_url)
           if valid_asset_definition?
             @asset_definition_url = metadata_url
           else
@@ -62,8 +66,6 @@ module OpenAssets
         end
       end
 
-      private
-
       def metadata_url
         unless @metadata.nil?
            @metadata.slice(2..-1)
@@ -72,6 +74,11 @@ module OpenAssets
 
       def valid_asset_definition?
         !@asset_definition.nil? && @asset_definition.include_asset_id?(@asset_id)
+      end
+
+      def load_asset_definition(url)
+        @@definition_cache[url] = AssetDefinition.parse_url(metadata_url) unless @@definition_cache.has_key?(url)
+        @@definition_cache[url]
       end
     end
 
