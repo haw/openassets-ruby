@@ -66,8 +66,7 @@ module OpenAssets
       def self.collect_uncolored_outputs(unspent_outputs, amount)
         total_amount = 0
         results = []
-        sorted_outputs = unspent_outputs.sort{|a,b| a.output.value <=> b.output.value}
-        sorted_outputs.each do |output|
+        unspent_outputs.each do |output|
           if output.output.asset_id.nil?
             results << output
             total_amount += output.output.value

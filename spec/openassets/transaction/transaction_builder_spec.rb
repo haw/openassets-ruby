@@ -16,12 +16,12 @@ describe OpenAssets::Transaction::TransactionBuilder do
     expect(result.in.length).to eq(2)
     expect(result.out.length).to eq(3)
     in0 = result.in[0]
-    expect(in0.prev_out.reverse_hth).to eq('8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8222')
-    expect(in0.prev_out_index).to eq(2)
+    expect(in0.prev_out.reverse_hth).to eq('8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8221')
+    expect(in0.prev_out_index).to eq(1)
     expect(in0.script_sig).to eq('source')
     in1 = result.in[1]
-    expect(in1.prev_out.reverse_hth).to eq('8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8221')
-    expect(in1.prev_out_index).to eq(1)
+    expect(in1.prev_out.reverse_hth).to eq('8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8222')
+    expect(in1.prev_out_index).to eq(2)
     expect(in1.script_sig).to eq('source')
     # Asset issued
     out0 = result.out[0]
@@ -97,8 +97,8 @@ describe OpenAssets::Transaction::TransactionBuilder do
          [600, 'source', 'ALn3aK1fSuG27N96UGYB1kUYUpGKRhBuBC', 10, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8221'],
          [600, 'source', 'AVQ1hnBhEyaNPk6sS2kpmav2YkyXqrwoUT', 50, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8222'],
          [10700, 'source', nil, 0, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8223'],
-         [999988, 'source', nil, 0, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8224'],
-         [800, 'source', nil, 0, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8225']])
+         [800, 'source', nil, 0, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8224'],
+         [999988, 'source', nil, 0, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8225']])
     builder = OpenAssets::Transaction::TransactionBuilder.new(600)
     spec = OpenAssets::Transaction::TransferParameters.new(unspent_outputs,'akD71LJfDrVkPUg7dSZq6acdeDqgmHjrc2Q', from, 66, 2)
     # 作成されるアウトプット
