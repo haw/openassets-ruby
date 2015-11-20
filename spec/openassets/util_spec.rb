@@ -5,24 +5,33 @@ describe OpenAssets::Util do
   let(:test_class) {Struct.new(:util) {include OpenAssets::Util}}
   let(:util) {test_class.new}
 
-  it 'convert address ' do
-    btc_address = '1F2AQr6oqNtcJQ6p9SiCLQTrHuM9en44H8'
-    oa_address = 'akQz3f1v9JrnJAeGBC4pNzGNRdWXKan4U6E'
-    expect(util.address_to_oa_address(btc_address)).to eq(oa_address)
-    expect(util.oa_address_to_address(oa_address)).to eq(btc_address)
+  context 'mainnet' do
+    it 'convert address ' do
+      btc_address = '1F2AQr6oqNtcJQ6p9SiCLQTrHuM9en44H8'
+      oa_address = 'akQz3f1v9JrnJAeGBC4pNzGNRdWXKan4U6E'
+      expect(util.address_to_oa_address(btc_address)).to eq(oa_address)
+      expect(util.oa_address_to_address(oa_address)).to eq(btc_address)
+    end
+
+    it 'generate asset ID from public key' do
+      expect(util.generate_asset_id(
+          '0450863ad64a87ae8a2fe83c1af1a8403cb53f53e486d8511dad8a04887e5b23522cd470243453a299fa9e77237716103abc11a1df38855ed6f2ee187e9c582ba6'))
+          .to eq('ALn3aK1fSuG27N96UGYB1kUYUpGKRhBuBC')
+    end
   end
 
-  it 'generate asset ID from public key' do
-    expect(util.generate_asset_id(
-               '0450863ad64a87ae8a2fe83c1af1a8403cb53f53e486d8511dad8a04887e5b23522cd470243453a299fa9e77237716103abc11a1df38855ed6f2ee187e9c582ba6'))
-      .to eq('ALn3aK1fSuG27N96UGYB1kUYUpGKRhBuBC')
+  context 'testnet', :network => :testnet do
+    it 'pubkey_hash_to_asset_id' do
+      expect(util.pubkey_hash_to_asset_id('081522820f2ccef873e47ee62b31cb9e9267e725')).to eq('oWLkUn44E45cnQtsP6x1wrvJ2iRx9XyFny')
+    end
   end
 
   it 'leb128 encode' do
     expect(util.encode_leb128(300)).to eq('ac02')
   end
-  
+
   it 'satoshi to coin' do
     expect(util.satoshi_to_coin(100000)).to eq('0.00100000')
   end
+
 end

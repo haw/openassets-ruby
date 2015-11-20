@@ -8,6 +8,7 @@ module OpenAssets
 
     # version byte for Open Assets Address
     OA_VERSION_BYTE = 23
+    OA_VERSION_BYTE_TESTNET = 115
 
     # convert bitcoin address to open assets address
     # @param [String] btc_address The Bitcoin address.
@@ -41,7 +42,7 @@ module OpenAssets
       # P2PKH script = OP_DUP OP_HASH160 <PubKeyHash> OP_EQUALVERIFY OP_CHECKSIG
       # （76=OP_DUP, a9=OP_HASH160, 14=Bytes to push, 88=OP_EQUALVERIFY, ac=OP_CHECKSIG）
       script = hash160(["76", "a9", "14", hash, "88", "ac"].join)
-      script = OA_VERSION_BYTE.to_s(16) + script # add version byte to script hash
+      script = oa_version_byte.to_s(16) + script # add version byte to script hash
       encode_base58(script + checksum(script)) # add checksum & encode
     end
 
@@ -88,6 +89,11 @@ module OpenAssets
       addresses.each{|a|
         raise ArgumentError, "#{a} is invalid bitcoin address. " unless valid_address?(a)
       }
+    end
+
+    private
+    def oa_version_byte
+      Bitcoin.network[:address_version] == "6f" ? OA_VERSION_BYTE_TESTNET : OA_VERSION_BYTE
     end
   end
 end
