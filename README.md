@@ -11,6 +11,7 @@ gem install openassets-ruby
 
 Initialize the connection information to the Bitcoin Core server.
 
+* **use mainnet**  
 ```ruby
 require 'openassets'
 
@@ -18,6 +19,17 @@ api = OpenAssets::Api.new({:network => 'mainnet',
                      :provider => 'bitcoind',
                      :dust_limit => 600,
                      :rpc => {:user => 'xxx', :password => 'xxx', :schema => 'http', :port => 8332, :host => 'localhost'}})                      
+```
+
+* **use testnet**  
+change :network and :port(depends on your server setting).
+```ruby
+require 'openassets'
+
+api = OpenAssets::Api.new({:network => 'testnet',
+                     :provider => 'bitcoind',
+                     :dust_limit => 600,
+                     :rpc => {:user => 'xxx', :password => 'xxx', :schema => 'http', :port => 18332, :host => 'localhost'}})                      
 ```
 
 ## API
