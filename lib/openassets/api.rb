@@ -4,7 +4,10 @@ module OpenAssets
 
   class Api
 
-    include OpenAssets::Util
+    include Util
+    include MethodFilter
+
+    before_filter :change_network, {:include => [:list_unspent, :get_balance, :issue_asset, :send_asset]}
 
     attr_reader :config
     attr_reader :provider
@@ -280,6 +283,14 @@ module OpenAssets
         signed_tx
       else
         tx
+      end
+    end
+
+    def change_network
+      if is_testnet?
+        Bitcoin.network = :testnet
+      else
+        Bitcoin.network = :bitcoin
       end
     end
 
