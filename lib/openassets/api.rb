@@ -42,7 +42,9 @@ module OpenAssets
     # @return [Array] Return array of the unspent information Hash.
     def list_unspent(oa_address = [])
       outputs = get_unspent_outputs([])
-      result = outputs.map {|out|
+      result = outputs.
+        select{|out| oa_address.empty? || oa_address.include?(address_to_oa_address(script_to_address(out.output.script)))}.
+        map{|out|
         address = script_to_address(out.output.script)
         script = out.output.script.to_payload.bth
         {
@@ -60,7 +62,7 @@ module OpenAssets
           'asset_definition_url' => out.output.asset_definition_url
         }
       }
-      oa_address.empty? ? result : result.select{|r|oa_address.include?(r['oa_address'])}
+      result
     end
 
     # Returns the balance in both bitcoin and colored coin assets for all of the addresses available in your Bitcoin Core wallet.
