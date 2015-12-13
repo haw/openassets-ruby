@@ -37,12 +37,6 @@ describe OpenAssets::Api do
         expect(result['asset_quantity']).to eq(OA_UNSPENT[index]['asset_quantity'])
         expect(result['account']).to eq(get_account(result['address']))
       }
-
-      list = subject.list_unspent(['akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6'])
-      expect(list.length).to eq(3)
-      list.each{|r|expect(r['oa_address']).to eq('akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6')}
-
-      expect(subject.list_unspent(['akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t8']).length).to eq(0)
     end
 
     it 'get_balance' do
@@ -105,6 +99,24 @@ describe OpenAssets::Api do
       expect(tx.outputs[1].value).to eq(0)
       expect(marker_output.asset_quantities).to eq([125])
       expect(marker_output.metadata).to eq('')
+    end
+
+  end
+
+  context 'specify oa_address' do
+    subject{
+      btc_provider_mock = double('BitcoinCoreProvider Mock')
+      api = OpenAssets::Api.new
+      allow(btc_provider_mock).to receive(:list_unspent).and_return(filter_btc_unspent('1HhJs3JgbiyxC8ktfi6nU4wTqVmrMtCVkG'))
+      setup_tx_load_mock(btc_provider_mock)
+      allow(api).to receive(:provider).and_return(btc_provider_mock)
+      api
+    }
+
+    it 'list_unspent with args' do
+      list = subject.list_unspent(['akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6'])
+      expect(list.length).to eq(3)
+      list.each{|r|expect(r['oa_address']).to eq('akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6')}
     end
 
   end
@@ -221,12 +233,6 @@ describe OpenAssets::Api do
       expect(unspent[0]['asset_quantity']).to eq('1433')
       expect(unspent[0]['asset_amount']).to eq('143.3')
       expect(unspent[0]['asset_definition_url']).to eq('http://goo.gl/fS4mEj')
-
-      unspent = subject.list_unspent(['akPKayJJg4DGAnx9tqBeyAzoG3imbdrJmNv'])
-      expect(unspent[0]['asset_id']).to eq('AdMs8umPHqWWoefCQQiboe3qfXBRkMQKY6')
-      expect(unspent[0]['asset_quantity']).to eq('2000')
-      expect(unspent[0]['asset_amount']).to eq('2000')
-      expect(unspent[0]['asset_definition_url']).to eq('The asset definition is invalid. http://goo.gl/fS4mEj')
     end
 
     it 'get_balance' do

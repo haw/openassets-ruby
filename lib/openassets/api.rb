@@ -38,13 +38,12 @@ module OpenAssets
     end
 
     # get UTXO for colored coins.
-    # @param [Array] oa_address Obtain the balance of this open assets address only, or all addresses if unspecified.
+    # @param [Array] oa_address_list Obtain the balance of this open assets address only, or all addresses if unspecified.
     # @return [Array] Return array of the unspent information Hash.
-    def list_unspent(oa_address = [])
-      outputs = get_unspent_outputs([])
-      result = outputs.
-        select{|out| oa_address.empty? || oa_address.include?(address_to_oa_address(script_to_address(out.output.script)))}.
-        map{|out|
+    def list_unspent(oa_address_list = [])
+      btc_address_list = oa_address_list.map { |oa_address| oa_address_to_address(oa_address)}
+      outputs = get_unspent_outputs(btc_address_list)
+      result = outputs.map{|out|
         address = script_to_address(out.output.script)
         script = out.output.script.to_payload.bth
         {
