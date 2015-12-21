@@ -7,7 +7,7 @@ module OpenAssets
     include Util
     include MethodFilter
 
-    before_filter :change_network, {:include => [:list_unspent, :get_balance, :issue_asset, :send_asset]}
+    before_filter :change_network, {:include => [:list_unspent, :get_balance, :issue_asset, :send_asset, :send_bitcoin]}
 
     attr_reader :config
     attr_reader :provider
