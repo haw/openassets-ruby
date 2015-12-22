@@ -184,11 +184,15 @@ module OpenAssets
       tx.outputs.map{|out| OpenAssets::Protocol::TransactionOutput.new(out.value, out.parsed_script, nil, 0, OpenAssets::Protocol::OutputType::UNCOLORED)}
     end
 
-    def get_color_outputs_from_txid(txid)
+    # Get tx outputs. (use for debug)
+    # @param[String] txid Transaction ID.
+    # @return[Array] Return array of the transaction output Hash with coloring information.
+    def get_outputs_from_txid(txid)
       decode_tx = provider.get_transaction(txid, 0)
       raise OpenAssets::Transaction::TransactionBuildError, "txid #{txid} could not be retrieved." if decode_tx.nil?
       tx = Bitcoin::Protocol::Tx.new(decode_tx.htb)
-      get_color_outputs_from_tx(tx)
+      outputs = get_color_outputs_from_tx(tx)
+      outputs.map.with_index{|out, i|out.to_hash.merge({'txid' => tx.hash, 'vout' => i})}
     end
 
     private

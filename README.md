@@ -164,6 +164,8 @@ This transaction inputs use only uncolored outputs.
 If specified ``output_qty``, the send output is divided by the number of output_qty.   
 Ex, amount = 60000 and output_qty = 2, send TxOut is two (each value is 30000, 30000) and change TxOut one.
 
+* **send_bitcoin** 
+
 ## License
 
 The MIT License (MIT)

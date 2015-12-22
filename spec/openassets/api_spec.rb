@@ -101,6 +101,73 @@ describe OpenAssets::Api do
       expect(marker_output.metadata).to eq('')
     end
 
+    it 'get colored outputs from txid' do
+      # case for uncolored output
+      uncolored = subject.get_outputs_from_txid('21b093ec41244898a50e1f97cb80fd98d7714c7235e0a4a30d7d0c6fb6a6ce8a')
+      expect(uncolored.length).to eq(2)
+      expect(uncolored[0]['txid']).to eq('21b093ec41244898a50e1f97cb80fd98d7714c7235e0a4a30d7d0c6fb6a6ce8a')
+      expect(uncolored[0]['vout']).to eq(0)
+      expect(uncolored[0]['address']).to eq('1Q4QP2oqRKCTAhBwKjEm6B56KvjRw2fbMi')
+      expect(uncolored[0]['oa_address']).to eq('aka2HdCdAto692wMJNMLwk2yffXubxan81c')
+      expect(uncolored[0]['script']).to eq('76a914fcefa84d15d0bf818b020f0cdaf99f4029c15ce788ac')
+      expect(uncolored[0]['amount']).to eq('0.00343779')
+      expect(uncolored[0]['asset_id']).to eq(nil)
+      expect(uncolored[0]['asset_quantity']).to eq('0')
+      expect(uncolored[0]['asset_amount']).to eq('0')
+      expect(uncolored[0]['account']).to eq(nil)
+      expect(uncolored[0]['asset_definition_url']).to eq('')
+
+      expect(uncolored[1]['txid']).to eq('21b093ec41244898a50e1f97cb80fd98d7714c7235e0a4a30d7d0c6fb6a6ce8a')
+      expect(uncolored[1]['vout']).to eq(1)
+      expect(uncolored[1]['address']).to eq('14M4kbAtn71P1nnNYuhBDFTNYxa19t1XP6')
+      expect(uncolored[1]['oa_address']).to eq('akEJwzkzEFau4t2wjbXoMs7MwtZkB8xixmH')
+      expect(uncolored[1]['script']).to eq('76a91424b3d405bc60bd9628691fe28bb00f6800e1480688ac')
+      expect(uncolored[1]['amount']).to eq('0.00100000')
+      expect(uncolored[1]['asset_id']).to eq(nil)
+      expect(uncolored[1]['asset_quantity']).to eq('0')
+      expect(uncolored[1]['asset_amount']).to eq('0')
+      expect(uncolored[1]['account']).to eq(nil)
+      expect(uncolored[1]['asset_definition_url']).to eq('')
+
+      # case for coloed output
+      outputs = subject.get_outputs_from_txid('3fba8bfb157ae29c293d5bd65c178fec169a87f880e2e62537fcce26612a6aa3')
+      expect(outputs.length).to eq(4)
+      expect(outputs[0]['txid']).to eq('3fba8bfb157ae29c293d5bd65c178fec169a87f880e2e62537fcce26612a6aa3')
+      expect(outputs[0]['vout']).to eq(0)
+      expect(outputs[0]['address']).to eq(nil)
+      expect(outputs[0]['oa_address']).to eq(nil)
+      expect(outputs[0]['script']).to eq('6a084f41010002010200')
+      expect(outputs[0]['amount']).to eq('0.00000000')
+      expect(outputs[0]['asset_id']).to eq(nil)
+      expect(outputs[0]['asset_quantity']).to eq('0')
+      expect(outputs[0]['asset_amount']).to eq('0')
+      expect(outputs[0]['account']).to eq(nil)
+      expect(outputs[0]['asset_definition_url']).to eq('')
+
+      expect(outputs[1]['txid']).to eq('3fba8bfb157ae29c293d5bd65c178fec169a87f880e2e62537fcce26612a6aa3')
+      expect(outputs[1]['vout']).to eq(1)
+      expect(outputs[1]['address']).to eq('14M4kbAtn71P1nnNYuhBDFTNYxa19t1XP6')
+      expect(outputs[1]['oa_address']).to eq('akEJwzkzEFau4t2wjbXoMs7MwtZkB8xixmH')
+      expect(outputs[1]['script']).to eq('76a91424b3d405bc60bd9628691fe28bb00f6800e1480688ac')
+      expect(outputs[1]['amount']).to eq('0.00000600')
+      expect(outputs[1]['asset_id']).to eq('AWo3R89p5REmoSyMWB8AeUmud8456bRxZL')
+      expect(outputs[1]['asset_quantity']).to eq('1')
+      expect(outputs[1]['asset_amount']).to eq('1')
+      expect(outputs[1]['account']).to eq(nil)
+      expect(outputs[1]['asset_definition_url']).to eq('')
+
+      expect(outputs[2]['txid']).to eq('3fba8bfb157ae29c293d5bd65c178fec169a87f880e2e62537fcce26612a6aa3')
+      expect(outputs[2]['vout']).to eq(2)
+      expect(outputs[2]['address']).to eq('1HhJs3JgbiyxC8ktfi6nU4wTqVmrMtCVkG')
+      expect(outputs[2]['oa_address']).to eq('akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6')
+      expect(outputs[2]['script']).to eq('76a914b7218fe503cd18555255e5b13d4f07f3fd00d0c988ac')
+      expect(outputs[2]['amount']).to eq('0.00000600')
+      expect(outputs[2]['asset_id']).to eq('AWo3R89p5REmoSyMWB8AeUmud8456bRxZL')
+      expect(outputs[2]['asset_quantity']).to eq('2')
+      expect(outputs[2]['asset_amount']).to eq('2')
+      expect(outputs[2]['account']).to eq(nil)
+      expect(outputs[2]['asset_definition_url']).to eq('')
+    end
   end
 
   context 'specify oa_address' do
@@ -244,6 +311,7 @@ describe OpenAssets::Api do
       expect(balance[0]['assets'][0]['amount']).to eq('143.3')
       expect(balance[0]['assets'][0]['asset_definition_url']).to eq('http://goo.gl/fS4mEj')
     end
+
   end
 
   def filter_btc_unspent(btc_address = nil)
