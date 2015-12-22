@@ -164,8 +164,25 @@ This transaction inputs use only uncolored outputs.
 If specified ``output_qty``, the send output is divided by the number of output_qty.   
 Ex, amount = 60000 and output_qty = 2, send TxOut is two (each value is 30000, 30000) and change TxOut one.
 
-* **send_bitcoin** 
-
+* **get_outputs_from_txid**  
+Get tx outputs. (use for debug)
+  ```ruby
+  api.get_outputs_from_txid('3fba8bfb157ae29c293d5bd65c178fec169a87f880e2e62537fcce26612a6aa3')
+  > [{
+      "address": "14M4kbAtn71P1nnNYuhBDFTNYxa19t1XP6",
+      "oa_address": "akEJwzkzEFau4t2wjbXoMs7MwtZkB8xixmH",
+      "script": "76a91424b3d405bc60bd9628691fe28bb00f6800e1480688ac",
+      "amount": "0.00000600",
+      "asset_id": "AWo3R89p5REmoSyMWB8AeUmud8456bRxZL",
+      "asset_quantity": "1",
+      "asset_amount": "1",
+      "account": null,
+      "asset_definition_url": "",
+      "txid": "3fba8bfb157ae29c293d5bd65c178fec169a87f880e2e62537fcce26612a6aa3",
+      "vout": 1
+    },..
+  ``` 
+  
 ## License
 
 The MIT License (MIT)
