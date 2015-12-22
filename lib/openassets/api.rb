@@ -194,7 +194,7 @@ module OpenAssets
     private
     # @param [Array[OpenAssets::Protocol::TransactionOutput] inputs The outputs referenced by the inputs of the transaction.
     # @param [Integer] marker_output_index The position of the marker output in the transaction.
-    # @param [Array[Bitcoin::Protocol::TxOUt]] outputs The outputs of the transaction.
+    # @param [Array[Bitcoin::Protocol::TxOut]] outputs The outputs of the transaction.
     # @param [Array[OpenAssets::Protocol::TransactionOutput]] asset_quantities The list of asset quantities of the outputs.
     def compute_asset_ids(inputs, marker_output_index, outputs, asset_quantities)
       return nil if asset_quantities.length > outputs.length - 1 || inputs.length == 0
