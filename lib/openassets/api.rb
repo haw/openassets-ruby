@@ -179,12 +179,12 @@ module OpenAssets
       decode_tx = provider.get_transaction(txid, 0)
       raise OpenAssets::Transaction::TransactionBuildError, "txid #{txid} could not be retrieved." if decode_tx.nil?
       tx = Bitcoin::Protocol::Tx.new(decode_tx.htb)
-      colored_outputs = get_color_transaction(tx)
+      colored_outputs = get_color_outputs_from_tx(tx)
       colored_outputs.each_with_index { |o, index | @cache[txid + index.to_s] = o}
       colored_outputs[output_index]
     end
 
-    def get_color_transaction(tx)
+    def get_color_outputs_from_tx(tx)
       unless tx.is_coinbase?
         tx.outputs.each_with_index { |out, i|
           marker_output_payload = OpenAssets::Protocol::MarkerOutput.parse_script(out.pk_script)
@@ -199,6 +199,13 @@ module OpenAssets
         }
       end
       tx.outputs.map{|out| OpenAssets::Protocol::TransactionOutput.new(out.value, out.parsed_script, nil, 0, OpenAssets::Protocol::OutputType::UNCOLORED)}
+    end
+
+    def get_color_outputs_from_txid(txid)
+      decode_tx = provider.get_transaction(txid, 0)
+      raise OpenAssets::Transaction::TransactionBuildError, "txid #{txid} could not be retrieved." if decode_tx.nil?
+      tx = Bitcoin::Protocol::Tx.new(decode_tx.htb)
+      get_color_outputs_from_tx(tx)
     end
 
     private
