@@ -16,6 +16,13 @@ module OpenAssets
       def initialize(out_point, output)
         @out_point = out_point
         @output = output
+        @confirmations = nil
+      end
+
+      # convert to hash.
+      def to_hash
+        return {} if @output.nil?
+        {'txid' => @out_point.hash, 'vout' => @out_point.index, 'confirmations' => @confirmations}.merge(@output.to_hash)
       end
 
     end

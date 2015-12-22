@@ -4,6 +4,8 @@ module OpenAssets
     # Represents a transaction output and its asset ID and asset quantity.
     class TransactionOutput
 
+      include OpenAssets::Util
+
       attr_accessor :value
       attr_accessor :script
       attr_accessor :asset_id
@@ -44,6 +46,22 @@ module OpenAssets
       def divisibility
         return 0 unless valid_asset_definition?
         @asset_definition.divisibility
+      end
+
+      # convert to hash object.
+      def to_hash
+        address = script_to_address(@script)
+        {
+            'address' =>  address,
+            'oa_address' => address.nil? ? nil : address_to_oa_address(address),
+            'script' => @script.to_payload.bth,
+            'amount' => satoshi_to_coin(@value),
+            'asset_id' => @asset_id,
+            'asset_quantity' => @asset_quantity.to_s,
+            'asset_amount' => asset_amount.to_s,
+            'account' => @account,
+            'asset_definition_url' => @asset_definition_url
+        }
       end
 
       private

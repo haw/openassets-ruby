@@ -43,24 +43,7 @@ module OpenAssets
     def list_unspent(oa_address_list = [])
       btc_address_list = oa_address_list.map { |oa_address| oa_address_to_address(oa_address)}
       outputs = get_unspent_outputs(btc_address_list)
-      result = outputs.map{|out|
-        address = script_to_address(out.output.script)
-        script = out.output.script.to_payload.bth
-        {
-          'txid' => out.out_point.hash,
-          'vout' =>  out.out_point.index,
-          'address' =>  address,
-          'oa_address' => address.nil? ? nil : address_to_oa_address(address),
-          'script' => script,
-          'amount' => satoshi_to_coin(out.output.value),
-          'confirmations' => out.confirmations,
-          'asset_id' => out.output.asset_id,
-          'account' => out.output.account,
-          'asset_quantity' => out.output.asset_quantity.to_s,
-          'asset_amount' => out.output.asset_amount.to_s,
-          'asset_definition_url' => out.output.asset_definition_url
-        }
-      }
+      result = outputs.map{|out| out.to_hash}
       result
     end
 
