@@ -44,7 +44,7 @@ module OpenAssets
 
       # get divisibility defined by asset definition file.
       def divisibility
-        return 0 unless valid_asset_definition?
+        return 0 if !valid_asset_definition? || @asset_definition.divisibility.nil?
         @asset_definition.divisibility
       end
 

@@ -39,6 +39,13 @@ describe OpenAssets::Protocol::TransactionOutput do
     output = OpenAssets::Protocol::TransactionOutput.new(
         100, Bitcoin::Script.new('hoge'), 'AJk2Gx5V67S2wNuwTK5hef3TpHunfbjcmX', 200, OpenAssets::Protocol::OutputType::ISSUANCE, 'u=http://goo.gl/fS4mEj')
     expect(output.asset_definition_url).to eq('http://goo.gl/fS4mEj')
+
+    # for min asset definition spec
+    output = OpenAssets::Protocol::TransactionOutput.new(
+        100, Bitcoin::Script.new('hoge'), 'AGHhobo7pVQN5fZWqv3rhdc324ryT7qVTB', 200, OpenAssets::Protocol::OutputType::ISSUANCE, 'u=https://goo.gl/Q0NZfe')
+    expect(output.divisibility).to eq(0)
+    expect(output.asset_amount).to eq(200)
+
   end
 
   it 'asset definition cache' do
