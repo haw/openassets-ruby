@@ -20,6 +20,12 @@ module OpenAssets
       attr_accessor :image_url
       attr_accessor :version
 
+      def initialize
+        @asset_ids = []
+        @version = '1.0'
+        @divisibility = 0
+      end
+
       # Parse the JSON obtained from the json String, and create a AssetDefinition object.
       # @param[String]
       def self.parse_json(json)
@@ -47,6 +53,7 @@ module OpenAssets
         begin
           parse_json(RestClient.get url, :accept => :json)
         rescue => e
+          puts e
           nil
         end
       end
@@ -56,6 +63,16 @@ module OpenAssets
         asset_ids.include?(asset_id)
       end
 
+      # Convert Asset Definition to json format.
+      def to_json
+        hash = {}
+        self.instance_variables.each do |var|
+          key = var.to_s
+          key.slice!(0) if key.start_with?('@')
+          hash[key] = self.instance_variable_get var
+        end
+        hash.to_json
+      end
     end
 
   end
