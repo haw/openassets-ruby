@@ -6,6 +6,22 @@ module OpenAssets
     # The implementation of BlockChain provider using Bitcoin Core.
     class BitcoinCoreProvider < BlockChainProviderBase
 
+      RPC_API = [
+          :addmultisigaddress, :addnode, :backupwallet, :createmultisig, :createrawtransaction, :decoderawtransaction,
+          :decodescript, :dumpprivkey, :dumpwallet, :encryptwallet, :estimatefee, :estimatepriority, :generate,
+          :getaccountaddress, :getaccount, :getaddednodeinfo, :getaddressesbyaccount, :getbalance, :getbestblockhash,
+          :getblock, :getblockchaininfo, :getblockcount, :getblockhash, :getchaintips, :getconnectioncount, :getdifficulty,
+          :getgenerate, :gethashespersec, :getinfo, :getmempoolinfo, :getmininginfo, :getnettotals, :getnetworkhashps,
+          :getnetworkinfo, :getnewaddress, :getpeerinfo, :getrawchangeaddress, :getrawmempool, :getrawtransaction,
+          :getreceivedbyaccount, :getreceivedbyaddress, :gettransaction, :gettxout, :gettxoutproof, :gettxoutsetinfo,
+          :getunconfirmedbalance, :getwalletinfo, :getwork, :help, :importaddress, :importprivkey, :importwallet,
+          :keypoolrefill, :listaccounts, :listaddressgroupings, :listlockunspent, :listreceivedbyaccount, :listreceivedbyaddress,
+          :listsinceblock, :listtransactions, :listunspent, :lockunspent, :move, :ping, :prioritisetransaction, :sendfrom,
+          :sendmany, :sendrawtransaction, :sendtoaddress, :setaccount, :setgenerate, :settxfee, :signmessage, :signrawtransaction,
+          :stop, :submitblock, :validateaddress, :verifychain, :verifymessage, :verifytxoutproof, :walletlock, :walletpassphrase,
+          :walletpassphrasechange
+      ]
+
       attr_reader :config
 
       def initialize(config)
@@ -46,6 +62,11 @@ module OpenAssets
       # @return [String] The TXID or error message.
       def send_transaction(tx)
         request('sendrawtransaction', tx)
+      end
+
+      def method_missing(method, *params)
+        super unless RPC_API.include?(method)
+        request(method, *params)
       end
 
       private
