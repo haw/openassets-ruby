@@ -65,13 +65,15 @@ module OpenAssets
 
       # Convert Asset Definition to json format.
       def to_json
-        hash = {}
-        self.instance_variables.each do |var|
+        to_hash.to_json
+      end
+
+      def to_hash
+        instance_variables.inject({}) do |result, var|
           key = var.to_s
           key.slice!(0) if key.start_with?('@')
-          hash[key] = self.instance_variable_get var
+          result.update(key => instance_variable_get(var))
         end
-        hash.to_json
       end
     end
 
