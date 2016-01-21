@@ -91,6 +91,17 @@ module OpenAssets
       }
     end
 
+    # generate Asset ID from open asset address.
+    def oa_address_to_asset_id(oa_address)
+      address_to_asset_id(oa_address_to_address(oa_address))
+    end
+
+    # generate Asset ID from bitcoin address.
+    def address_to_asset_id(btc_address)
+      pubkey_hash = hash160_from_address(btc_address)
+      pubkey_hash_to_asset_id(pubkey_hash)
+    end
+
     private
     def oa_version_byte
       Bitcoin.network[:address_version] == "6f" ? OA_VERSION_BYTE_TESTNET : OA_VERSION_BYTE

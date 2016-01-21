@@ -24,6 +24,10 @@ describe OpenAssets::Util do
     it 'pubkey_hash_to_asset_id' do
       expect(util.pubkey_hash_to_asset_id('081522820f2ccef873e47ee62b31cb9e9267e725')).to eq('oWLkUn44E45cnQtsP6x1wrvJ2iRx9XyFny')
     end
+
+    it 'oa_address_to_asset_id' do
+      expect(util.address_to_asset_id('myfTSkKCbvNqf231xMR5sVCBTi8VvqfR4y')).to eq('oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY')
+    end
   end
 
   it 'leb128 encode' do
