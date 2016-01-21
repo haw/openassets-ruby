@@ -114,7 +114,7 @@ module OpenAssets
       builder = OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
       colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
       asset_transfer_spec = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount, output_qty)
-      tx = builder.transfer_assets(asset_id, asset_transfer_spec, from, fees.nil? ? @config[:default_fees]: fees)
+      tx = builder.transfer_asset(asset_id, asset_transfer_spec, from, fees.nil? ? @config[:default_fees]: fees)
       tx = process_transaction(tx, mode)
       tx
     end
