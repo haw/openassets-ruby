@@ -9,5 +9,6 @@ module OpenAssets
   autoload :Api, 'openassets/api'
   autoload :Provider, 'openassets/provider'
   autoload :Error, 'openassets/error'
+  autoload :SendAssetParam, 'openassets/send_asset_param'
 
 end

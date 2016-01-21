@@ -7,7 +7,7 @@ module OpenAssets
     include Util
     include MethodFilter
 
-    before_filter :change_network, {:include => [:list_unspent, :get_balance, :issue_asset, :send_asset, :send_bitcoin]}
+    before_filter :change_network, {:include => [:list_unspent, :get_balance, :issue_asset, :send_asset, :send_assets, :send_bitcoin]}
 
     attr_reader :config
     attr_reader :provider
@@ -115,6 +115,25 @@ module OpenAssets
       colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
       asset_transfer_spec = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount, output_qty)
       tx = builder.transfer_asset(asset_id, asset_transfer_spec, from, fees.nil? ? @config[:default_fees]: fees)
+      tx = process_transaction(tx, mode)
+      tx
+    end
+
+    # Creates a transaction for sending multiple asset from an address to another.
+    # @param[String] from The open asset address to send the asset from.
+    # @param[Array[OpenAssets::SendAssetParams]] send_asset_params The send Asset information(asset_id, amount, to).
+    # @param[Integer] fees The fess in satoshis for the transaction.
+    # @param[String] mode 'broadcast' (default) for signing and broadcasting the transaction,
+    # 'signed' for signing the transaction without broadcasting,
+    # 'unsigned' for getting the raw unsigned transaction without broadcasting"""='broadcast'
+    # @return[Bitcoin::Protocol:Tx] The resulting transaction.
+    def send_assets(from, send_asset_params, fees = nil, mode = 'broadcast')
+      builder = OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
+      colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
+      transfer_specs = send_asset_params.map{|param|
+        [param.asset_id, OpenAssets::Transaction::TransferParameters.new(colored_outputs, param.to, from, param.amount)]
+      }
+      tx = builder.transfer_assets(transfer_specs, from, fees.nil? ? @config[:default_fees]: fees)
       tx = process_transaction(tx, mode)
       tx
     end

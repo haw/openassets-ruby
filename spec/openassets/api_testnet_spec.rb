@@ -30,7 +30,7 @@ describe OpenAssets::Api do
     end
 
     it 'get_balance' do
-      balances = subject.get_balance
+      balances = subject.get_balance('bX3FwNkYLUkW1n9CoMhtnjDHrBy96Dgz2gG')
       expect(balances[0]['value']).to eq('0.00000600')
       expect(balances[0]['oa_address']).to eq('bX3FwNkYLUkW1n9CoMhtnjDHrBy96Dgz2gG')
       expect(balances[0]['address']).to eq('msJ48aj11GcKuu3SK5nc5MPGrMxvE1oR5Y')
@@ -67,6 +67,31 @@ describe OpenAssets::Api do
       expect(outputs[3]['asset_id']).to be nil
       expect(outputs[3]['asset_quantity']).to eq('0')
     end
+
+    it 'send multiple asset' do
+      from = address_to_oa_address('mrxpeizRrF8ymNx5FrvcGGZVecZjtUFVP3')
+      to = address_to_oa_address('n4MEsSUN8GktDFZzU3V55mP3jWGMN7e4wE')
+      params = []
+      params << OpenAssets::SendAssetParam.new('oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY', 50, to)
+      params << OpenAssets::SendAssetParam.new('oUygwarZqNGrjDvcZUpZdvEc7es6dcs1vs', 4, to)
+      tx = subject.send_assets(from, params, 10000, 'unsignd')
+      expect(tx.inputs.length).to eq(6)
+      expect(tx.outputs.length).to eq(6)
+      # marker output
+      marker_output_payload = OpenAssets::Protocol::MarkerOutput.parse_script(tx.outputs[0].pk_script)
+      marker_output = OpenAssets::Protocol::MarkerOutput.deserialize_payload(marker_output_payload)
+      expect(tx.outputs[0].value).to eq(0)
+      expect(marker_output.asset_quantities).to eq([50, 22, 4, 2])
+      # output for oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY
+      expect(tx.outputs[1].parsed_script.to_string).to eq('OP_DUP OP_HASH160 fa7491ee214ab15241a613fb5906f6df996bb08b OP_EQUALVERIFY OP_CHECKSIG')
+      expect(tx.outputs[2].parsed_script.to_string).to eq('OP_DUP OP_HASH160 7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6 OP_EQUALVERIFY OP_CHECKSIG')
+      # output for oUygwarZqNGrjDvcZUpZdvEc7es6dcs1vs
+      expect(tx.outputs[3].parsed_script.to_string).to eq('OP_DUP OP_HASH160 fa7491ee214ab15241a613fb5906f6df996bb08b OP_EQUALVERIFY OP_CHECKSIG')
+      expect(tx.outputs[4].parsed_script.to_string).to eq('OP_DUP OP_HASH160 7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6 OP_EQUALVERIFY OP_CHECKSIG')
+      # output for otsuri
+      expect(tx.outputs[5].parsed_script.to_string).to eq('OP_DUP OP_HASH160 7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6 OP_EQUALVERIFY OP_CHECKSIG')
+      expect(tx.outputs[5].value).to eq(90600)
+    end
   end
 
   def filter_btc_unspent(btc_address = nil)
@@ -85,6 +110,13 @@ describe OpenAssets::Api do
     allow(btc_provider_mock).to receive(:get_transaction).with('2ef6aaf051229ff755a137a51466b54da6d8c87d17130bca8a879e9e64172ebd', 0).and_return('0100000002dd6cee22d848a609df2d316112ca26b569c97c189400ad6f01046d65aa7b5f52000000006a473044022021806c9f0d888862cb6e8eb3952c48499fe4c0bedc4fb3ef20743c418109a23b02206249fceeeb4c2f496a3a48b57087f97e540af465f8b9328919f6f536ba5346ed012103e46fdcbf2062598a221c0e34d0505c270fb77c2c305c40ef0919f8efc0c7f959ffffffffdd6cee22d848a609df2d316112ca26b569c97c189400ad6f01046d65aa7b5f52020000006b483045022100981c9757ddf1280a47e9274fae9ff331a1a5b750c7f0c2a18de0b18413a3121e0220395d8baeb7802f9f3947152098442144946987d6be4065a0febe20bc20ca55df012103e46fdcbf2062598a221c0e34d0505c270fb77c2c305c40ef0919f8efc0c7f959ffffffff0400000000000000000b6a094f4101000263ac4d0058020000000000001976a914e9ac589641f17a2286631c24d6d2d00b8c959eb588ac58020000000000001976a91438a6ebdf20cae2c9287ea014464042112ea3dbfd88ac504e0700000000001976a91438a6ebdf20cae2c9287ea014464042112ea3dbfd88ac00000000')
     allow(btc_provider_mock).to receive(:get_transaction).with('525f7baa656d04016fad0094187cc969b526ca1261312ddf09a648d822ee6cdd', 0).and_return('010000000154f5a67cb14d7e50056f53263b72165daaf438164e7e825b862b9062a4e40612000000006b48304502210098e16e338e9600876e30d9dc0894bcd1bbb612431e7a36732c5feab0686d0641022044e7dcd512073f31d0c67e0fbbf2269c4a31d5bf3bb1fcc8fbdd2e4d3c0d7e58012103e46fdcbf2062598a221c0e34d0505c270fb77c2c305c40ef0919f8efc0c7f959ffffffff0358020000000000001976a91438a6ebdf20cae2c9287ea014464042112ea3dbfd88ac0000000000000000216a1f4f410100018f4e17753d68747470733a2f2f676f6f2e676c2f755667737434b8770700000000001976a91438a6ebdf20cae2c9287ea014464042112ea3dbfd88ac00000000')
     allow(btc_provider_mock).to receive(:get_transaction).with('1206e4a462902b865b827e4e1638f4aa5d16723b26536f05507e4db17ca6f554', 0).and_return('0100000001e065787fe31b0f87a1e7fc3d36915bd2048c40e12198d3dfcdb01824953c8cf8010000006b483045022100a6752e02271f668aa0d72eabb2132738816b35d15cae5d5d293b32b0e5d22bf102202d653d019ec10aa3eef5be4cc2488908352b47beea91cb18465b16edcae4e2cf01210316cff587a01a2736d5e12e53551b18d73780b83c3bfb4fcf209c869b11b6415effffffff0220a10700000000001976a91438a6ebdf20cae2c9287ea014464042112ea3dbfd88acbc371004000000001976a914c01a7ca16b47be50cbdbc60724f701d52d75156688ac00000000')
+    allow(btc_provider_mock).to receive(:get_transaction).with('6887dd16b7ad2847bd4546211665199e05711c3acd1a67da879506adb5486910', 0).and_return('0100000002e7a0899f2e66533f2d3501c50e149200d5a077f00761d2dbc873e6c1a902549e000000006a473044022055ee8e20e181898da602024b2985b1527621ed72017efd892fa32b9cdf8fab15022037ad071f95880ee3fea1845a0702ac6e8b01c3e9f3cbc82e51aeb7000cf12aac0121029362a6141d20521f77af9c5f2b6573527602baae2f9e8819039a874647e95346ffffffffe7a0899f2e66533f2d3501c50e149200d5a077f00761d2dbc873e6c1a902549e020000006a473044022041faeb6fad8a1eeda1d44b0770e229395249f1d97c340bc9d35e5c4542564322022037a642dcff8006e34875321a6770ccf0a331f20594704ccdb039640b2d6d2ead0121029362a6141d20521f77af9c5f2b6573527602baae2f9e8819039a874647e95346ffffffff0700000000000000000e6a0c4f410100051818181b85070058020000000000001976a9147d8dd16cc3413a64a9964c91cb0ee9358ab1dff688ac58020000000000001976a9147d8dd16cc3413a64a9964c91cb0ee9358ab1dff688ac58020000000000001976a9147d8dd16cc3413a64a9964c91cb0ee9358ab1dff688ac58020000000000001976a9147d8dd16cc3413a64a9964c91cb0ee9358ab1dff688ac58020000000000001976a914c70decc68bd86b6a8ae3a13b077af1a7304bdd5b88acc82c0100000000001976a914c70decc68bd86b6a8ae3a13b077af1a7304bdd5b88ac00000000')
+    allow(btc_provider_mock).to receive(:get_transaction).with('9e5402a9c1e673c8dbd26107f077a0d50092140ec501352d3f53662e9f89a0e7', 0).and_return('010000000122c442b89c652e32ba7e2cff90715b834b71834526bd509295baea5965b71e2d010000006a47304402202986a33a7c6077eb8039bbe39b304917f3dc655cc5b30a17d729f864fb1a19c502206e8e0c411018d41dfe0380b673a010e75fea6411ca9187f983084da5da6fefc50121029362a6141d20521f77af9c5f2b6573527602baae2f9e8819039a874647e95346ffffffff0358020000000000001976a914c70decc68bd86b6a8ae3a13b077af1a7304bdd5b88ac0000000000000000216a1f4f41010001e80717753d68747470733a2f2f676f6f2e676c2f755667737434385d0100000000001976a914c70decc68bd86b6a8ae3a13b077af1a7304bdd5b88ac00000000')
+    allow(btc_provider_mock).to receive(:get_transaction).with('2d1eb76559eaba959250bd264583714b835b7190ff2c7eba322e659cb842c422', 0).and_return('01000000011c963366a33ab3df14243e22ed1a893cca3f5d315b4b7b5755503c96a4f1dbc4000000006a4730440220305cb233b6996d57d7eca72d1c571dbc867aa7f1f7444ad980cf028e7994bc74022040e31c3d6c2224949ed2e43bbc10c04ede6ac5cf7a33d3cfca6862096437742b012103e96fd7e921b64954bbff1eec73b0331c8c9d27aa70b0520eb36b50019a978f1cffffffff0206f37847000000001976a914d3c96dc04a62f488a3f1b588f74af136469c6fca88aca0860100000000001976a914c70decc68bd86b6a8ae3a13b077af1a7304bdd5b88ac00000000')
+    allow(btc_provider_mock).to receive(:get_transaction).with('9ece6cdda95805e47667f0b389ee3c0c29efd5929bc372e68a34ac1ecbb92d6f', 0).and_return('0100000002bab7d2b0bfdd11bb8e7757bc575398bbaa8f30110f56590e1bf2dfff0c210c37000000006b483045022100ef7e82e77372407da5586acd77cf61a9d7682782b7ead0450ae220d07913555c0220101cb1a026a4c81204a01ec0c02e237f0d0c22f31fd87030e85640f1a53a2d5c0121033917dfab0a99833380034fa77159a812feb8333382e53075b88dcbebfde7cc49ffffffffbab7d2b0bfdd11bb8e7757bc575398bbaa8f30110f56590e1bf2dfff0c210c37020000006b483045022100ae225c601583b1e8cf6190ac6f7ae32df94aeb347d6bb7d17ee98532b94e9379022010718ac1a2c68a21e1f80bdd7f7fcd42866d50006ecdcda341cc8c40419403770121033917dfab0a99833380034fa77159a812feb8333382e53075b88dcbebfde7cc49ffffffff0600000000000000000d6a0b4f41010004030304de070058020000000000001976a9147d8dd16cc3413a64a9964c91cb0ee9358ab1dff688ac58020000000000001976a9147d8dd16cc3413a64a9964c91cb0ee9358ab1dff688ac58020000000000001976a9147d8dd16cc3413a64a9964c91cb0ee9358ab1dff688ac58020000000000001976a914a938dad89bbd964cbaf5d9059e0bda1d900ce08388ac202f0100000000001976a914a938dad89bbd964cbaf5d9059e0bda1d900ce08388ac00000000')
+    allow(btc_provider_mock).to receive(:get_transaction).with('370c210cffdff21b0e59560f11308faabb985357bc57778ebb11ddbfb0d2b7ba', 0).and_return('01000000011c963366a33ab3df14243e22ed1a893cca3f5d315b4b7b5755503c96a4f1dbc4010000006b48304502210089b69fa58bf02bffa9399aa4328e3f9816d4041f4b2a0b8e00c0d1ad37c5cfbe022029423551060bedb943f5ff1ff1c4e91cfc7fdbc21d5035c580cfc4ef4b2156810121033917dfab0a99833380034fa77159a812feb8333382e53075b88dcbebfde7cc49ffffffff0358020000000000001976a914a938dad89bbd964cbaf5d9059e0bda1d900ce08388ac0000000000000000216a1f4f41010001e80717753d68747470733a2f2f676f6f2e676c2f755667737434385d0100000000001976a914a938dad89bbd964cbaf5d9059e0bda1d900ce08388ac00000000')
+    allow(btc_provider_mock).to receive(:get_transaction).with('c4dbf1a4963c5055577b4b5b315d3fca3c891aed223e2414dfb33aa36633961c', 0).and_return('010000000175552d5eddd4494aa6b05dcec201eec8280d0e2840b3843aaf884df15ce328f4010000006b483045022100e0a219f87cea50c95a45fca4204c3fe25d0e44baa54c498afbc657ed6c20f4bf0220329892eb524487a1b8724c531b27602794cdadca365681a9f62a054fb1c4713f012103e96fd7e921b64954bbff1eec73b0331c8c9d27aa70b0520eb36b50019a978f1cffffffff02b6a07a47000000001976a914d3c96dc04a62f488a3f1b588f74af136469c6fca88aca0860100000000001976a914a938dad89bbd964cbaf5d9059e0bda1d900ce08388ac00000000')
+    allow(btc_provider_mock).to receive(:get_transaction).with('308ea73b45bef1428acb41f996543d6ebd534dca8f5de965e7f00eae084aaa5c', 0).and_return('010000000122c442b89c652e32ba7e2cff90715b834b71834526bd509295baea5965b71e2d000000006b48304502210095b72684aa4a8355f4057d476ac222a683220fa0087ca99d2efcea0149ff1287022014c77b8f9e0d0f457792f562a09517d752cde5c7d7b941c5ad33a95fe471b66b012103e96fd7e921b64954bbff1eec73b0331c8c9d27aa70b0520eb36b50019a978f1cffffffff0256457747000000001976a914d3c96dc04a62f488a3f1b588f74af136469c6fca88aca0860100000000001976a9147d8dd16cc3413a64a9964c91cb0ee9358ab1dff688ac00000000')
 
   end
 
@@ -97,7 +129,61 @@ describe OpenAssets::Api do
        "amount" => 0.00000600,
        "confirmations" => 1,
        "spendable" => true
-      }
+      },
+      {"txid" => "6887dd16b7ad2847bd4546211665199e05711c3acd1a67da879506adb5486910",
+       "vout" => 1,
+       "address" => "7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6",
+       "account" => "",
+       "scriptPubKey" => "",
+       "amount" => 0.00000600,
+       "confirmations" => 1,
+       "spendable" => true
+      },
+      {"txid" => "6887dd16b7ad2847bd4546211665199e05711c3acd1a67da879506adb5486910",
+        "vout" => 2,
+        "address" => "mrxpeizRrF8ymNx5FrvcGGZVecZjtUFVP3",
+        "account" => "",
+        "scriptPubKey" => "7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6",
+        "amount" => 0.00000600,
+        "confirmations" => 1,
+        "spendable" => true
+      },
+      {"txid" => "6887dd16b7ad2847bd4546211665199e05711c3acd1a67da879506adb5486910",
+       "vout" => 3,
+       "address" => "mrxpeizRrF8ymNx5FrvcGGZVecZjtUFVP3",
+       "account" => "",
+       "scriptPubKey" => "7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6",
+       "amount" => 0.00000600,
+       "confirmations" => 1,
+       "spendable" => true
+      },
+      {"txid" => "9ece6cdda95805e47667f0b389ee3c0c29efd5929bc372e68a34ac1ecbb92d6f",
+        "vout" => 1,
+       "address" => "mrxpeizRrF8ymNx5FrvcGGZVecZjtUFVP3",
+       "account" => "",
+       "scriptPubKey" => "7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6",
+       "amount" => 0.00000600,
+       "confirmations" => 1,
+       "spendable" => true
+      },
+      {"txid" => "9ece6cdda95805e47667f0b389ee3c0c29efd5929bc372e68a34ac1ecbb92d6f",
+        "vout" => 2,
+       "address" => "mrxpeizRrF8ymNx5FrvcGGZVecZjtUFVP3",
+       "account" => "",
+       "scriptPubKey" => "7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6",
+       "amount" => 0.00000600,
+       "confirmations" => 1,
+       "spendable" => true
+      },
+      {"txid" => "308ea73b45bef1428acb41f996543d6ebd534dca8f5de965e7f00eae084aaa5c",
+       "vout" => 1,
+       "address" => "mzpnB3S31yZRDJFLmTd1ZsWJTtzymL7HsA",
+       "account" => "",
+       "scriptPubKey" => "d3c96dc04a62f488a3f1b588f74af136469c6fca",
+       "amount" => 0.00000600,
+       "confirmations" => 1,
+       "spendable" => true
+    }
   ]
 
 end

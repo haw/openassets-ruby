@@ -51,6 +51,12 @@ module OpenAssets
         transfer([[asset_id, asset_transfer_spec]], btc_transfer_spec, fees)
       end
 
+      def transfer_assets(transfer_specs, btc_change_script, fees)
+        btc_transfer_spec = OpenAssets::Transaction::TransferParameters.new(
+            transfer_specs[0][1].unspent_outputs, nil, oa_address_to_address(btc_change_script), 0)
+        transfer(transfer_specs, btc_transfer_spec, fees)
+      end
+
       # Creates a transaction for sending bitcoins.
       # @param[OpenAssets::Transaction::TransferParameters] btc_transfer_spec The parameters of the bitcoins being transferred.
       # @param[Integer] fees The fees to include in the transaction.
