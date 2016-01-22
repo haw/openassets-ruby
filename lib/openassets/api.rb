@@ -39,18 +39,20 @@ module OpenAssets
 
     # get UTXO for colored coins.
     # @param [Array] oa_address_list Obtain the balance of this open assets address only, or all addresses if unspecified.
+    # @param [Integer] minconf the minumum confirmation of the unspent outputs
     # @return [Array] Return array of the unspent information Hash.
-    def list_unspent(oa_address_list = [])
+    def list_unspent(oa_address_list = [], minconf = 1)
       btc_address_list = oa_address_list.map { |oa_address| oa_address_to_address(oa_address)}
-      outputs = get_unspent_outputs(btc_address_list)
+      outputs = get_unspent_outputs(btc_address_list, minconf)
       result = outputs.map{|out| out.to_hash}
       result
     end
 
     # Returns the balance in both bitcoin and colored coin assets for all of the addresses available in your Bitcoin Core wallet.
     # @param [String] address The open assets address. if unspecified nil.
-    def get_balance(address = nil)
-      outputs = get_unspent_outputs(address.nil? ? [] : [oa_address_to_address(address)])
+    # @param [Integer] minconf the minumum confirmation of the unspent outputs
+    def get_balance(address = nil, minconf = 1)
+      outputs = get_unspent_outputs(address.nil? ? [] : [oa_address_to_address(address)], minconf)
       colored_outputs = outputs.map{|o|o.output}
       sorted_outputs = colored_outputs.sort_by { |o|o.script.to_string}
       groups = sorted_outputs.group_by{|o| o.script.to_string}
@@ -109,10 +111,13 @@ module OpenAssets
     # @param[String] mode 'broadcast' (default) for signing and broadcasting the transaction,
     # 'signed' for signing the transaction without broadcasting,
     # 'unsigned' for getting the raw unsigned transaction without broadcasting"""='broadcast'
+    # @param[Integer] output_qty The number of divides the issue output. Default value is 1.
+    # Ex. amount = 125 and output_qty = 2, asset quantity = [62, 63] and issue TxOut is two.
+    # @param [Integer] minconf the minumum confirmation of the unspent outputs
     # @return[Bitcoin::Protocol:Tx] The resulting transaction.
-    def send_asset(from, asset_id, amount, to, fees = nil, mode = 'broadcast', output_qty = 1)
+    def send_asset(from, asset_id, amount, to, fees = nil, mode = 'broadcast', output_qty = 1, minconf = 1)
       builder = OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
-      colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
+      colored_outputs = get_unspent_outputs([oa_address_to_address(from)], minconf)
       asset_transfer_spec = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount, output_qty)
       tx = builder.transfer_asset(asset_id, asset_transfer_spec, from, fees.nil? ? @config[:default_fees]: fees)
       tx = process_transaction(tx, mode)
@@ -126,10 +131,11 @@ module OpenAssets
     # @param[String] mode 'broadcast' (default) for signing and broadcasting the transaction,
     # 'signed' for signing the transaction without broadcasting,
     # 'unsigned' for getting the raw unsigned transaction without broadcasting"""='broadcast'
+    # @param [Integer] minconf the minumum confirmation of the unspent outputs
     # @return[Bitcoin::Protocol:Tx] The resulting transaction.
-    def send_assets(from, send_asset_params, fees = nil, mode = 'broadcast')
+    def send_assets(from, send_asset_params, fees = nil, mode = 'broadcast', minconf = 1)
       builder = OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
-      colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
+      colored_outputs = get_unspent_outputs([oa_address_to_address(from)], minconf)
       transfer_specs = send_asset_params.map{|param|
         [param.asset_id, OpenAssets::Transaction::TransferParameters.new(colored_outputs, param.to, from, param.amount)]
       }
@@ -160,10 +166,11 @@ module OpenAssets
 
     # Get unspent outputs.
     # @param [Array] addresses The array of Bitcoin address.
+    # @param [Integer] minconf the minumum confirmation of the unspent outputs
     # @return [Array[OpenAssets::Transaction::SpendableOutput]] The array of unspent outputs.
-    def get_unspent_outputs(addresses)
+    def get_unspent_outputs(addresses, minconf = 1)
       validate_address(addresses)
-      unspent = provider.list_unspent(addresses)
+      unspent = provider.list_unspent(addresses, minconf)
       result = unspent.map{|item|
         output_result = get_output(item['txid'], item['vout'])
         output_result.account = item['account']
