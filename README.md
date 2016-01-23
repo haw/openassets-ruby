@@ -208,6 +208,25 @@ Creates a transaction for sending **multiple** asset from the open asset address
   tx = api.send_assets(from, params)
   ``` 
 
+
+## Command line interface
+
+Openassets-ruby comes with a `openassets` command line interface that allows easy interaction with OpenAssets. 
+
+### Usage
+
+    openassets [options] [command]
+    
+    Options: 
+    -c path to config JSON which is passed to OpenAssets::Api.new - see Configuration for details
+    -e load conifg from ENV variables (look at the exe/openassets file for details) 
+
+    commands:
+    * console runs an IRB console and gives you an initialized Api instance to interact with OpenAssets
+    * any method on the API instance, helpful for get_balance, list_unspent
+
+
+
 ## License
 
 The MIT License (MIT)
