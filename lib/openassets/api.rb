@@ -17,7 +17,7 @@ module OpenAssets
       @cache = {}
       @config = {:network => 'mainnet',
                  :provider => 'bitcoind',
-                 :dust_limit => 600, :default_fees => 10000,
+                 :dust_limit => 600, :default_fees => 10000, :min_confirmation => 1, :max_confirmation => 9999999,
                  :rpc => { :host => 'localhost', :port => 8332 , :user => '', :password => '', :schema => 'https'}}
       if config
         @config.update(config)
@@ -163,7 +163,7 @@ module OpenAssets
     # @return [Array[OpenAssets::Transaction::SpendableOutput]] The array of unspent outputs.
     def get_unspent_outputs(addresses)
       validate_address(addresses)
-      unspent = provider.list_unspent(addresses)
+      unspent = provider.list_unspent(addresses, @config[:min_confirmation], @config[:max_confirmation])
       result = unspent.map{|item|
         output_result = get_output(item['txid'], item['vout'])
         output_result.account = item['account']

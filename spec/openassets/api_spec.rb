@@ -9,8 +9,12 @@ describe OpenAssets::Api do
     expect(api.is_testnet?).to be false
     expect(api.config[:rpc][:host]).to eq('localhost')
     expect(api.config[:rpc][:port]).to eq(8332)
+    expect(api.config[:min_confirmation]).to eq(1)
+    expect(api.config[:max_confirmation]).to eq(9999999)
     api = OpenAssets::Api.new(JSON.parse(File.read("#{File.dirname(__FILE__)}/../test-config.json"), {:symbolize_names => true}))
     expect(api.is_testnet?).to be true
+    expect(api.config[:min_confirmation]).to eq(0)
+    expect(api.config[:max_confirmation]).to eq(1)
     expect{OpenAssets::Api.new({:provider => 'hoge'})}.to raise_error(OpenAssets::Error)
   end
 
@@ -37,6 +41,16 @@ describe OpenAssets::Api do
         expect(result['asset_quantity']).to eq(OA_UNSPENT[index]['asset_quantity'])
         expect(result['account']).to eq(get_account(result['address']))
       }
+    end
+
+    it 'list_unspent with custom confirmation' do
+      expect(subject.provider).to receive(:list_unspent).with([], 1, 9999999)
+      subject.list_unspent
+
+      subject.config[:min_confirmation] = 10
+      subject.config[:max_confirmation] = 100
+      expect(subject.provider).to receive(:list_unspent).with([], 10, 100)
+      subject.list_unspent
     end
 
     it 'get_balance' do

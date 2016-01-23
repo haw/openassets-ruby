@@ -1,3 +1,5 @@
 {
-  "network": "testnet"
+  "network": "testnet",
+  "min_confirmation": 0,
+  "max_confirmation": 1
 }
