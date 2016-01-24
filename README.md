@@ -17,7 +17,7 @@ require 'openassets'
 
 api = OpenAssets::Api.new({:network => 'mainnet',
                      :provider => 'bitcoind',
-                     :dust_limit => 600, :default_fees => 10000,
+                     :dust_limit => 600, :default_fees => 10000, :min_confirmation => 1, :max_confirmation => 9999999,
                      :rpc => {:user => 'xxx', :password => 'xxx', :schema => 'http', :port => 8332, :host => 'localhost'}})                      
 ```
 
@@ -28,7 +28,7 @@ require 'openassets'
 
 api = OpenAssets::Api.new({:network => 'testnet',
                      :provider => 'bitcoind',
-                     :dust_limit => 600, :default_fees => 10000,
+                     :dust_limit => 600, :default_fees => 10000, :min_confirmation => 1, :max_confirmation => 9999999,
                      :rpc => {:user => 'xxx', :password => 'xxx', :schema => 'http', :port => 18332, :host => 'localhost'}})                      
 ```
 
@@ -40,6 +40,8 @@ The configuration options are as follows:
 |**provider**|The RPC server. Specify possible now only "bitcoind".|bitcoind|
 |**dust_limit**|The amount of Bitcoin, which is set to the each output of the Open Assets Protocol(issue or transfer).|600 (satoshi)|
 |**default_fees**|The transaction fee. (used by issue_asset and send_asset, send_bitcoin )|10000 (satoshi)|
+|**min_confirmation**|The minimum number of confirmations the transaction containing an output that used to get UTXO.|1|
+|**max_confirmation**|The maximum number of confirmations the transaction containing an output that used to get UTXO.|9999999|
 |**rpc**|The access information to the RPC server of Bitcoin Core.|N/A|
 
 ## API
