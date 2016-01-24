@@ -1,0 +1,65 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "openassets"
+require 'optparse'
+require 'json'
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: openassets [options] [command]"
+
+  opts.on("-c PATH", "--config PATH", "config load path") do |path|
+    options[:config] = path
+  end
+  opts.on("-e", "--env", "load config from ENV variablse") do |env|
+    options[:env] = env
+  end
+  opts.on("-v", "--verbose", "verbose output") do |v|
+    options[:verbose] = v
+  end
+end.parse!
+
+puts "Welcome to OpenAssets\n\n"
+if options[:env]
+  rpc = {
+    :host			=> ENV['OA_RPC_HOST']			|| 'localhost',
+    :port			=> ENV['OA_RPC_PORT']			|| 8332,
+    :user			=> ENV['OA_RPC_USER']			|| '',
+    :password => ENV['OA_RPC_PASSWORD'] || '',
+    :schema		=> ENV['OA_RPC_SCHEMA']   || 'http'
+  }
+  config = {
+    :network	    => ENV['OA_NETWORK'] || 'mainnet',
+    :provider     => 'bitcoind',
+    :dust_limit   => (ENV['OA_DUST_LIMIT'] || 600).to_i,
+    :default_fees => (ENV['OA_DEFAULT_FEES'] || 10000).to_i,
+    :rpc					=> rpc
+  }
+elsif options[:config]
+  if !File.exists?(options[:config])
+    puts "File not found: #{options[:config]}"
+    exit(1)
+  end
+  config = JSON.parse(File.read(options[:config]), {symbolize_names: true})
+end
+
+if options[:verbose]
+  puts "using config:"
+  puts config.inspect
+end
+$oa = $api = OpenAssets::Api.new(config)
+
+command = ARGV.shift
+
+if command == 'console'
+  require "irb"
+  puts "API is available as $oa:"
+  IRB.start
+  puts "bye, bye"
+elsif command && $oa.respond_to?(command)
+  puts "running command '#{command}'"
+  puts $oa.send(command, *ARGV).inspect
+else
+  puts "use 'openassets --help' for help"
+end
