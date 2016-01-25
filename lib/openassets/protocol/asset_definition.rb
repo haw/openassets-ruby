@@ -91,11 +91,7 @@ module OpenAssets
           unless cert.nil?
             subject = response.peer_cert.subject.to_a
             o = subject.find{|x|x[0] == 'O'}
-            unless o.nil? && o.length > 2
-              if o[1] == issuer
-                result = 'verified'
-              end
-            end
+            result = 'verified' if !o.nil? && o.length > 2 && o[1] == issuer
           end
         end
         result
