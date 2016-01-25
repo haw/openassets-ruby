@@ -38,4 +38,8 @@ describe OpenAssets::Util do
     expect(util.satoshi_to_coin(100000)).to eq('0.00100000')
   end
 
+  it 'coin to satoshi' do
+    expect(util.coin_to_satoshi('0.00100000')).to eq(100000)
+  end
+
 end

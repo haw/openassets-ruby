@@ -1,3 +1,4 @@
+require 'bigdecimal'
 module OpenAssets
   module Util
     extend ::Bitcoin::Util
@@ -71,6 +72,13 @@ module OpenAssets
     # @return [String] The amount of coin.
     def satoshi_to_coin(satoshi)
       "%.8f" % (satoshi / 100000000.0)
+    end
+
+    # Convert coin unit to satoshi.
+    # @param [String] coin The amount of bitcoin
+    # @return [String] The amount of satoshi.
+    def coin_to_satoshi(coin)
+      BigDecimal(coin) * BigDecimal(100000000)
     end
 
     # Get address from script.
