@@ -1,10 +1,12 @@
 require 'rest-client'
-
+require 'httpclient'
 module OpenAssets
   module Protocol
 
     # The Definition of Open Asset
     class AssetDefinition
+
+      attr_accessor :asset_definition_url
 
       attr_accessor :asset_ids
       attr_accessor :name_short
@@ -51,7 +53,9 @@ module OpenAssets
       # @param[String] url The URL of Asset Definition.
       def self.parse_url(url)
         begin
-          parse_json(RestClient.get url, :accept => :json)
+          definition = parse_json(RestClient.get url, :accept => :json)
+          definition.asset_definition_url = url
+          definition
         rescue => e
           puts e
           nil
@@ -74,6 +78,27 @@ module OpenAssets
           key.slice!(0) if key.start_with?('@')
           result.update(key => instance_variable_get(var))
         end
+      end
+
+      # Check Proof of authenticity.
+      # SSL certificate subject matches issuer.
+      def proof_of_authenticity
+        result = 'not verified'
+        unless asset_definition_url.nil?
+          client = HTTPClient.new
+          response = client.get(asset_definition_url, :follow_redirect => true)
+          cert = response.peer_cert
+          unless cert.nil?
+            subject = response.peer_cert.subject.to_a
+            o = subject.find{|x|x[0] == 'O'}
+            unless o.nil? && o.length > 2
+              if o[1] == issuer
+                result = 'verified'
+              end
+            end
+          end
+        end
+        result
       end
     end
 
