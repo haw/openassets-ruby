@@ -70,7 +70,8 @@ Returns an array of unspent transaction outputs, argument with the asset ID and 
         "account": "openassets-ruby",
         "asset_quantity": "67",
         "asset_amount": "6.7",
-        "asset_definition_url": "http://goo.gl/fS4mEj"
+        "asset_definition_url": "http://goo.gl/fS4mEj",
+        "proof_of_authenticity": false
       },
       ...
   ``` 
@@ -89,6 +90,7 @@ Returns an array of unspent transaction outputs, argument with the asset ID and 
   |asset_quantity|The asset quantity is an unsigned integer representing how many units of that asset are stored on the output.|
   |asset_amount| The asset amount is the value obtained by converting the asset quantity to the unit of divisibility that are defined in the Asset definition file. |  
   |asset_definition_url|The url of asset definition file.|
+  |proof_of_authenticity|The result of [Proof of Authenticity](https://github.com/OpenAssets/open-assets-protocol/blob/master/asset-definition-protocol.mediawiki#Proof_of_Authenticity) that is checked consistent with the subject in the SSL certificate. If the result is true, issuer is verified. If the result is false, issuer is not verified.||
 
 * **get_balance**  
 Returns the balance in both bitcoin and colored coin assets for all of the addresses available in your Bitcoin Core wallet.
@@ -108,13 +110,15 @@ Returns the balance in both bitcoin and colored coin assets for all of the addre
             "asset_id": "AWo3R89p5REmoSyMWB8AeUmud8456bRxZL",
             "quantity": "81",
             "amount": "20.7",
-            "asset_definition_url": "http://goo.gl/fS4mEj"
+            "asset_definition_url": "http://goo.gl/fS4mEj",
+            "proof_of_authenticity": false
           },
           {
             "asset_id": "AJk2Gx5V67S2wNuwTK5hef3TpHunfbjcmX",
             "quantity": "67",
             "amount": "6.7",
-            "asset_definition_url": ""
+            "asset_definition_url": "",
+            "proof_of_authenticity": false
           }
         ],
         "account": "openassets-ruby"
@@ -132,6 +136,7 @@ Returns the balance in both bitcoin and colored coin assets for all of the addre
   |asset_quantity|The asset quantity is an unsigned integer representing how many units of that asset are stored on the output.|
   |asset_amount| The asset amount is the value obtained by converting the asset quantity to the unit of divisibility that are defined in the Asset definition file. |  
   |asset_definition_url|The url of asset definition file.|
+  |proof_of_authenticity|The result of [Proof of Authenticity](https://github.com/OpenAssets/open-assets-protocol/blob/master/asset-definition-protocol.mediawiki#Proof_of_Authenticity) that is checked consistent with the subject in the SSL certificate. If the result is true, issuer is verified. If the result is false, issuer is not verified.|
   |account|The name of an account.|
   
 * **issue_asset**  

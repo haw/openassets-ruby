@@ -83,7 +83,12 @@ module OpenAssets
       # Check Proof of authenticity.
       # SSL certificate subject matches issuer.
       def proof_of_authenticity
-        result = 'not verified'
+        @proof_of_authenticity ||= calc_proof_of_authenticity
+      end
+
+      private
+      def calc_proof_of_authenticity
+        result = false
         unless asset_definition_url.nil?
           client = HTTPClient.new
           response = client.get(asset_definition_url, :follow_redirect => true)
@@ -91,7 +96,7 @@ module OpenAssets
           unless cert.nil?
             subject = response.peer_cert.subject.to_a
             o = subject.find{|x|x[0] == 'O'}
-            result = 'verified' if !o.nil? && o.length > 2 && o[1] == issuer
+            result = true if !o.nil? && o.length > 2 && o[1] == issuer
           end
         end
         result

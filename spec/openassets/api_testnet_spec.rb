@@ -24,9 +24,13 @@ describe OpenAssets::Api do
       expect(list[0]['confirmations']).to eq(1)
       expect(list[0]['oa_address']).to eq('bX3FwNkYLUkW1n9CoMhtnjDHrBy96Dgz2gG')
       expect(list[0]['address']).to eq('msJ48aj11GcKuu3SK5nc5MPGrMxvE1oR5Y')
-      expect(list[0]['asset_quantity']).to eq("547")
-      expect(list[0]['asset_amount']).to eq("547")
+      expect(list[0]['asset_quantity']).to eq('547')
+      expect(list[0]['asset_amount']).to eq('547')
       expect(list[0]['account']).to eq('')
+      expect(list[0]['proof_of_authenticity']).to eq(false)
+
+      expect(list[7]['asset_id']).to eq('oNJgtrSSRzsU9k8Gnozy8pARhrwjKRoX5m')
+      expect(list[7]['proof_of_authenticity']).to eq(true)
     end
 
     it 'get_balance' do
@@ -35,9 +39,16 @@ describe OpenAssets::Api do
       expect(balances[0]['oa_address']).to eq('bX3FwNkYLUkW1n9CoMhtnjDHrBy96Dgz2gG')
       expect(balances[0]['address']).to eq('msJ48aj11GcKuu3SK5nc5MPGrMxvE1oR5Y')
       assets = balances[0]['assets']
-      expect(assets[0]['asset_id']).to eq("oWLkUn44E45cnQtsP6x1wrvJ2iRx9XyFny")
-      expect(assets[0]['quantity']).to eq("547")
+      expect(assets[0]['asset_id']).to eq('oWLkUn44E45cnQtsP6x1wrvJ2iRx9XyFny')
+      expect(assets[0]['quantity']).to eq('547')
+      expect(assets[0]['proof_of_authenticity']).to eq(false)
       expect(balances[0]['account']).to eq('')
+
+      balances = subject.get_balance('bWsM93ZHn89GByRWrBDoWhFUeBMZEt9mFcT')
+      assets = balances[0]['assets']
+      expect(assets[0]['asset_id']).to eq('oNJgtrSSRzsU9k8Gnozy8pARhrwjKRoX5m')
+      expect(assets[0]['quantity']).to eq('777')
+      expect(assets[0]['proof_of_authenticity']).to eq(true)
     end
 
     it 'multiple marker output exists in transaction' do
@@ -117,6 +128,8 @@ describe OpenAssets::Api do
     allow(btc_provider_mock).to receive(:get_transaction).with('370c210cffdff21b0e59560f11308faabb985357bc57778ebb11ddbfb0d2b7ba', 0).and_return('01000000011c963366a33ab3df14243e22ed1a893cca3f5d315b4b7b5755503c96a4f1dbc4010000006b48304502210089b69fa58bf02bffa9399aa4328e3f9816d4041f4b2a0b8e00c0d1ad37c5cfbe022029423551060bedb943f5ff1ff1c4e91cfc7fdbc21d5035c580cfc4ef4b2156810121033917dfab0a99833380034fa77159a812feb8333382e53075b88dcbebfde7cc49ffffffff0358020000000000001976a914a938dad89bbd964cbaf5d9059e0bda1d900ce08388ac0000000000000000216a1f4f41010001e80717753d68747470733a2f2f676f6f2e676c2f755667737434385d0100000000001976a914a938dad89bbd964cbaf5d9059e0bda1d900ce08388ac00000000')
     allow(btc_provider_mock).to receive(:get_transaction).with('c4dbf1a4963c5055577b4b5b315d3fca3c891aed223e2414dfb33aa36633961c', 0).and_return('010000000175552d5eddd4494aa6b05dcec201eec8280d0e2840b3843aaf884df15ce328f4010000006b483045022100e0a219f87cea50c95a45fca4204c3fe25d0e44baa54c498afbc657ed6c20f4bf0220329892eb524487a1b8724c531b27602794cdadca365681a9f62a054fb1c4713f012103e96fd7e921b64954bbff1eec73b0331c8c9d27aa70b0520eb36b50019a978f1cffffffff02b6a07a47000000001976a914d3c96dc04a62f488a3f1b588f74af136469c6fca88aca0860100000000001976a914a938dad89bbd964cbaf5d9059e0bda1d900ce08388ac00000000')
     allow(btc_provider_mock).to receive(:get_transaction).with('308ea73b45bef1428acb41f996543d6ebd534dca8f5de965e7f00eae084aaa5c', 0).and_return('010000000122c442b89c652e32ba7e2cff90715b834b71834526bd509295baea5965b71e2d000000006b48304502210095b72684aa4a8355f4057d476ac222a683220fa0087ca99d2efcea0149ff1287022014c77b8f9e0d0f457792f562a09517d752cde5c7d7b941c5ad33a95fe471b66b012103e96fd7e921b64954bbff1eec73b0331c8c9d27aa70b0520eb36b50019a978f1cffffffff0256457747000000001976a914d3c96dc04a62f488a3f1b588f74af136469c6fca88aca0860100000000001976a9147d8dd16cc3413a64a9964c91cb0ee9358ab1dff688ac00000000')
+    allow(btc_provider_mock).to receive(:get_transaction).with('5004b6e4108ff2e39112e7b9fa596f225086373d33a1839af3e027a1cd259872', 0).and_return('0100000001181fbb20375c941384069fdefd739c8e14fa40490a335607da6ea912f4383cab010000006a47304402205ddd66e0e59e3d377298a5ce2ece08804a49e0ca55215c0500e00871f75390ad0220452f91c7beea5b20b0b6c23f0dc3294ed36dbffec15dd8294cdf31d683ea5f850121024126e617f993a6fd24bb344a6c13f16f20bea4c74e451232fea494a8b53516cdffffffff0358020000000000001976a914147b897573a9586f64320d29c7780f383d00f06d88ac0000000000000000216a1f4f41010001890617753d68747470733a2f2f676f6f2e676c2f36704e503237e8990000000000001976a914147b897573a9586f64320d29c7780f383d00f06d88ac00000000')
+    allow(btc_provider_mock).to receive(:get_transaction).with('ab3c38f412a96eda0756330a4940fa148e9c73fdde9f068413945c3720bb1f18', 0).and_return('0100000001b43aca2d4f5b4ca395e54057a420180136adb1a9d7dfe0f22b2d68ec41bce90e000000006b48304502210099171aa53917c566c55c27543012f430b2dcac118101e83168a5da97703c3229022024958d98c54ad0390e4afcfbae233c3c2d68936c5626c27b51fe452caaca350c012103e96fd7e921b64954bbff1eec73b0331c8c9d27aa70b0520eb36b50019a978f1cffffffff0296ff7247000000001976a914d3c96dc04a62f488a3f1b588f74af136469c6fca88ac50c30000000000001976a914147b897573a9586f64320d29c7780f383d00f06d88ac00000000')
 
   end
 
@@ -183,7 +196,17 @@ describe OpenAssets::Api do
        "amount" => 0.00000600,
        "confirmations" => 1,
        "spendable" => true
-    }
+      },
+      {
+        "txid" => "5004b6e4108ff2e39112e7b9fa596f225086373d33a1839af3e027a1cd259872",
+        "vout" => 0,
+        "confirmations" => 8957,
+        "address" => "mhPFoPUSefNW7BMV8bhL3Pa4qkP4vtJaba",
+        "script" => "76a914147b897573a9586f64320d29c7780f383d00f06d88ac",
+        "amount" => 0.00000600,
+        "account" => "proof-of-authenticity",
+        "spendable" => true
+      }
   ]
 
 end

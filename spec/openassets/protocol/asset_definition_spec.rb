@@ -73,16 +73,16 @@ describe OpenAssets::Protocol::AssetDefinition do
     definition = OpenAssets::Protocol::AssetDefinition.new
     definition.link_to_website = false
     definition.asset_definition_url = 'http://techmedia-think.hatenablog.com/'
-    # expect(definition.proof_of_authenticity).to eq('not verified')
+    expect(definition.proof_of_authenticity).to eq(false)
 
     definition.link_to_website = true
-    # expect(definition.proof_of_authenticity).to eq('not verified')
+    expect(definition.proof_of_authenticity).to eq(false)
 
     definition.asset_definition_url = 'https://goo.gl/6pNP27'
-    # expect(definition.proof_of_authenticity).to eq('not verified')
+    expect(definition.proof_of_authenticity).to eq(false)
 
     definition.issuer = 'Amazon.com Inc.'
-    expect(definition.proof_of_authenticity).to eq('verified')
+    expect(definition.proof_of_authenticity).to eq(true)
   end
 
 end

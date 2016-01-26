@@ -63,7 +63,8 @@ module OpenAssets
               'asset_id' => asset_id,
               'quantity' => outputs.inject(0) { |sum, o| sum + o.asset_quantity }.to_s,
               'amount' => outputs.inject(0) { |sum, o| sum + o.asset_amount }.to_s,
-              'asset_definition_url' => outputs[0].asset_definition_url
+              'asset_definition_url' => outputs[0].asset_definition_url,
+              'proof_of_authenticity' => outputs[0].proof_of_authenticity
           }
         }
         {

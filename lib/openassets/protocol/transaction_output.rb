@@ -48,6 +48,10 @@ module OpenAssets
         @asset_definition.divisibility
       end
 
+      def proof_of_authenticity
+        valid_asset_definition? ? @asset_definition.proof_of_authenticity : false
+      end
+
       # convert to hash object.
       def to_hash
         address = script_to_address(@script)
@@ -60,7 +64,8 @@ module OpenAssets
             'asset_quantity' => @asset_quantity.to_s,
             'asset_amount' => asset_amount.to_s,
             'account' => @account,
-            'asset_definition_url' => @asset_definition_url
+            'asset_definition_url' => @asset_definition_url,
+            'proof_of_authenticity' => proof_of_authenticity
         }
       end
 
