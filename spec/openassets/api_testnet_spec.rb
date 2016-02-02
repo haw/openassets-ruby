@@ -103,6 +103,17 @@ describe OpenAssets::Api do
       expect(tx.outputs[5].parsed_script.to_string).to eq('OP_DUP OP_HASH160 7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6 OP_EQUALVERIFY OP_CHECKSIG')
       expect(tx.outputs[5].value).to eq(90600)
     end
+
+    it 'send same asset using send_assets' do
+      from = address_to_oa_address('mrxpeizRrF8ymNx5FrvcGGZVecZjtUFVP3')
+      to1 = address_to_oa_address('n4MEsSUN8GktDFZzU3V55mP3jWGMN7e4wE')
+      to2 = address_to_oa_address('msJ48aj11GcKuu3SK5nc5MPGrMxvE1oR5Y')
+      params = []
+      params << OpenAssets::SendAssetParam.new('oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY', 30, to1)
+      params << OpenAssets::SendAssetParam.new('oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY', 20, to2)
+      expect{subject.send_assets(from, params, 10000, 'unsignd')}.to raise_error(OpenAssets::Error)
+    end
+
   end
 
   def filter_btc_unspent(btc_address = nil)
