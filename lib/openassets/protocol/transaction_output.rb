@@ -63,14 +63,10 @@ module OpenAssets
             'asset_id' => @asset_id,
             'asset_quantity' => @asset_quantity.to_s,
             'asset_amount' => asset_amount.to_s,
-            'account' => account,
+            'account' => @account,
             'asset_definition_url' => @asset_definition_url,
             'proof_of_authenticity' => proof_of_authenticity
         }
-      end
-
-      def account
-        @account.nil? ? nil : @account.encode('ISO-8859-1').force_encoding('UTF-8')
       end
 
       private

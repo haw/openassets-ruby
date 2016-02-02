@@ -106,7 +106,7 @@ module OpenAssets
           :id => 'jsonrpc'
         }
         RestClient.post(server_url, data.to_json, content_type: :json) do |respdata, request, result|
-          response = JSON.parse(respdata)
+          response = JSON.parse(respdata.gsub(/\\u([\da-fA-F]{4})/) { [$1].pack('H*').unpack('n*').pack('U*').encode('ISO-8859-1').force_encoding('UTF-8') })
           raise ApiError, response['error'] if response['error']
           response['result']
         end
