@@ -129,7 +129,6 @@ module OpenAssets
     # 'unsigned' for getting the raw unsigned transaction without broadcasting"""='broadcast'
     # @return[Bitcoin::Protocol:Tx] The resulting transaction.
     def send_assets(from, send_asset_params, fees = nil, mode = 'broadcast')
-      validate_multi_send_params(send_asset_params)
       builder = OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
       colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
       transfer_specs = send_asset_params.map{|param|
@@ -307,14 +306,6 @@ module OpenAssets
         Bitcoin.network = :testnet
       else
         Bitcoin.network = :bitcoin
-      end
-    end
-
-    # validate multi send parameters.
-    def validate_multi_send_params(params)
-      asset_ids = params.map{|p|p.asset_id}
-      unless asset_ids.size == asset_ids.uniq.size
-        raise OpenAssets::Error.new 'SendAssetParam has same asset ID.'
       end
     end
 

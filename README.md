@@ -214,7 +214,6 @@ Creates a transaction for sending **multiple** asset from the open asset address
   params << OpenAssets::SendAssetParam.new('oUygwarZqNGrjDvcZUpZdvEc7es6dcs1vs', 4, to)
   tx = api.send_assets(from, params)
   ``` 
-Note: Currently, **send_assets** supports only different asset ID transfer, so can not send same asset. 
 
 ## Command line interface
 
