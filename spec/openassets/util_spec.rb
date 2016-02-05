@@ -18,6 +18,15 @@ describe OpenAssets::Util do
           '0450863ad64a87ae8a2fe83c1af1a8403cb53f53e486d8511dad8a04887e5b23522cd470243453a299fa9e77237716103abc11a1df38855ed6f2ee187e9c582ba6'))
           .to eq('ALn3aK1fSuG27N96UGYB1kUYUpGKRhBuBC')
     end
+
+    it 'validate asset ID' do
+      puts
+      expect(util.valid_asset_id?('ALn3aK1fSuG27N96UGYB1kUYUpGKRhBuBC')).to be true
+      expect(util.valid_asset_id?('')).to be false
+      expect(util.valid_asset_id?(nil)).to be false
+      expect(util.valid_asset_id?('oLn3aK1fSuG27N96UGYB1kUYUpGKRhBuBC')).to be false
+      expect(util.valid_asset_id?('ALn3aK1fSuG27N96UGYB1kUYUpGKRhBuBC3')).to be false
+    end
   end
 
   context 'testnet', :network => :testnet do
@@ -27,6 +36,15 @@ describe OpenAssets::Util do
 
     it 'oa_address_to_asset_id' do
       expect(util.address_to_asset_id('myfTSkKCbvNqf231xMR5sVCBTi8VvqfR4y')).to eq('oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY')
+    end
+
+    it 'validate asset ID' do
+      puts
+      expect(util.valid_asset_id?('oWLkUn44E45cnQtsP6x1wrvJ2iRx9XyFny')).to be true
+      expect(util.valid_asset_id?('')).to be false
+      expect(util.valid_asset_id?(nil)).to be false
+      expect(util.valid_asset_id?('kXiQGL32ybiiZKfznYMAAPQnVy35LRDL7M')).to be false
+      expect(util.valid_asset_id?('oXiQGL32ybiiZKfznYMAAPQnVy35LRDL7M1')).to be false
     end
   end
 

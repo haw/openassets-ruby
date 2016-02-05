@@ -99,6 +99,16 @@ module OpenAssets
       }
     end
 
+    # validate asset ID
+    def valid_asset_id?(asset_id)
+      return false if asset_id.nil? || asset_id.length != 34
+      decoded = decode_base58(asset_id)
+      return false if  decoded[0,2].to_i(16) != oa_version_byte
+      p2pkh_script_hash = decoded[2..-9]
+      address = hash160_to_address(p2pkh_script_hash)
+      valid_address?(address)
+    end
+
     # generate Asset ID from open asset address.
     def oa_address_to_asset_id(oa_address)
       address_to_asset_id(oa_address_to_address(oa_address))
