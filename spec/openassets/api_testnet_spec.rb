@@ -132,6 +132,36 @@ describe OpenAssets::Api do
       expect(tx.outputs[6].value).to eq(90000)
     end
 
+    it 'burn asset' do
+      oa_address = 'bX2vhttomKj2fdd7SJV2nv8U4zDjusE5Y4B'
+      btc_address = oa_address_to_address(oa_address)
+      asset_id = 'oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY'
+
+      tx = subject.burn_asset(oa_address, asset_id, 20000, 'unsignd')
+      expect(tx.inputs.length).to eq(4)
+      expect(tx.inputs[0].prev_out_hash.reverse_hth).to eq('6887dd16b7ad2847bd4546211665199e05711c3acd1a67da879506adb5486910')
+      expect(tx.inputs[0].prev_out_index).to eq(1)
+      expect(tx.inputs[1].prev_out_hash.reverse_hth).to eq('6887dd16b7ad2847bd4546211665199e05711c3acd1a67da879506adb5486910')
+      expect(tx.inputs[1].prev_out_index).to eq(2)
+      expect(tx.inputs[2].prev_out_hash.reverse_hth).to eq('6887dd16b7ad2847bd4546211665199e05711c3acd1a67da879506adb5486910')
+      expect(tx.inputs[2].prev_out_index).to eq(3)
+      expect(tx.inputs[3].prev_out_hash.reverse_hth).to eq('308ea73b45bef1428acb41f996543d6ebd534dca8f5de965e7f00eae084aaa5c')
+      expect(tx.inputs[3].prev_out_index).to eq(1)
+
+      expect(tx.outputs.length).to eq(1)
+      expect(tx.outputs[0].value).to eq(81800)
+      script = Bitcoin::Script.new(Bitcoin::Script.to_hash160_script(Bitcoin.hash160_from_address(btc_address)))
+      expect(tx.outputs[0].parsed_script.to_string).to eq(script.to_string)
+
+      # not have enough fee
+      expect{subject.burn_asset(oa_address, asset_id, 101201, 'unsignd')}.to raise_error(OpenAssets::Transaction::InsufficientFundsError)
+      # fee = utxo
+      subject.burn_asset(oa_address, asset_id, 101200, 'unsignd')
+
+      # not have asset
+      expect{subject.burn_asset(oa_address, 'oZuo5eABTxR3fjQT9Dqi17jjqZsQpCXBE6', 10000, 'unsignd')}.to raise_error(OpenAssets::Transaction::TransactionBuildError)
+    end
+
   end
 
   def filter_btc_unspent(btc_address = nil)

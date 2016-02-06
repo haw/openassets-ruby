@@ -93,10 +93,9 @@ module OpenAssets
     # @return[Bitcoin::Protocol::Tx] The Bitcoin::Protocol::Tx object.
     def issue_asset(from, amount, metadata = nil, to = nil, fees = nil, mode = 'broadcast', output_qty = 1)
       to = from if to.nil?
-      builder = OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
       colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
       issue_param = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount, output_qty)
-      tx = builder.issue_asset(issue_param, metadata, fees.nil? ? @config[:default_fees]: fees)
+      tx = create_tx_builder.issue_asset(issue_param, metadata, fees.nil? ? @config[:default_fees]: fees)
       tx = process_transaction(tx, mode)
       tx
     end
@@ -112,10 +111,9 @@ module OpenAssets
     # 'unsigned' for getting the raw unsigned transaction without broadcasting"""='broadcast'
     # @return[Bitcoin::Protocol:Tx] The resulting transaction.
     def send_asset(from, asset_id, amount, to, fees = nil, mode = 'broadcast', output_qty = 1)
-      builder = OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
       colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
       asset_transfer_spec = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount, output_qty)
-      tx = builder.transfer_asset(asset_id, asset_transfer_spec, from, fees.nil? ? @config[:default_fees]: fees)
+      tx = create_tx_builder.transfer_asset(asset_id, asset_transfer_spec, from, fees.nil? ? @config[:default_fees]: fees)
       tx = process_transaction(tx, mode)
       tx
     end
@@ -129,12 +127,11 @@ module OpenAssets
     # 'unsigned' for getting the raw unsigned transaction without broadcasting"""='broadcast'
     # @return[Bitcoin::Protocol:Tx] The resulting transaction.
     def send_assets(from, send_asset_params, fees = nil, mode = 'broadcast')
-      builder = OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
       colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
       transfer_specs = send_asset_params.map{|param|
         [param.asset_id, OpenAssets::Transaction::TransferParameters.new(colored_outputs, param.to, from, param.amount)]
       }
-      tx = builder.transfer_assets(transfer_specs, from, fees.nil? ? @config[:default_fees]: fees)
+      tx = create_tx_builder.transfer_assets(transfer_specs, from, fees.nil? ? @config[:default_fees]: fees)
       tx = process_transaction(tx, mode)
       tx
     end
@@ -152,10 +149,22 @@ module OpenAssets
     # @return[Bitcoin::Protocol:Tx] The resulting transaction.
     def send_bitcoin(from, amount, to, fees = nil, mode = 'broadcast', output_qty = 1)
       validate_address([from, to])
-      builder = OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
       colored_outputs = get_unspent_outputs([from])
       btc_transfer_spec = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount, output_qty)
-      tx = builder.transfer_btc(btc_transfer_spec, fees.nil? ? @config[:default_fees]: fees)
+      tx = create_tx_builder.transfer_btc(btc_transfer_spec, fees.nil? ? @config[:default_fees]: fees)
+      process_transaction(tx, mode)
+    end
+
+    # Creates a transaction for burn asset.
+    # @param[String] oa_address The open asset address to burn asset.
+    # @param[String] asset_id The asset ID identifying the asset to burn.
+    # @param[Integer] fees The fess in satoshis for the transaction.
+    # @param[String] mode 'broadcast' (default) for signing and broadcasting the transaction,
+    # 'signed' for signing the transaction without broadcasting,
+    # 'unsigned' for getting the raw unsigned transaction without broadcasting"""='broadcast'
+    def burn_asset(oa_address, asset_id, fees = nil, mode = 'broadcast')
+      unspents = get_unspent_outputs([oa_address_to_address(oa_address)])
+      tx = create_tx_builder.burn_asset(unspents, asset_id, fees.nil? ? @config[:default_fees]: fees)
       process_transaction(tx, mode)
     end
 
@@ -307,6 +316,10 @@ module OpenAssets
       else
         Bitcoin.network = :bitcoin
       end
+    end
+
+    def create_tx_builder
+      OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
     end
 
   end

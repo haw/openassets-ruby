@@ -65,6 +65,29 @@ module OpenAssets
         transfer([], btc_transfer_spec, fees)
       end
 
+      # Create a transaction for burn asset
+      def burn_asset(unspents, asset_id, fee)
+        tx = Bitcoin::Protocol::Tx.new
+        targets = unspents.select{|o|o.output.asset_id == asset_id}
+        raise TransactionBuildError.new('There is no asset.') if targets.length == 0
+        total_amount = targets.inject(0){|sum, o|o.output.value + sum}
+        otsuri = total_amount - fee
+        if otsuri < @amount
+          uncolored_outputs, uncolored_amount =
+            TransactionBuilder.collect_uncolored_outputs(unspents, @amount - otsuri)
+          targets = targets + uncolored_outputs
+          otsuri += uncolored_amount
+        end
+        targets.each{|o|
+          script_sig = o.output.script.to_binary
+          tx_in = Bitcoin::Protocol::TxIn.from_hex_hash(o.out_point.hash, o.out_point.index)
+          tx_in.script_sig = script_sig
+          tx.add_in(tx_in)
+        }
+        tx.add_out(create_uncolored_output(targets[0].output.address, otsuri))
+        tx
+      end
+
       # collect uncolored outputs in unspent outputs(contains colored output).
       # @param [Array[OpenAssets::Transaction::SpendableOutput]] unspent_outputs The Array of available outputs.
       # @param [Integer] amount The amount to collect.

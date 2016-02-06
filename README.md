@@ -215,6 +215,21 @@ Creates a transaction for sending **multiple** asset from the open asset address
   tx = api.send_assets(from, params)
   ``` 
 
+* **burn_asset**  
+Creates a transaction for burn asset.  
+This API is to burn the asset by spending the all UTXO of specified asset as Bitcoin.  
+  ```ruby
+  # burn_asset
+  # api.burn_asset(<from open asset address>, <asset ID>,, <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>, <mode=('broadcast', 'signed', 'unsigned')>, <output_qty default value is 1.>)
+
+  # example
+  oa_address = 'bX2vhttomKj2fdd7SJV2nv8U4zDjusE5Y4B'
+  asset_id = 'oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY'
+  tx = api.burn_asset(oa_address, asset_id, 10000)
+  ```
+  
+**Note:** Burned asset will not be able to again get.
+
 ## Command line interface
 
 Openassets-ruby comes with a `openassets` command line interface that allows easy interaction with OpenAssets. 

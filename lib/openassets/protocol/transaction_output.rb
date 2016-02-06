@@ -54,7 +54,6 @@ module OpenAssets
 
       # convert to hash object.
       def to_hash
-        address = script_to_address(@script)
         {
             'address' =>  address,
             'oa_address' => address.nil? ? nil : address_to_oa_address(address),
@@ -67,6 +66,10 @@ module OpenAssets
             'asset_definition_url' => @asset_definition_url,
             'proof_of_authenticity' => proof_of_authenticity
         }
+      end
+
+      def address
+        script_to_address(@script)
       end
 
       private
