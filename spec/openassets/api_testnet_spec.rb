@@ -162,6 +162,14 @@ describe OpenAssets::Api do
       expect{subject.burn_asset(oa_address, 'oZuo5eABTxR3fjQT9Dqi17jjqZsQpCXBE6', 10000, 'unsignd')}.to raise_error(OpenAssets::Transaction::TransactionBuildError)
     end
 
+    it 'cached tx' do
+      txid = 'e1dcdb553d40ec35aac0a5b9bc2cce0112dd10c869a887b52b3b58071bb29f3c'
+      out_index = 1
+      expect(subject.provider).to receive(:get_transaction).with(txid, 0).once
+      subject.get_output(txid, out_index)
+      subject.get_output(txid, out_index)
+    end
+
   end
 
   def filter_btc_unspent(btc_address = nil)
