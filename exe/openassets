@@ -32,6 +32,7 @@ if options[:env]
   config = {
     :network	    => ENV['OA_NETWORK'] || 'mainnet',
     :provider     => 'bitcoind',
+    :cache        => ENV['OA_CACHE'] || 'cache.db',
     :dust_limit   => (ENV['OA_DUST_LIMIT'] || 600).to_i,
     :default_fees => (ENV['OA_DEFAULT_FEES'] || 10000).to_i,
     :rpc					=> rpc
