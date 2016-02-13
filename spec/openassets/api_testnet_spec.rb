@@ -7,7 +7,7 @@ describe OpenAssets::Api do
   context 'testnet', :network => :testnet do
     subject {
       testnet_mock = double('BitcoinCoreProviderTestnet Mock')
-      api = OpenAssets::Api.new
+      api = OpenAssets::Api.new({:cache => ':memory:'})
       api.config[:network] = 'testnet'
       allow(testnet_mock).to receive(:list_unspent).and_return(TESTNET_BTC_UNSPENT)
       setup_tx_load_mock(testnet_mock)
@@ -168,6 +168,11 @@ describe OpenAssets::Api do
       expect(subject.provider).to receive(:get_transaction).with(txid, 0).once
       subject.get_output(txid, out_index)
       subject.get_output(txid, out_index)
+
+      get_output_tx = '5004b6e4108ff2e39112e7b9fa596f225086373d33a1839af3e027a1cd259872'
+      expect(subject.provider).to receive(:get_transaction).with(get_output_tx, 0).twice
+      subject.get_outputs_from_txid(get_output_tx)
+      subject.get_outputs_from_txid(get_output_tx)
     end
 
   end

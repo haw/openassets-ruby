@@ -11,12 +11,11 @@ module OpenAssets
 
     attr_reader :config
     attr_reader :provider
-    attr_reader :cache
+    attr_reader :tx_cache
 
     def initialize(config = nil)
-      @cache = {}
       @config = {:network => 'mainnet',
-                 :provider => 'bitcoind',
+                 :provider => 'bitcoind', :cache => 'cache.db',
                  :dust_limit => 600, :default_fees => 10000, :min_confirmation => 1, :max_confirmation => 9999999,
                  :rpc => { :host => 'localhost', :port => 8332 , :user => '', :password => '', :schema => 'https'}}
       if config
@@ -27,6 +26,7 @@ module OpenAssets
       else
         raise OpenAssets::Error, 'specified unsupported provider.'
       end
+      @tx_cache = Cache::TransactionCache.new(@config[:cache])
     end
 
     def provider
@@ -186,13 +186,14 @@ module OpenAssets
     end
 
     def get_output(txid, output_index)
-      cached_output = @cache[txid + output_index.to_s]
-      return cached_output if cached_output
-      decode_tx = provider.get_transaction(txid, 0)
-      raise OpenAssets::Transaction::TransactionBuildError, "txid #{txid} could not be retrieved." if decode_tx.nil?
+      decode_tx = tx_cache.get(txid)
+      if decode_tx.nil?
+        decode_tx = provider.get_transaction(txid, 0)
+        raise OpenAssets::Transaction::TransactionBuildError, "txid #{txid} could not be retrieved." if decode_tx.nil?
+        tx_cache.put(txid, decode_tx)
+      end
       tx = Bitcoin::Protocol::Tx.new(decode_tx.htb)
       colored_outputs = get_color_outputs_from_tx(tx)
-      colored_outputs.each_with_index { |o, index | @cache[txid + index.to_s] = o}
       colored_outputs[output_index]
     end
 
@@ -213,7 +214,7 @@ module OpenAssets
       tx.outputs.map{|out| OpenAssets::Protocol::TransactionOutput.new(out.value, out.parsed_script, nil, 0, OpenAssets::Protocol::OutputType::UNCOLORED)}
     end
 
-    # Get tx outputs. (use for debug)
+    # Get tx outputs. This method will always get the latest transaction without the cache.
     # @param[String] txid Transaction ID.
     # @return[Array] Return array of the transaction output Hash with coloring information.
     def get_outputs_from_txid(txid)

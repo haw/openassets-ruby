@@ -11,6 +11,7 @@ describe OpenAssets::Api do
     expect(api.config[:rpc][:port]).to eq(8332)
     expect(api.config[:min_confirmation]).to eq(1)
     expect(api.config[:max_confirmation]).to eq(9999999)
+    expect(api.config[:cache]).to eq('cache.db')
     api = OpenAssets::Api.new(JSON.parse(File.read("#{File.dirname(__FILE__)}/../test-config.json"), {:symbolize_names => true}))
     expect(api.is_testnet?).to be true
     expect(api.config[:min_confirmation]).to eq(0)
