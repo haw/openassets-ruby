@@ -185,6 +185,9 @@ Ex, amount = 60000 and output_qty = 2, send TxOut is two (each value is 30000, 3
 * **get_outputs_from_txid**  
 Get tx outputs. (use for debug)
   ```ruby
+  # api.get_outputs_from_txid(<txid>, <use_cache default value is false.>)
+
+  # example
   api.get_outputs_from_txid('3fba8bfb157ae29c293d5bd65c178fec169a87f880e2e62537fcce26612a6aa3')
   > [{
       "address": "14M4kbAtn71P1nnNYuhBDFTNYxa19t1XP6",

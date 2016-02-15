@@ -186,12 +186,7 @@ module OpenAssets
     end
 
     def get_output(txid, output_index)
-      decode_tx = tx_cache.get(txid)
-      if decode_tx.nil?
-        decode_tx = provider.get_transaction(txid, 0)
-        raise OpenAssets::Transaction::TransactionBuildError, "txid #{txid} could not be retrieved." if decode_tx.nil?
-        tx_cache.put(txid, decode_tx)
-      end
+      decode_tx = load_cached_tx(txid)
       tx = Bitcoin::Protocol::Tx.new(decode_tx.htb)
       colored_outputs = get_color_outputs_from_tx(tx)
       colored_outputs[output_index]
@@ -214,12 +209,12 @@ module OpenAssets
       tx.outputs.map{|out| OpenAssets::Protocol::TransactionOutput.new(out.value, out.parsed_script, nil, 0, OpenAssets::Protocol::OutputType::UNCOLORED)}
     end
 
-    # Get tx outputs. This method will always get the latest transaction without the cache.
+    # Get tx outputs.
     # @param[String] txid Transaction ID.
+    # @param[Boolean] use_cache If specified true use cache.(default value is false)
     # @return[Array] Return array of the transaction output Hash with coloring information.
-    def get_outputs_from_txid(txid)
-      decode_tx = provider.get_transaction(txid, 0)
-      raise OpenAssets::Transaction::TransactionBuildError, "txid #{txid} could not be retrieved." if decode_tx.nil?
+    def get_outputs_from_txid(txid, use_cache = false)
+      decode_tx = use_cache ? load_cached_tx(txid) : load_tx(txid)
       tx = Bitcoin::Protocol::Tx.new(decode_tx.htb)
       outputs = get_color_outputs_from_tx(tx)
       outputs.map.with_index{|out, i|out.to_hash.merge({'txid' => tx.hash, 'vout' => i})}
@@ -321,6 +316,21 @@ module OpenAssets
 
     def create_tx_builder
       OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
+    end
+
+    def load_tx(txid)
+      decode_tx = provider.get_transaction(txid, 0)
+      raise OpenAssets::Transaction::TransactionBuildError, "txid #{txid} could not be retrieved." if decode_tx.nil?
+      decode_tx
+    end
+
+    def load_cached_tx(txid)
+      decode_tx = tx_cache.get(txid)
+      if decode_tx.nil?
+        decode_tx = load_tx(txid)
+        tx_cache.put(txid, decode_tx)
+      end
+      decode_tx
     end
 
   end

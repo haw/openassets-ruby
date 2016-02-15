@@ -173,6 +173,11 @@ describe OpenAssets::Api do
       expect(subject.provider).to receive(:get_transaction).with(get_output_tx, 0).twice
       subject.get_outputs_from_txid(get_output_tx)
       subject.get_outputs_from_txid(get_output_tx)
+
+      get_output_tx_cache = '9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5'
+      expect(subject.provider).to receive(:get_transaction).with(get_output_tx_cache, 0).once
+      subject.get_outputs_from_txid(get_output_tx_cache, true)
+      subject.get_outputs_from_txid(get_output_tx_cache, true)
     end
 
   end
