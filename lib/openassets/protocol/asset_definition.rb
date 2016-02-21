@@ -94,20 +94,32 @@ module OpenAssets
       def calc_proof_of_authenticity
         result = false
         if !asset_definition_url.nil? && link_to_website
-          client = HTTPClient.new
-          response = client.get(asset_definition_url, :follow_redirect => true)
-          cert = response.peer_cert
-          unless cert.nil?
-            subject = response.peer_cert.subject.to_a
-            o = subject.find{|x|x[0] == 'O'}
-            result = true if !o.nil? && o.length > 2 && o[1] == issuer
-          end
+          subject = ssl_certificate_subject
+          return true if !subject.nil? && subject == issuer
         end
         result
       end
 
       def clear_poa_cache
         @proof_of_authenticity = nil
+      end
+
+      def ssl_certificate_subject
+        cache = OpenAssets::Cache::SSLCertificateCache.new
+        subject = cache.get(asset_definition_url)
+        if subject.nil?
+          response = HTTPClient.new.get(asset_definition_url, :follow_redirect => true)
+          cert = response.peer_cert
+          unless cert.nil?
+            subjects = cert.subject.to_a
+            o = subjects.find{|x|x[0] == 'O'}
+            if !o.nil? && o.length > 2
+              subject = o[1]
+              cache.put(asset_definition_url, subject, cert.not_after)
+            end
+          end
+        end
+        subject
       end
     end
 

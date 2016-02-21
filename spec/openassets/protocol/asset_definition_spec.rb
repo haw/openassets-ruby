@@ -81,20 +81,22 @@ describe OpenAssets::Protocol::AssetDefinition do
     definition.asset_definition_url = 'http://techmedia-think.hatenablog.com/'
     expect(definition.proof_of_authenticity).to eq(false)
 
+    ssl_site = 'https://goo.gl/6pNP27'
+
     definition = OpenAssets::Protocol::AssetDefinition.new
     definition.link_to_website = true
-    definition.asset_definition_url = 'https://goo.gl/6pNP27'
+    definition.asset_definition_url = ssl_site
     expect(definition.proof_of_authenticity).to eq(false)
 
     definition = OpenAssets::Protocol::AssetDefinition.new
     definition.link_to_website = true
-    definition.asset_definition_url = 'https://goo.gl/6pNP27'
+    definition.asset_definition_url = ssl_site
     definition.issuer = 'Amazon.com Inc.'
     expect(definition.proof_of_authenticity).to eq(true)
 
     definition = OpenAssets::Protocol::AssetDefinition.new
     definition.link_to_website = true
-    definition.asset_definition_url = 'https://goo.gl/6pNP27'
+    definition.asset_definition_url = ssl_site
     definition.issuer = 'Amazon.com Inc.'
     expect(definition.proof_of_authenticity).to eq(true)
     definition.link_to_website = false

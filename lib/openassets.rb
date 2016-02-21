@@ -12,4 +12,8 @@ module OpenAssets
   autoload :SendAssetParam, 'openassets/send_asset_param'
   autoload :Cache, 'openassets/cache'
 
+  class << self
+    attr_accessor :configuration
+  end
+
 end

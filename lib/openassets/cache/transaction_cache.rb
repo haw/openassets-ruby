@@ -1,17 +1,11 @@
-require 'sqlite3'
 module OpenAssets
   module Cache
 
     # An object that can be used for caching serialized transaction in a Sqlite database.
-    class TransactionCache
+    class TransactionCache < SQLiteBase
 
-      attr_reader :db
-
-      # Initializes the connection to the database, and creates the table if needed.
-      # @param[String] path The path to the database file. Use ':memory:' for an in-memory database.
-      def initialize(path)
-        @db = SQLite3::Database.new path
-        @db.execute <<-SQL
+      def setup
+        db.execute <<-SQL
           CREATE TABLE IF NOT EXISTS Tx(
                   TransactionHash BLOB,
                   SerializedTx BLOB,
