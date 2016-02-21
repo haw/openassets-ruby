@@ -5,6 +5,9 @@ module OpenAssets
 
     # The Definition of Open Asset
     class AssetDefinition
+      include OpenAssets::MethodFilter
+
+      before_filter :clear_poa_cache, {:include => [:issuer=, :asset_definition_url=, :link_to_website=]}
 
       attr_accessor :asset_definition_url
 
@@ -21,6 +24,7 @@ module OpenAssets
       attr_accessor :icon_url
       attr_accessor :image_url
       attr_accessor :version
+      attr_accessor :proof_of_authenticity
 
       def initialize
         @asset_ids = []
@@ -89,7 +93,7 @@ module OpenAssets
       private
       def calc_proof_of_authenticity
         result = false
-        unless asset_definition_url.nil?
+        if !asset_definition_url.nil? && link_to_website
           client = HTTPClient.new
           response = client.get(asset_definition_url, :follow_redirect => true)
           cert = response.peer_cert
@@ -100,6 +104,10 @@ module OpenAssets
           end
         end
         result
+      end
+
+      def clear_poa_cache
+        @proof_of_authenticity = nil
       end
     end
 

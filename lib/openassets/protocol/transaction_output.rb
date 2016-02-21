@@ -48,6 +48,7 @@ module OpenAssets
         @asset_definition.divisibility
       end
 
+      # Verify proof of authenticity.
       def proof_of_authenticity
         valid_asset_definition? ? @asset_definition.proof_of_authenticity : false
       end

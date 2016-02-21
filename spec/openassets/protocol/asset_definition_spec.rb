@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe OpenAssets::Protocol::AssetDefinition do
 
-  json = '{"asset_ids":["AGHhobo7pVQN5fZWqv3rhdc324ryT7qVTB","AWo3R89p5REmoSyMWB8AeUmud8456bRxZL","AJk2Gx5V67S2wNuwTK5hef3TpHunfbjcmX"],"version":"1.0","divisibility":1,"name_short":"HAWSCoin","name":"MHAWS Coin","contract_url":"http://techmedia-think.hatenablog.com/","issuer":"Shigeyuki Azuchi","description":"The OpenAsset test description.","description_mime":"text/x-markdown; charset=UTF-8","type":"Currency","link_to_website":false}'
+  json = '{"asset_ids":["AGHhobo7pVQN5fZWqv3rhdc324ryT7qVTB","AWo3R89p5REmoSyMWB8AeUmud8456bRxZL","AJk2Gx5V67S2wNuwTK5hef3TpHunfbjcmX"],"version":"1.0","divisibility":1,"name_short":"HAWSCoin","name":"MHAWS Coin","contract_url":"http://techmedia-think.hatenablog.com/","proof_of_authenticity":false,"issuer":"Shigeyuki Azuchi","description":"The OpenAsset test description.","description_mime":"text/x-markdown; charset=UTF-8","type":"Currency","link_to_website":false}'
 
   it 'parse_json' do
     definition = OpenAssets::Protocol::AssetDefinition.parse_json(json)
@@ -65,6 +65,7 @@ describe OpenAssets::Protocol::AssetDefinition do
     definition.divisibility = 1
     definition.link_to_website = false
     definition.version = '1.0'
+    definition.proof_of_authenticity = false
 
     expect(definition.to_json).to eq(json)
   end
@@ -75,14 +76,29 @@ describe OpenAssets::Protocol::AssetDefinition do
     definition.asset_definition_url = 'http://techmedia-think.hatenablog.com/'
     expect(definition.proof_of_authenticity).to eq(false)
 
+    definition = OpenAssets::Protocol::AssetDefinition.new
     definition.link_to_website = true
+    definition.asset_definition_url = 'http://techmedia-think.hatenablog.com/'
     expect(definition.proof_of_authenticity).to eq(false)
 
+    definition = OpenAssets::Protocol::AssetDefinition.new
+    definition.link_to_website = true
     definition.asset_definition_url = 'https://goo.gl/6pNP27'
     expect(definition.proof_of_authenticity).to eq(false)
 
+    definition = OpenAssets::Protocol::AssetDefinition.new
+    definition.link_to_website = true
+    definition.asset_definition_url = 'https://goo.gl/6pNP27'
     definition.issuer = 'Amazon.com Inc.'
     expect(definition.proof_of_authenticity).to eq(true)
+
+    definition = OpenAssets::Protocol::AssetDefinition.new
+    definition.link_to_website = true
+    definition.asset_definition_url = 'https://goo.gl/6pNP27'
+    definition.issuer = 'Amazon.com Inc.'
+    expect(definition.proof_of_authenticity).to eq(true)
+    definition.link_to_website = false
+    expect(definition.proof_of_authenticity).to eq(false)
   end
 
 end
