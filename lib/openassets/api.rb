@@ -215,10 +215,17 @@ module OpenAssets
     # @param[Boolean] use_cache If specified true use cache.(default value is false)
     # @return[Array] Return array of the transaction output Hash with coloring information.
     def get_outputs_from_txid(txid, use_cache = false)
-      decode_tx = use_cache ? load_cached_tx(txid) : load_tx(txid)
-      tx = Bitcoin::Protocol::Tx.new(decode_tx.htb)
+      tx = get_tx(txid, use_cache)
       outputs = get_color_outputs_from_tx(tx)
       outputs.map.with_index{|out, i|out.to_hash.merge({'txid' => tx.hash, 'vout' => i})}
+    end
+
+    # Get tx. (This method returns plain Bitcoin::Protocol::Tx object, so it not contains open asset information.)
+    # @param[String] txid Transaction ID.
+    # @return[Bitcoin::Protocol::Tx] Return the Bitcoin::Protocol::Tx.
+    def get_tx(txid, use_cache = true)
+      decode_tx = use_cache ? load_cached_tx(txid) : load_tx(txid)
+      Bitcoin::Protocol::Tx.new(decode_tx.htb)
     end
 
     private
