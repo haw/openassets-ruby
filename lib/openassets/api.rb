@@ -316,7 +316,7 @@ module OpenAssets
 
     def change_network
       if is_testnet?
-        Bitcoin.network = :testnet
+        Bitcoin.network = :testnet3
       else
         Bitcoin.network = :bitcoin
       end
