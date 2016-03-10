@@ -76,7 +76,8 @@ describe OpenAssets::Protocol::TransactionOutput do
                                   'asset_amount' => '990.0',
                                   'account' => 'hoge',
                                   'asset_definition_url' => 'https://goo.gl/uVgst4',
-                                  'proof_of_authenticity' => false)
+                                  'proof_of_authenticity' => false,
+                                  'output_type' => 'transfer')
   end
 
 end

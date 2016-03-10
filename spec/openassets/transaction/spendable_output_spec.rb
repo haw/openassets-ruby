@@ -26,7 +26,8 @@ describe OpenAssets::Transaction::SpendableOutput, :network => :testnet do
                                   'asset_quantity' => '9900',
                                   'asset_amount' => '990.0',
                                   'asset_definition_url' => 'https://goo.gl/uVgst4',
-                                  'proof_of_authenticity' => false)
+                                  'proof_of_authenticity' => false,
+                                  'output_type' => 'transfer')
   end
 
 end

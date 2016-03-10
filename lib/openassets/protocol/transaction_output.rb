@@ -65,7 +65,8 @@ module OpenAssets
             'asset_amount' => asset_amount.to_s,
             'account' => @account,
             'asset_definition_url' => @asset_definition_url,
-            'proof_of_authenticity' => proof_of_authenticity
+            'proof_of_authenticity' => proof_of_authenticity,
+            'output_type' => OpenAssets::Protocol::OutputType.output_type_label(@output_type)
         }
       end
 

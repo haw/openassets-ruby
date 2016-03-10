@@ -131,6 +131,7 @@ describe OpenAssets::Api do
       expect(uncolored[0]['asset_amount']).to eq('0')
       expect(uncolored[0]['account']).to eq(nil)
       expect(uncolored[0]['asset_definition_url']).to eq('')
+      expect(uncolored[0]['output_type']).to eq('uncolored')
 
       expect(uncolored[1]['txid']).to eq('21b093ec41244898a50e1f97cb80fd98d7714c7235e0a4a30d7d0c6fb6a6ce8a')
       expect(uncolored[1]['vout']).to eq(1)
@@ -143,6 +144,7 @@ describe OpenAssets::Api do
       expect(uncolored[1]['asset_amount']).to eq('0')
       expect(uncolored[1]['account']).to eq(nil)
       expect(uncolored[1]['asset_definition_url']).to eq('')
+      expect(uncolored[0]['output_type']).to eq('uncolored')
 
       # case for coloed output
       outputs = subject.get_outputs_from_txid('3fba8bfb157ae29c293d5bd65c178fec169a87f880e2e62537fcce26612a6aa3')
@@ -170,6 +172,7 @@ describe OpenAssets::Api do
       expect(outputs[1]['asset_amount']).to eq('1')
       expect(outputs[1]['account']).to eq(nil)
       expect(outputs[1]['asset_definition_url']).to eq('')
+      expect(outputs[1]['output_type']).to eq('transfer')
 
       expect(outputs[2]['txid']).to eq('3fba8bfb157ae29c293d5bd65c178fec169a87f880e2e62537fcce26612a6aa3')
       expect(outputs[2]['vout']).to eq(2)
@@ -182,6 +185,7 @@ describe OpenAssets::Api do
       expect(outputs[2]['asset_amount']).to eq('2')
       expect(outputs[2]['account']).to eq(nil)
       expect(outputs[2]['asset_definition_url']).to eq('')
+      expect(outputs[2]['output_type']).to eq('transfer')
     end
   end
 

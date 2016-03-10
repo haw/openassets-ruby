@@ -53,6 +53,9 @@ describe OpenAssets::Api do
 
     it 'multiple marker output exists in transaction' do
       outputs = subject.get_outputs_from_txid('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
+
+      expect(outputs[0]['output_type']).to eq('marker')
+
       expect(outputs[1]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5') # second marker output
       expect(outputs[1]['vout']).to eq(1)
       expect(outputs[1]['address']).to be nil
@@ -61,6 +64,8 @@ describe OpenAssets::Api do
       expect(outputs[1]['amount']).to eq('0.00000000')
       expect(outputs[1]['asset_id']).to eq('oK31ByjFuNhfnFuRMmZgchsdiprYmRzuz5')
       expect(outputs[1]['asset_quantity']).to eq('100')
+      expect(outputs[1]['output_type']).to eq('transfer')
+
       expect(outputs[2]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
       expect(outputs[2]['vout']).to eq(2)
       expect(outputs[2]['address']).to eq('n3RKjN5TRcNeTzDvdaApME6KMchht2oMTU')
@@ -69,6 +74,8 @@ describe OpenAssets::Api do
       expect(outputs[2]['amount']).to eq('0.00000600')
       expect(outputs[2]['asset_id']).to eq('oK31ByjFuNhfnFuRMmZgchsdiprYmRzuz5')
       expect(outputs[2]['asset_quantity']).to eq('9800')
+      expect(outputs[1]['output_type']).to eq('transfer')
+
       expect(outputs[3]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
       expect(outputs[3]['vout']).to eq(3)
       expect(outputs[3]['address']).to eq('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4')
@@ -77,6 +84,7 @@ describe OpenAssets::Api do
       expect(outputs[3]['amount']).to eq('0.00000600')
       expect(outputs[3]['asset_id']).to be nil
       expect(outputs[3]['asset_quantity']).to eq('0')
+      expect(outputs[3]['output_type']).to eq('transfer')
     end
 
     it 'send multiple asset' do
