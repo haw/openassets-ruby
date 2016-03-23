@@ -12,6 +12,7 @@ module OpenAssets
     attr_reader :config
     attr_reader :provider
     attr_reader :tx_cache
+    attr_reader :output_cache
 
     def initialize(config = nil)
       @config = {:network => 'mainnet',
@@ -28,6 +29,7 @@ module OpenAssets
         raise OpenAssets::Error, 'specified unsupported provider.'
       end
       @tx_cache = Cache::TransactionCache.new(@config[:cache])
+      @output_cache = Cache::OutputCache.new(@config[:cache])
     end
 
     def provider
@@ -187,9 +189,12 @@ module OpenAssets
     end
 
     def get_output(txid, output_index)
+      cached = output_cache.get(txid, output_index)
+      return cached unless cached.nil?
       decode_tx = load_cached_tx(txid)
       tx = Bitcoin::Protocol::Tx.new(decode_tx.htb)
       colored_outputs = get_color_outputs_from_tx(tx)
+      colored_outputs.each_with_index { |o, index| output_cache.put(txid, index, o)}
       colored_outputs[output_index]
     end
 
