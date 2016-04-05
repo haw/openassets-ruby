@@ -71,6 +71,11 @@ module OpenAssets
       end
 
       def address
+        if @script.is_multisig?
+          @script.get_multisig_addresses.each do |address|
+            return nil if address.nil?
+          end
+        end
         script_to_address(@script)
       end
 
