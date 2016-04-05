@@ -57,7 +57,7 @@ module OpenAssets
       def to_hash
         {
             'address' =>  address,
-            'oa_address' => address.nil? ? nil : address_to_oa_address(address),
+            'oa_address' => oa_address,
             'script' => @script.to_payload.bth,
             'amount' => satoshi_to_coin(@value),
             'asset_id' => @asset_id,
@@ -72,6 +72,16 @@ module OpenAssets
 
       def address
         script_to_address(@script)
+      end
+
+      def oa_address
+        a = address
+        return nil if a.nil?
+        if a.is_a?(Array)
+          a.map{|btc_address| address_to_oa_address(btc_address)}
+        else
+          address_to_oa_address(a)
+        end
       end
 
       private

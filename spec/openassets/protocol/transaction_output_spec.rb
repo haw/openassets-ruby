@@ -80,4 +80,16 @@ describe OpenAssets::Protocol::TransactionOutput do
                                   'output_type' => 'transfer')
   end
 
+  describe 'to hash with multisig', :network => :testnet  do
+    subject {
+      tx = Bitcoin::Protocol::Tx.new('0100000001aac9ccdb7eb7a47a35be4e1814c675658fd6de41d1747c8000e6ce09b9faa221000000006b483045022100a94d970535e58ca5e8df01e671806fb1d7bb2157492e8ec1b5dc7bc70c4cfb65022055a94e8679d0ad75b09c948efe8b8132d2cc5cc9a38a588cd1d8cd84e03c1cb50121030712171ff2a109f94ec422b9830c456a3c1f97eec253a0f09f024b50a895e3d8ffffffff02b0c0d617000000001976a9146409eb200880acae69f3458591c3a7f36c4c770288ac80f0fa020000000047522103cdd34ec0a05d91c026fe8cb74434923075d3acc20f3f673fb855c8f2c04ca5222103b99b5e2a06b41612a6235c0a536fabfd293d4fce5fe6a4ba3461ed6f07d5372052ae00000000'.htb)
+      output = tx.outputs[1]
+      OpenAssets::Protocol::TransactionOutput.new(output.value, output.parsed_script)
+    }
+    it do
+      expect(subject.address.length).to eq(2)
+      expect(subject.to_hash['address']).to eq(['mx8JNZiqmTEG7KcrL1PtWuAzU6adagE8V6', 'mzURevsZS7FZnBBuBVyCGrG2oRtWS9ArxV'])
+    end
+  end
+
 end
