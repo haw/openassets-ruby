@@ -49,7 +49,7 @@ describe OpenAssets::Protocol::TransactionOutput do
   end
 
   it 'asset definition cache' do
-    expect(RestClient).to receive(:get).twice
+    expect(RestClient::Request).to receive(:execute).twice
     OpenAssets::Protocol::TransactionOutput.new(
         100, Bitcoin::Script.new('hoge'), 'AJk2Gx5V67S2wNuwTK5hef3TpHunfbjcmX', 200, OpenAssets::Protocol::OutputType::ISSUANCE, 'u=http://goo.gl/fS4mEjhoge')
     OpenAssets::Protocol::TransactionOutput.new(
