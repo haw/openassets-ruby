@@ -57,7 +57,7 @@ module OpenAssets
       # @param[String] url The URL of Asset Definition.
       def self.parse_url(url)
         begin
-          definition = parse_json(RestClient.get url, :accept => :json)
+          definition = parse_json(RestClient::Request.execute(:method => :get, :url => url, :timeout => 10, :open_timeout => 10))
           definition.asset_definition_url = url
           definition
         rescue => e
