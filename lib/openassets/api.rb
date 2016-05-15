@@ -268,6 +268,19 @@ module OpenAssets
       # Add the marker output
       result << OpenAssets::Protocol::TransactionOutput.new(marker_output.value, marker_output.parsed_script, nil, 0, OpenAssets::Protocol::OutputType::MARKER_OUTPUT)
 
+      # remove invalid marker
+      remove_outputs = []
+      for i in (marker_output_index + 1)..(outputs.length-1)
+        marker_output_payload = OpenAssets::Protocol::MarkerOutput.parse_script(outputs[i].pk_script)
+        unless marker_output_payload.nil?
+          remove_outputs << outputs[i]
+          result << OpenAssets::Protocol::TransactionOutput.new(
+              outputs[i].value, outputs[i].parsed_script, nil, 0, OpenAssets::Protocol::OutputType::MARKER_OUTPUT)
+          next
+        end
+      end
+      remove_outputs.each{|o|outputs.delete(o)}
+
       # Add the transfer outputs
       input_enum = inputs.each
       input_units_left = 0

@@ -62,9 +62,9 @@ describe OpenAssets::Api do
       expect(outputs[1]['oa_address']).to be nil
       expect(outputs[1]['script']).to eq('6a0a4f41010002c801e44b00')
       expect(outputs[1]['amount']).to eq('0.00000000')
-      expect(outputs[1]['asset_id']).to eq('oK31ByjFuNhfnFuRMmZgchsdiprYmRzuz5')
-      expect(outputs[1]['asset_quantity']).to eq('100')
-      expect(outputs[1]['output_type']).to eq('transfer')
+      expect(outputs[1]['asset_id']).to be nil
+      expect(outputs[1]['asset_quantity']).to eq('0')
+      expect(outputs[1]['output_type']).to eq('marker')
 
       expect(outputs[2]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
       expect(outputs[2]['vout']).to eq(2)
@@ -73,8 +73,8 @@ describe OpenAssets::Api do
       expect(outputs[2]['script']).to eq('76a914f0422a68ea970a9b007924bc8173f25e862eba8588ac')
       expect(outputs[2]['amount']).to eq('0.00000600')
       expect(outputs[2]['asset_id']).to eq('oK31ByjFuNhfnFuRMmZgchsdiprYmRzuz5')
-      expect(outputs[2]['asset_quantity']).to eq('9800')
-      expect(outputs[1]['output_type']).to eq('transfer')
+      expect(outputs[2]['asset_quantity']).to eq('100')
+      expect(outputs[2]['output_type']).to eq('transfer')
 
       expect(outputs[3]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
       expect(outputs[3]['vout']).to eq(3)
@@ -82,9 +82,19 @@ describe OpenAssets::Api do
       expect(outputs[3]['oa_address']).to eq(address_to_oa_address('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4'))
       expect(outputs[3]['script']).to eq('76a91438a6ebdf20cae2c9287ea014464042112ea3dbfd88ac')
       expect(outputs[3]['amount']).to eq('0.00000600')
-      expect(outputs[3]['asset_id']).to be nil
-      expect(outputs[3]['asset_quantity']).to eq('0')
+      expect(outputs[3]['asset_id']).to eq('oK31ByjFuNhfnFuRMmZgchsdiprYmRzuz5')
+      expect(outputs[3]['asset_quantity']).to eq('9800')
       expect(outputs[3]['output_type']).to eq('transfer')
+
+      expect(outputs[4]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
+      expect(outputs[4]['vout']).to eq(4)
+      expect(outputs[4]['address']).to eq('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4')
+      expect(outputs[4]['oa_address']).to eq(address_to_oa_address('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4'))
+      expect(outputs[4]['script']).to eq('76a91438a6ebdf20cae2c9287ea014464042112ea3dbfd88ac')
+      expect(outputs[4]['amount']).to eq('0.00468200')
+      expect(outputs[4]['asset_id']).to be nil
+      expect(outputs[4]['asset_quantity']).to eq('0')
+      expect(outputs[4]['output_type']).to eq('transfer')
     end
 
     it 'send multiple asset' do
