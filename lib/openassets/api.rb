@@ -30,6 +30,7 @@ module OpenAssets
       end
       @tx_cache = Cache::TransactionCache.new(@config[:cache])
       @output_cache = Cache::OutputCache.new(@config[:cache])
+      change_network
     end
 
     def provider
@@ -333,10 +334,13 @@ module OpenAssets
     end
 
     def change_network
-      if is_testnet?
-        Bitcoin.network = :testnet3
-      else
-        Bitcoin.network = :bitcoin
+      case @config[:network]
+        when 'testnet'
+          Bitcoin.network = :testnet3
+        when 'regtest'
+          Bitcoin.network = :regtest
+        else
+          Bitcoin.network = :bitcoin
       end
     end
 

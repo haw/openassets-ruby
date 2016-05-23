@@ -36,7 +36,7 @@ The configuration options are as follows:
 
 |option|describe|default|
 |---|---|---|
-|**network**|The using network. "mainnet" or "testnet" |mainnet|
+|**network**|The using network. "mainnet" or "testnet" or "regtest" |mainnet|
 |**provider**|The RPC server. Specify possible now only "bitcoind".|bitcoind|
 |**cache**|The path to the database file. If you want to use in-memory database, specify ':memory:'.|cache.db|
 |**dust_limit**|The amount of Bitcoin, which is set to the each output of the Open Assets Protocol(issue or transfer).|600 (satoshi)|
