@@ -61,21 +61,46 @@ describe OpenAssets::Transaction::TransactionBuilder do
     }.to raise_error(OpenAssets::Transaction::InsufficientFundsError)
   end
 
-  it 'create uncolored output' do
-    target = OpenAssets::Transaction::TransactionBuilder.new(10)
-    expect{target.send(:create_uncolored_output, '1F2AQr6oqNtcJQ6p9SiCLQTrHuM9en44H8', 9)}.to raise_error(OpenAssets::Transaction::DustOutputError)
-    expect(target.send(:create_uncolored_output, '1F2AQr6oqNtcJQ6p9SiCLQTrHuM9en44H8', 11)).to be_a(Bitcoin::Protocol::TxOut)
+  context 'p2pkh address' do
+    it 'create uncolored output' do
+      target = OpenAssets::Transaction::TransactionBuilder.new(10)
+      expect{target.send(:create_uncolored_output, '1F2AQr6oqNtcJQ6p9SiCLQTrHuM9en44H8', 9)}.to raise_error(OpenAssets::Transaction::DustOutputError)
+      tx_out = target.send(:create_uncolored_output, '1F2AQr6oqNtcJQ6p9SiCLQTrHuM9en44H8', 11)
+      expect(tx_out).to be_a(Bitcoin::Protocol::TxOut)
+      expect(tx_out.parsed_script.to_string).to eq('OP_DUP OP_HASH160 99ca0870645ebc81abbe0806318efc9ff474e540 OP_EQUALVERIFY OP_CHECKSIG')
+    end
+
+    it 'create_colored_output' do
+      target = OpenAssets::Transaction::TransactionBuilder.new(10)
+      tx_out = target.send(:create_colored_output, '1F2AQr6oqNtcJQ6p9SiCLQTrHuM9en44H8')
+      expect(tx_out.parsed_script.to_string).to eq('OP_DUP OP_HASH160 99ca0870645ebc81abbe0806318efc9ff474e540 OP_EQUALVERIFY OP_CHECKSIG')
+    end
+
+    it 'collect colored outputs' do
+      unspent_outputs = gen_outputs(
+          [[20, 'source', 'AVQ1hnBhEyaNPk6sS2kpmav2YkyXqrwoUT', 50, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8220'],
+           [15, 'source', 'ALn3aK1fSuG27N96UGYB1kUYUpGKRhBuBC', 0, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8221'],
+           [10, 'source', 'AVQ1hnBhEyaNPk6sS2kpmav2YkyXqrwoUT', 27, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8222']])
+      outputs, amount = OpenAssets::Transaction::TransactionBuilder.collect_colored_outputs(unspent_outputs, 'AVQ1hnBhEyaNPk6sS2kpmav2YkyXqrwoUT', 60)
+      expect(outputs.length).to eq(2)
+      outputs.each{|o|expect(o.output.asset_id).to eq('AVQ1hnBhEyaNPk6sS2kpmav2YkyXqrwoUT')}
+      expect(amount).to eq(77)
+    end
   end
 
-  it 'collect colored outputs' do
-    unspent_outputs = gen_outputs(
-      [[20, 'source', 'AVQ1hnBhEyaNPk6sS2kpmav2YkyXqrwoUT', 50, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8220'],
-       [15, 'source', 'ALn3aK1fSuG27N96UGYB1kUYUpGKRhBuBC', 0, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8221'],
-       [10, 'source', 'AVQ1hnBhEyaNPk6sS2kpmav2YkyXqrwoUT', 27, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8222']])
-    outputs, amount = OpenAssets::Transaction::TransactionBuilder.collect_colored_outputs(unspent_outputs, 'AVQ1hnBhEyaNPk6sS2kpmav2YkyXqrwoUT', 60)
-    expect(outputs.length).to eq(2)
-    outputs.each{|o|expect(o.output.asset_id).to eq('AVQ1hnBhEyaNPk6sS2kpmav2YkyXqrwoUT')}
-    expect(amount).to eq(77)
+  context 'p2sh address', :network => :testnet do
+
+    it 'create_uncolored_output' do
+      target = OpenAssets::Transaction::TransactionBuilder.new(10)
+      tx_out = target.send(:create_uncolored_output, '2MtHrGGHzuiW18MF113xJmZXZ8AuBmbeXo4', 11)
+      expect(tx_out.parsed_script.to_string).to eq('OP_HASH160 0b773d2e93630161ea0c9cb6aa80c758d131cf9e OP_EQUAL')
+    end
+
+    it 'create_colored_output' do
+      target = OpenAssets::Transaction::TransactionBuilder.new(10)
+      tx_out = target.send(:create_colored_output, '2MtHrGGHzuiW18MF113xJmZXZ8AuBmbeXo4')
+      expect(tx_out.parsed_script.to_string).to eq('OP_HASH160 0b773d2e93630161ea0c9cb6aa80c758d131cf9e OP_EQUAL')
+    end
   end
 
   it 'collect colored outputs but insufficient' do
@@ -136,6 +161,5 @@ describe OpenAssets::Transaction::TransactionBuilder do
     }
     results
   end
-
 
 end

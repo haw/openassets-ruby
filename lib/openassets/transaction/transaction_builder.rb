@@ -128,9 +128,7 @@ module OpenAssets
       # @param [String] address The Bitcoin address.
       # @return [Bitcoin::Protocol::TxOut] colored output
       def create_colored_output(address)
-        hash160 = Bitcoin.hash160_from_address(address)
-        Bitcoin::Protocol::TxOut.new(@amount,
-                                     Bitcoin::Script.new(Bitcoin::Script.to_hash160_script(hash160)).to_payload)
+        Bitcoin::Protocol::TxOut.new(@amount, Bitcoin::Script.new(Bitcoin::Script.to_address_script(address)).to_payload)
       end
 
       # create marker output.
@@ -148,8 +146,7 @@ module OpenAssets
       # @return [Bitcoin::Protocol::TxOut] an uncolored output.
       def create_uncolored_output(address, value)
         raise DustOutputError if value < @amount
-        hash160 = Bitcoin.hash160_from_address(address)
-        Bitcoin::Protocol::TxOut.new(value, Bitcoin::Script.new(Bitcoin::Script.to_hash160_script(hash160)).to_payload)
+        Bitcoin::Protocol::TxOut.new(value, Bitcoin::Script.new(Bitcoin::Script.to_address_script(address)).to_payload)
       end
 
       def transfer(asset_transfer_specs, btc_transfer_spec, fees)
