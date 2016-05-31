@@ -7,7 +7,7 @@ module OpenAssets
     include Util
     include MethodFilter
 
-    before_filter :change_network, {:include => [:list_unspent, :get_balance, :issue_asset, :send_asset, :send_assets, :send_bitcoin]}
+    before_filter :change_network, {:include => [:list_unspent, :get_balance, :issue_asset, :send_asset, :send_assets, :send_bitcoin, :send_bitcoins]}
 
     attr_reader :config
     attr_reader :provider
@@ -158,6 +158,25 @@ module OpenAssets
       tx = create_tx_builder.transfer_btc(btc_transfer_spec, fees.nil? ? @config[:default_fees]: fees)
       process_transaction(tx, mode)
     end
+
+    # Creates a transaction for sending multiple bitcoins from an address to others.
+    # @param[String] from The address to send the bitcoins from.
+    # @param[Array[OpenAssets::SendBitcoinParam]] send_params The send information(amount of satoshis and to).
+    # @param[Integer] fees The fees in satoshis for the transaction.
+    # @param[String] mode 'broadcast' (default) for signing and broadcasting the transaction,
+    # 'signed' for signing the transaction without broadcasting,
+    # 'unsigned' for getting the raw unsigned transaction without broadcasting"""='broadcast'
+    # @return[Bitcoin::Protocol:Tx] The resulting transaction.
+    def send_bitcoins(from, send_params, fees = nil, mode = 'broadcast')
+      colored_outputs = get_unspent_outputs([from])
+      btc_transfer_specs = send_params.map{|param|
+        OpenAssets::Transaction::TransferParameters.new(colored_outputs, param.to, from, param.amount)
+      }
+      tx = create_tx_builder.transfer_btcs(btc_transfer_specs, fees.nil? ? @config[:default_fees]: fees)
+      tx = process_transaction(tx, mode)
+      tx
+    end
+
 
     # Creates a transaction for burn asset.
     # @param[String] oa_address The open asset address to burn asset.
