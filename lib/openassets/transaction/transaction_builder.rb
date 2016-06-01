@@ -169,7 +169,6 @@ module OpenAssets
         outputs = []    # vout field
         asset_quantities = []
 
-
         # Only when assets are transferred
         asset_based_specs = {}
         asset_transfer_specs.each{|asset_id, transfer_spec|
@@ -195,36 +194,31 @@ module OpenAssets
           end
         }
 
-        # End of assets transfer
-
-        require 'pp'
-        p "aaaaaaaaaaaaa"
-        pp inputs
+        # End of asset settings
 
         ## For bitcoins transfer
-        # btc_excess = inputs(colored) total satoshi - outputs(transfer) total satoshi
+        # Assume that there is one address from
         utxo = btc_transfer_specs[0].unspent_outputs.dup
-        p "utxo"
-        pp utxo  # too many output, maybe
 
+        # Calculate rest of bitcoins in asset settings
+        # btc_excess = inputs(colored) total satoshi - outputs(transfer) total satoshi
         btc_excess = inputs.inject(0) { |sum, i| sum + i.output.value } - outputs.inject(0){|sum, o| sum + o.value}
 
-        p inputs.inject(0) { |sum, i| sum + i.output.value }
-        p outputs.inject(0){|sum, o| sum + o.value}
-        p btc_excess # 0 when no asset sending
+        # Calculate total amount of bitcoins to send
+        btc_transfer_total_amount = btc_transfer_specs.inject(0) {|sum, b| sum + b.amount}
 
-        if btc_excess < btc_transfer_specs[0].amount + fees
+        if btc_excess < btc_transfer_total_amount + fees
           # When there does not exist enough bitcoins to send in the inputs
           # assign new address (utxo) to the inputs (does not include output coins)
           # CREATING INPUT (if needed)
           uncolored_outputs, uncolored_amount =
-              TransactionBuilder.collect_uncolored_outputs(utxo, btc_transfer_specs[0].amount + fees - btc_excess)
+              TransactionBuilder.collect_uncolored_outputs(utxo, btc_transfer_total_amount + fees - btc_excess)
           utxo = utxo - uncolored_outputs
           inputs << uncolored_outputs
           btc_excess += uncolored_amount
         end
 
-        otsuri = btc_excess - btc_transfer_specs[0].amount - fees
+        otsuri = btc_excess - btc_transfer_total_amount - fees
         if otsuri > 0 && otsuri < @amount
           # When there exists otsuri, but it is smaller than @amount (default is 600 satoshis)
           # assign new address (utxo) to the input (does not include @amount - otsuri)
@@ -241,20 +235,22 @@ module OpenAssets
           outputs << create_uncolored_output(btc_transfer_specs[0].change_script, otsuri)
         end
 
-        if btc_transfer_specs[0].amount > 0
+        btc_transfer_specs.each{|btc_transfer_spec|
+          if btc_transfer_spec.amount > 0
           # Write output for bitcoin transfer by specifics of the argument
           # CREATING OUTPUT
-          btc_transfer_specs[0].split_output_amount.each {|amount|
-            outputs << create_uncolored_output(btc_transfer_specs[0].to_script, amount)
+          btc_transfer_spec.split_output_amount.each {|amount|
+            outputs << create_uncolored_output(btc_transfer_spec.to_script, amount)
           }
-        end
+          end
+        }
 
         # add marker output to outputs first.
         unless asset_quantities.empty?
           outputs.unshift(create_marker_output(asset_quantities))
         end
 
-        # create a bitcoin transaction
+        # create a bitcoin transaction (assembling inputs and output into one transaction)
         tx = Bitcoin::Protocol::Tx.new
         # for all inputs (vin fields), add sigs to the same transaction
         inputs.flatten.each{|i|
