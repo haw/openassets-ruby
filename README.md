@@ -218,6 +218,7 @@ Creates a transaction for sending **multiple** asset from the open asset address
   params << OpenAssets::SendAssetParam.new('oUygwarZqNGrjDvcZUpZdvEc7es6dcs1vs', 4, to)
   tx = api.send_assets(from, params)
   ```
+
 * **send_bitcoins**
 Creates a transaction for sending **multiple** bitcoins from an address to others.
 This transaction inputs use only uncolored outputs.

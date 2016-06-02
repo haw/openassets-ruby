@@ -157,6 +157,8 @@ describe OpenAssets::Api do
       params << OpenAssets::SendBitcoinParam.new(20000, to1)
       params << OpenAssets::SendBitcoinParam.new(1000, to2)
       tx = subject.send_bitcoins(from, params, 10000, 'unsignd')
+      expect(tx.inputs.length).to eq(1)
+      expect(tx.outputs.length).to eq(3)
 
       # output for otsuri mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T
       expect(tx.outputs[0].parsed_script.get_address).to eq('mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T')
