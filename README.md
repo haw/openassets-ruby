@@ -219,9 +219,9 @@ Creates a transaction for sending **multiple** asset from the open asset address
   tx = api.send_assets(from, params)
   ```
 
-* **send_bitcoins**
-Creates a transaction for sending **multiple** bitcoins from an address to others.
-This transaction inputs use only uncolored outputs.
+* **send_bitcoins**  
+Creates a transaction for sending **multiple** bitcoins from an address to others.  
+This transaction inputs use only uncolored outputs.  
   ```ruby
   # send bitcoins
   # api.send_bitcoins(<from btc address>, <The array of send bitcoin information(see OpenAssets::SendBitcoinParam).>, <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>, <mode=('broadcast', 'signed', 'unsigned')>, <output_qty default value is 1.>)
