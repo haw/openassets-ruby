@@ -10,6 +10,7 @@ module OpenAssets
   autoload :Provider, 'openassets/provider'
   autoload :Error, 'openassets/error'
   autoload :SendAssetParam, 'openassets/send_asset_param'
+  autoload :SendBitcoinParam, 'openassets/send_bitcoin_param'
   autoload :Cache, 'openassets/cache'
 
   class << self

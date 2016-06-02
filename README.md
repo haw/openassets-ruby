@@ -217,7 +217,25 @@ Creates a transaction for sending **multiple** asset from the open asset address
   params << OpenAssets::SendAssetParam.new('oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY', 50, to)
   params << OpenAssets::SendAssetParam.new('oUygwarZqNGrjDvcZUpZdvEc7es6dcs1vs', 4, to)
   tx = api.send_assets(from, params)
-  ``` 
+  ```
+
+* **send_bitcoins**  
+Creates a transaction for sending **multiple** bitcoins from an address to others.  
+This transaction inputs use only uncolored outputs.  
+  ```ruby
+  # send bitcoins
+  # api.send_bitcoins(<from btc address>, <The array of send bitcoin information(see OpenAssets::SendBitcoinParam).>, <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>, <mode=('broadcast', 'signed', 'unsigned')>, <output_qty default value is 1.>)
+
+  # example
+  from = 'mrxpeizRrF8ymNx5FrvcGGZVecZjtUFVP3'
+  to1 = 'n4MEsSUN8GktDFZzU3V55mP3jWGMN7e4wE'
+  to2 = 'mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T'
+  params = []
+  params << OpenAssets::SendBitcoinParam.new(50000, to1)
+  params << OpenAssets::SendBitcoinParam.new(3000, to2)
+  tx = api.send_bitcoins(from, params)
+  ```
+
 
 * **burn_asset**  
 Creates a transaction for burn asset.  
