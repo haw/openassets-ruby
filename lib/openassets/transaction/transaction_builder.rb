@@ -62,7 +62,7 @@ module OpenAssets
       # @param[Integer] fees The fees to include in the transaction.
       # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
       def transfer_btc(btc_transfer_spec, fees)
-        transfer([], [btc_transfer_spec], fees)
+        transfer_btcs([btc_transfer_spec], fees)
       end
 
       # Creates a transaction for sending bitcoins to many.
@@ -237,11 +237,11 @@ module OpenAssets
 
         btc_transfer_specs.each{|btc_transfer_spec|
           if btc_transfer_spec.amount > 0
-          # Write output for bitcoin transfer by specifics of the argument
-          # CREATING OUTPUT
-          btc_transfer_spec.split_output_amount.each {|amount|
-            outputs << create_uncolored_output(btc_transfer_spec.to_script, amount)
-          }
+            # Write output for bitcoin transfer by specifics of the argument
+            # CREATING OUTPUT
+            btc_transfer_spec.split_output_amount.each {|amount|
+              outputs << create_uncolored_output(btc_transfer_spec.to_script, amount)
+            }
           end
         }
 
