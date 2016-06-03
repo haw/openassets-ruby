@@ -72,8 +72,7 @@ module OpenAssets
       def transfer_btcs(btc_transfer_specs, fees)
         transfer([], btc_transfer_specs, fees)
       end
-
-
+      
       # Create a transaction for burn asset
       def burn_asset(unspents, asset_id, fee)
         tx = Bitcoin::Protocol::Tx.new
@@ -207,34 +206,17 @@ module OpenAssets
         # Calculate total amount of bitcoins to send
         btc_transfer_total_amount = btc_transfer_specs.inject(0) {|sum, b| sum + b.amount}
 
-        if btc_excess < btc_transfer_total_amount + fees
+        if btc_excess < btc_transfer_total_amount
           # When there does not exist enough bitcoins to send in the inputs
           # assign new address (utxo) to the inputs (does not include output coins)
           # CREATING INPUT (if needed)
           uncolored_outputs, uncolored_amount =
-              TransactionBuilder.collect_uncolored_outputs(utxo, btc_transfer_total_amount + fees - btc_excess)
+              TransactionBuilder.collect_uncolored_outputs(utxo, btc_transfer_total_amount - btc_excess)
           utxo = utxo - uncolored_outputs
           inputs << uncolored_outputs
           btc_excess += uncolored_amount
         end
-
-        otsuri = btc_excess - btc_transfer_total_amount - fees
-        if otsuri > 0 && otsuri < @amount
-          # When there exists otsuri, but it is smaller than @amount (default is 600 satoshis)
-          # assign new address (utxo) to the input (does not include @amount - otsuri)
-          # CREATING INPUT (if needed)
-          uncolored_outputs, uncolored_amount =
-              TransactionBuilder.collect_uncolored_outputs(utxo, @amount - otsuri)
-          inputs << uncolored_outputs
-          otsuri += uncolored_amount
-        end
-
-        if otsuri > 0
-          # When there exists otsuri, write it to outputs
-          # CREATING OUTPUT
-          outputs << create_uncolored_output(btc_transfer_specs[0].change_script, otsuri)
-        end
-
+        
         btc_transfer_specs.each{|btc_transfer_spec|
           if btc_transfer_spec.amount > 0
             # Write output for bitcoin transfer by specifics of the argument
@@ -250,6 +232,7 @@ module OpenAssets
           outputs.unshift(create_marker_output(asset_quantities))
         end
 
+        ###############################
         # create a bitcoin transaction (assembling inputs and output into one transaction)
         tx = Bitcoin::Protocol::Tx.new
         # for all inputs (vin fields), add sigs to the same transaction
@@ -259,9 +242,79 @@ module OpenAssets
           tx_in.script_sig = script_sig
           tx.add_in(tx_in)
         }
-
+        
+        # add vout (without otsuri)
         outputs.each{|o|tx.add_out(o)}
 
+        ###############################
+        # hereby, calculate fees and otsuri.
+        # after that, add vout (and vin if needed) for otsuri into the transaction.
+
+        fno_inputs = []     # vin field for fees and otsuri
+        fno_outputs = []    # vout field for fees and otsuri
+        
+        if fees == :auto then
+          final_fees = tx.calculate_minimum_fee(allow_free=true)
+          # Note: If possible, above method should care vout of otsuri, 
+          # but above code does not consider the vout.
+          p "I'm here (fees auto)"
+        else
+          # Use fees by the argument
+          final_fees = fees
+          p "I'm here (fixed fees)"
+        end
+        
+        p "final_fees"
+        p final_fees
+        
+        otsuri = btc_excess - btc_transfer_total_amount - final_fees
+        
+        if otsuri > 0 && otsuri < @amount
+          # When there exists otsuri, but it is smaller than @amount (default is 600 satoshis)
+          # assign new address (utxo) to the input (does not include @amount - otsuri)
+          # CREATING INPUT (if needed)
+          uncolored_outputs, uncolored_amount =
+              TransactionBuilder.collect_uncolored_outputs(utxo, @amount - otsuri)
+          fno_inputs << uncolored_outputs
+          otsuri += uncolored_amount
+          p "aaaaaaa"
+        end
+
+        # add vin if needed for fees
+        fno_inputs.flatten.each{|i|
+          script_sig = i.output.script.to_binary
+          tx_in = Bitcoin::Protocol::TxIn.from_hex_hash(i.out_point.hash, i.out_point.index)
+          tx_in.script_sig = script_sig
+          tx.add_in(tx_in)
+        }
+        
+        if otsuri > 0
+          # When there exists otsuri, write it to outputs
+          # CREATING OUTPUT
+          fno_outputs << create_uncolored_output(btc_transfer_specs[0].change_script, otsuri)
+        end
+        
+        # add vout of otsuri
+        fno_outputs.each{|o|tx.add_out(o)}
+        
+        ## 1 KBytes = 10_000 satoshis = 0.000_1 BTC
+        p inputs.size
+        p outputs.size
+        p fno_inputs.size
+        p fno_outputs.size
+        
+        b_size =  148 * inputs.size + 34 * outputs.size + 10
+        p b_size
+        # e_fee = tx.calculate_minimum_fee(allow_free=true)
+        # e_fee_b = (1 + b_size / 1_000) * 10_000
+        # p "------------"
+        # p e_fee
+        # p e_fee_b
+        # p "------------"
+        p tx.to_payload.bytesize
+        # e_fee_p = (1 + tx.to_payload.bytesize / 1_000) * 10_000
+        # p e_fee_p
+        
         tx
       end
 

@@ -103,6 +103,12 @@ describe OpenAssets::Api do
       params << OpenAssets::SendAssetParam.new('oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY', 50, to)
       params << OpenAssets::SendAssetParam.new('oUygwarZqNGrjDvcZUpZdvEc7es6dcs1vs', 4, to)
       tx = subject.send_assets(from, params, 10000, 'unsignd')
+      
+      tx.inputs.each do |i|
+        p i.parsed_script.get_address
+        p i.parsed_script.methods
+      end
+      
       expect(tx.inputs.length).to eq(6)
       expect(tx.outputs.length).to eq(6)
       # marker output
@@ -160,15 +166,16 @@ describe OpenAssets::Api do
       expect(tx.inputs.length).to eq(1)
       expect(tx.outputs.length).to eq(3)
 
-      # output for otsuri mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T
-      expect(tx.outputs[0].parsed_script.get_address).to eq('mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T')
-      expect(tx.outputs[0].value).to eq(69000)
       # output for to_1 mjLSaCyJHCSeh4MsiNGnF1RLqD9ySqnAQ1
-      expect(tx.outputs[1].parsed_script.get_address).to eq('mjLSaCyJHCSeh4MsiNGnF1RLqD9ySqnAQ1')
-      expect(tx.outputs[1].value).to eq(20000)
+      expect(tx.outputs[0].parsed_script.get_address).to eq('mjLSaCyJHCSeh4MsiNGnF1RLqD9ySqnAQ1')
+      expect(tx.outputs[0].value).to eq(20000)
       # output for to_2 mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ
-      expect(tx.outputs[2].parsed_script.get_address).to eq('mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ')
-      expect(tx.outputs[2].value).to eq(1000)
+      expect(tx.outputs[1].parsed_script.get_address).to eq('mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ')
+      expect(tx.outputs[1].value).to eq(1000)
+      # output for otsuri mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T
+      expect(tx.outputs[2].parsed_script.get_address).to eq('mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T')
+      expect(tx.outputs[2].value).to eq(69000)
+
     end
 
     it 'burn asset' do

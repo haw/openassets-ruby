@@ -17,7 +17,7 @@ module OpenAssets
     def initialize(config = nil)
       @config = {:network => 'mainnet',
                  :provider => 'bitcoind', :cache => 'cache.db',
-                 :dust_limit => 600, :default_fees => 10000, :min_confirmation => 1, :max_confirmation => 9999999,
+                 :dust_limit => 600, :default_fees => :auto, :min_confirmation => 1, :max_confirmation => 9999999,
                  :rpc => { :host => 'localhost', :port => 8332 , :user => '', :password => '', :schema => 'https'}}
       if config
         @config.update(config)
