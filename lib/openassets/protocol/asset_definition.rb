@@ -73,7 +73,9 @@ module OpenAssets
 
       # Convert Asset Definition to json format.
       def to_json
-        to_hash.to_json
+        h = to_hash
+        h.delete('proof_of_authenticity')
+        h.to_json
       end
 
       def to_hash
