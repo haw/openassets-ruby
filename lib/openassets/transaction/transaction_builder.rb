@@ -17,6 +17,15 @@ module OpenAssets
       # @param [Integer] fees The fees to include in the transaction.
       # @return[Bitcoin:Protocol:Tx] An unsigned transaction for issuing asset.
       def issue_asset(issue_spec, metadata, fees)
+
+        if fees == :auto then
+          fees = 10_000
+          # TODO: should be calculated considered with the tx size
+          #       Default minimum value is 10_000 satoshis
+        else
+          # Do nothing : use the argument fees for issue fees
+        end        
+        
         inputs, total_amount =
             TransactionBuilder.collect_uncolored_outputs(issue_spec.unspent_outputs, 2 * @amount + fees)
         tx = Bitcoin::Protocol::Tx.new
@@ -102,12 +111,16 @@ module OpenAssets
       # @return [Array] inputs, total_amount
       def self.collect_uncolored_outputs(unspent_outputs, amount)
         total_amount = 0
+        p "collect_uncolored_output(S)"
+        p total_amount
         results = []
         unspent_outputs.each do |output|
           if output.output.asset_id.nil?
             results << output
             total_amount += output.output.value
           end
+          p "collect_uncolored_output(E)"
+          p total_amount
           return results, total_amount if total_amount >= amount
         end
         raise InsufficientFundsError
@@ -215,6 +228,7 @@ module OpenAssets
           utxo = utxo - uncolored_outputs
           inputs << uncolored_outputs
           btc_excess += uncolored_amount
+          p "hhhh"
         end
         
         btc_transfer_specs.each{|btc_transfer_spec|
