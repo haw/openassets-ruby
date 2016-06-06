@@ -117,7 +117,9 @@ module OpenAssets
     def send_asset(from, asset_id, amount, to, fees = nil, mode = 'broadcast', output_qty = 1)
       colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
       asset_transfer_spec = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount, output_qty)
-      tx = create_tx_builder.transfer_asset(asset_id, asset_transfer_spec, from, fees.nil? ? @config[:default_fees]: fees)
+      # Estimate a transaction fee rate (satoshis/KB)
+      efr = coin_to_satoshi(provider.estimatefee(1))
+      tx = create_tx_builder.transfer_asset(asset_id, asset_transfer_spec, from, fees.nil? ? @config[:default_fees]: fees, efr)
       tx = process_transaction(tx, mode)
       tx
     end
@@ -135,7 +137,9 @@ module OpenAssets
       transfer_specs = send_asset_params.map{|param|
         [param.asset_id, OpenAssets::Transaction::TransferParameters.new(colored_outputs, param.to, from, param.amount)]
       }
-      tx = create_tx_builder.transfer_assets(transfer_specs, from, fees.nil? ? @config[:default_fees]: fees)
+      # Estimate a transaction fee rate (satoshis/KB)
+      efr = coin_to_satoshi(provider.estimatefee(1))
+      tx = create_tx_builder.transfer_assets(transfer_specs, from, fees.nil? ? @config[:default_fees]: fees, efr)
       tx = process_transaction(tx, mode)
       tx
     end
@@ -155,7 +159,9 @@ module OpenAssets
       validate_address([from, to])
       colored_outputs = get_unspent_outputs([from])
       btc_transfer_spec = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount, output_qty)
-      tx = create_tx_builder.transfer_btc(btc_transfer_spec, fees.nil? ? @config[:default_fees]: fees)
+      # Estimate a transaction fee rate (satoshis/KB)
+      efr = coin_to_satoshi(provider.estimatefee(1))
+      tx = create_tx_builder.transfer_btc(btc_transfer_spec, fees.nil? ? @config[:default_fees]: fees, efr)
       process_transaction(tx, mode)
     end
 
@@ -172,7 +178,9 @@ module OpenAssets
       btc_transfer_specs = send_params.map{|param|
         OpenAssets::Transaction::TransferParameters.new(colored_outputs, param.to, from, param.amount)
       }
-      tx = create_tx_builder.transfer_btcs(btc_transfer_specs, fees.nil? ? @config[:default_fees]: fees)
+      # Estimate a transaction fee rate (satoshis/KB)
+      efr = coin_to_satoshi(provider.estimatefee(1))
+      tx = create_tx_builder.transfer_btcs(btc_transfer_specs, fees.nil? ? @config[:default_fees]: fees, efr)
       tx = process_transaction(tx, mode)
       tx
     end

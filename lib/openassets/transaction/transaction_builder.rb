@@ -53,33 +53,42 @@ module OpenAssets
       # @param[OpenAssets::Transaction::TransferParameters] asset_transfer_spec The parameters of the asset being transferred.
       # @param[String] btc_change_script The script where to send bitcoin change, if any.
       # @param[Integer] fees The fees to include in the transaction.
+      # @param[Float] efr The estimated fee rate (satoshis/KB).
       # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
-      def transfer_asset(asset_id, asset_transfer_spec, btc_change_script, fees)
+      def transfer_asset(asset_id, asset_transfer_spec, btc_change_script, fees, efr)
         btc_transfer_spec = OpenAssets::Transaction::TransferParameters.new(
             asset_transfer_spec.unspent_outputs, nil, oa_address_to_address(btc_change_script), 0)
-        transfer([[asset_id, asset_transfer_spec]], [btc_transfer_spec], fees)
+        transfer([[asset_id, asset_transfer_spec]], [btc_transfer_spec], fees, efr)
       end
-
-      def transfer_assets(transfer_specs, btc_change_script, fees)
+      
+      # Creates a transaction for sending assets to many.
+      # @param[Array[OpenAssets::Transaction::TransferParameters]] asset_transfer_spec The parameters of the asset being transferred.
+      # @param[String] btc_change_script The script where to send bitcoin change, if any.
+      # @param[Integer] fees The fees to include in the transaction.
+      # @param[Float] efr The estimated fee rate (satoshis/KB).
+      # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
+      def transfer_assets(transfer_specs, btc_change_script, fees, efr)
         btc_transfer_spec = OpenAssets::Transaction::TransferParameters.new(
             transfer_specs[0][1].unspent_outputs, nil, oa_address_to_address(btc_change_script), 0)
-        transfer(transfer_specs, [btc_transfer_spec], fees)
+        transfer(transfer_specs, [btc_transfer_spec], fees, efr)
       end
 
       # Creates a transaction for sending bitcoins.
       # @param[OpenAssets::Transaction::TransferParameters] btc_transfer_spec The parameters of the bitcoins being transferred.
       # @param[Integer] fees The fees to include in the transaction.
+      # @param[Float] efr The estimated fee rate (satoshis/KB).
       # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
-      def transfer_btc(btc_transfer_spec, fees)
-        transfer_btcs([btc_transfer_spec], fees)
+      def transfer_btc(btc_transfer_spec, fees, efr)
+        transfer_btcs([btc_transfer_spec], fees, efr)
       end
 
       # Creates a transaction for sending bitcoins to many.
       # @param[Array[OpenAssets::Transaction::TransferParameters]] btc_transfer_specs The parameters of the bitcoins being transferred.
       # @param[Integer] fees The fees to include in the transaction.
+      # @param[Float] efr The estimated fee rate (satoshis/KB).
       # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
-      def transfer_btcs(btc_transfer_specs, fees)
-        transfer([], btc_transfer_specs, fees)
+      def transfer_btcs(btc_transfer_specs, fees, efr)
+        transfer([], btc_transfer_specs, fees, efr)
       end
       
       # Create a transaction for burn asset
@@ -111,16 +120,12 @@ module OpenAssets
       # @return [Array] inputs, total_amount
       def self.collect_uncolored_outputs(unspent_outputs, amount)
         total_amount = 0
-        p "collect_uncolored_output(S)"
-        p total_amount
         results = []
         unspent_outputs.each do |output|
           if output.output.asset_id.nil?
             results << output
             total_amount += output.output.value
           end
-          p "collect_uncolored_output(E)"
-          p total_amount
           return results, total_amount if total_amount >= amount
         end
         raise InsufficientFundsError
@@ -175,8 +180,9 @@ module OpenAssets
       # @param[Array[OpenAssets::Transaction::TransferParameters]] asset_transfer_specs The parameters of the assets being transferred.
       # @param[Array[OpenAssets::Transaction::TransferParameters]] btc_transfer_specs The parameters of the bitcoins being transferred.
       # @param[Integer] fees The fees to include in the transaction.
+      # @param[Float] efr The estimated fee rate (satoshis/KB).
       # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
-      def transfer(asset_transfer_specs, btc_transfer_specs, fees)
+      def transfer(asset_transfer_specs, btc_transfer_specs, fees, efr)
         inputs = []     # vin field
         outputs = []    # vout field
         asset_quantities = []
@@ -224,13 +230,56 @@ module OpenAssets
           # assign new address (utxo) to the inputs (does not include output coins)
           # CREATING INPUT (if needed)
           uncolored_outputs, uncolored_amount =
-              TransactionBuilder.collect_uncolored_outputs(utxo, btc_transfer_total_amount - btc_excess)
+            TransactionBuilder.collect_uncolored_outputs(utxo, btc_transfer_total_amount - btc_excess)
           utxo = utxo - uncolored_outputs
           inputs << uncolored_outputs
           btc_excess += uncolored_amount
-          p "hhhh"
+        end
+
+        if fees == :auto then
+          # Calculate fees and otsuri (the numbers of vins and vouts are known)
+          # +1 in the second term means "otsuri" vout, 
+          # and outputs size means the number of vout witn asset_id
+          # See http://bitcoinfees.com/
+          tx_size = 148 * inputs.size + 34 * (outputs.size + btc_transfer_specs.size + 1) + 10
+          
+          if efr < 0 then
+            # Negative efr means "estimatefee" of bitcoin-api returns false
+            # In this case, use default minimum fees rate (10_000 satoshis/KB)
+            efr = 10_000
+          end
+          
+          fees   = (1 + tx_size / 1_000) * efr
+
+          p "inputs #{inputs.size}"
+          p "outputs #{outputs.size}"
+          p "btc_spec #{btc_transfer_specs.size}"
+          p "efr #{efr}"
+
+          p "tx_size #{tx_size}"
+          p "fees = #{fees}"
+
         end
         
+        otsuri = btc_excess - btc_transfer_total_amount - fees
+        
+        # otsuri = btc_excess - btc_transfer_total_amount - fees
+        if otsuri > 0 && otsuri < @amount
+          # When there exists otsuri, but it is smaller than @amount (default is 600 satoshis)
+          # assign new address (utxo) to the input (does not include @amount - otsuri)
+          # CREATING INPUT (if needed)
+          uncolored_outputs, uncolored_amount =
+              TransactionBuilder.collect_uncolored_outputs(utxo, @amount - otsuri)
+          inputs << uncolored_outputs
+          otsuri += uncolored_amount
+        end
+
+        if otsuri > 0
+          # When there exists otsuri, write it to outputs
+          # CREATING OUTPUT
+          outputs << create_uncolored_output(btc_transfer_specs[0].change_script, otsuri)
+        end
+
         btc_transfer_specs.each{|btc_transfer_spec|
           if btc_transfer_spec.amount > 0
             # Write output for bitcoin transfer by specifics of the argument
@@ -246,7 +295,6 @@ module OpenAssets
           outputs.unshift(create_marker_output(asset_quantities))
         end
 
-        ###############################
         # create a bitcoin transaction (assembling inputs and output into one transaction)
         tx = Bitcoin::Protocol::Tx.new
         # for all inputs (vin fields), add sigs to the same transaction
@@ -256,78 +304,8 @@ module OpenAssets
           tx_in.script_sig = script_sig
           tx.add_in(tx_in)
         }
-        
-        # add vout (without otsuri)
+
         outputs.each{|o|tx.add_out(o)}
-
-        ###############################
-        # hereby, calculate fees and otsuri.
-        # after that, add vout (and vin if needed) for otsuri into the transaction.
-
-        fno_inputs = []     # vin field for fees and otsuri
-        fno_outputs = []    # vout field for fees and otsuri
-        
-        if fees == :auto then
-          final_fees = tx.calculate_minimum_fee(allow_free=true)
-          # Note: If possible, above method should care vout of otsuri, 
-          # but above code does not consider the vout.
-          p "I'm here (fees auto)"
-        else
-          # Use fees by the argument
-          final_fees = fees
-          p "I'm here (fixed fees)"
-        end
-        
-        p "final_fees"
-        p final_fees
-        
-        otsuri = btc_excess - btc_transfer_total_amount - final_fees
-        
-        if otsuri > 0 && otsuri < @amount
-          # When there exists otsuri, but it is smaller than @amount (default is 600 satoshis)
-          # assign new address (utxo) to the input (does not include @amount - otsuri)
-          # CREATING INPUT (if needed)
-          uncolored_outputs, uncolored_amount =
-              TransactionBuilder.collect_uncolored_outputs(utxo, @amount - otsuri)
-          fno_inputs << uncolored_outputs
-          otsuri += uncolored_amount
-          p "aaaaaaa"
-        end
-
-        # add vin if needed for fees
-        fno_inputs.flatten.each{|i|
-          script_sig = i.output.script.to_binary
-          tx_in = Bitcoin::Protocol::TxIn.from_hex_hash(i.out_point.hash, i.out_point.index)
-          tx_in.script_sig = script_sig
-          tx.add_in(tx_in)
-        }
-        
-        if otsuri > 0
-          # When there exists otsuri, write it to outputs
-          # CREATING OUTPUT
-          fno_outputs << create_uncolored_output(btc_transfer_specs[0].change_script, otsuri)
-        end
-        
-        # add vout of otsuri
-        fno_outputs.each{|o|tx.add_out(o)}
-        
-        ## 1 KBytes = 10_000 satoshis = 0.000_1 BTC
-        p inputs.size
-        p outputs.size
-        p fno_inputs.size
-        p fno_outputs.size
-        
-        b_size =  148 * inputs.size + 34 * outputs.size + 10
-        p b_size
-        # e_fee = tx.calculate_minimum_fee(allow_free=true)
-        # e_fee_b = (1 + b_size / 1_000) * 10_000
-        # p "------------"
-        # p e_fee
-        # p e_fee_b
-        # p "------------"
-        p tx.to_payload.bytesize
-        # e_fee_p = (1 + tx.to_payload.bytesize / 1_000) * 10_000
-        # p e_fee_p
         
         tx
       end
