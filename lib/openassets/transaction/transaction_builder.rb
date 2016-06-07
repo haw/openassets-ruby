@@ -7,29 +7,24 @@ module OpenAssets
       # The minimum allowed output value.
       attr_accessor :amount
 
-      def initialize(amount = 600)
+      # The estimated transaction fee rate (satoshis/KB).
+      attr_accessor :efr
+      
+      def initialize(amount = 600, efr = 10_000)
         @amount = amount
+        @efr = efr 
       end
 
       # Creates a transaction for issuing an asset.
       # @param [TransferParameters] issue_spec The parameters of the issuance.
       # @param [bytes] metadata The metadata to be embedded in the transaction.
       # @param [Integer] fees The fees to include in the transaction.
-      # @param [Integer] efr The estimated fee rate (satoshis/KB).
       # @return[Bitcoin:Protocol:Tx] An unsigned transaction for issuing asset.
-      def issue_asset(issue_spec, metadata, fees, efr)
+      def issue_asset(issue_spec, metadata, fees)
         
-        if fees == :auto then
-          # Calculate fees and otsuri (assume that one vin and four vouts are wrote)
-          # See http://bitcoinfees.com/
-          tx_size = 148 * 1 + 34 * 4 + 10
-          if efr < 0 then
-            # Negative efr means "estimatefee" of bitcoin-api returns false
-            # In this case, use default minimum fees rate (10_000 satoshis/KB)
-            efr = 10_000
-          end
-          # See Bitcoin::tx.calculate_minimum_fee
-          fees   = (1 + tx_size / 1_000) * efr
+        if fees == :auto
+          # Calculate fees (assume that one vin and four vouts are wrote)
+          fees = calc_fee(1, 4)
         end
         
         inputs, total_amount =
@@ -59,61 +54,49 @@ module OpenAssets
       # @param[OpenAssets::Transaction::TransferParameters] asset_transfer_spec The parameters of the asset being transferred.
       # @param[String] btc_change_script The script where to send bitcoin change, if any.
       # @param[Integer] fees The fees to include in the transaction.
-      # @param[Integer] efr The estimated fee rate (satoshis/KB).
       # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
-      def transfer_asset(asset_id, asset_transfer_spec, btc_change_script, fees, efr)
+      def transfer_asset(asset_id, asset_transfer_spec, btc_change_script, fees)
         btc_transfer_spec = OpenAssets::Transaction::TransferParameters.new(
             asset_transfer_spec.unspent_outputs, nil, oa_address_to_address(btc_change_script), 0)
-        transfer([[asset_id, asset_transfer_spec]], [btc_transfer_spec], fees, efr)
+        transfer([[asset_id, asset_transfer_spec]], [btc_transfer_spec], fees)
       end
       
       # Creates a transaction for sending assets to many.
       # @param[Array[OpenAssets::Transaction::TransferParameters]] asset_transfer_spec The parameters of the asset being transferred.
       # @param[String] btc_change_script The script where to send bitcoin change, if any.
       # @param[Integer] fees The fees to include in the transaction.
-      # @param[Integer] efr The estimated fee rate (satoshis/KB).
       # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
-      def transfer_assets(transfer_specs, btc_change_script, fees, efr)
+      def transfer_assets(transfer_specs, btc_change_script, fees)
         btc_transfer_spec = OpenAssets::Transaction::TransferParameters.new(
             transfer_specs[0][1].unspent_outputs, nil, oa_address_to_address(btc_change_script), 0)
-        transfer(transfer_specs, [btc_transfer_spec], fees, efr)
+        transfer(transfer_specs, [btc_transfer_spec], fees)
       end
 
       # Creates a transaction for sending bitcoins.
       # @param[OpenAssets::Transaction::TransferParameters] btc_transfer_spec The parameters of the bitcoins being transferred.
       # @param[Integer] fees The fees to include in the transaction.
-      # @param[Integer] efr The estimated fee rate (satoshis/KB).
       # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
-      def transfer_btc(btc_transfer_spec, fees, efr)
-        transfer_btcs([btc_transfer_spec], fees, efr)
+      def transfer_btc(btc_transfer_spec, fees)
+        transfer_btcs([btc_transfer_spec], fees)
       end
 
       # Creates a transaction for sending bitcoins to many.
       # @param[Array[OpenAssets::Transaction::TransferParameters]] btc_transfer_specs The parameters of the bitcoins being transferred.
       # @param[Integer] fees The fees to include in the transaction.
-      # @param[Integer] efr The estimated fee rate (satoshis/KB).
       # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
-      def transfer_btcs(btc_transfer_specs, fees, efr)
-        transfer([], btc_transfer_specs, fees, efr)
+      def transfer_btcs(btc_transfer_specs, fees)
+        transfer([], btc_transfer_specs, fees)
       end
       
       # Create a transaction for burn asset
-      def burn_asset(unspents, asset_id, fee, efr)
+      def burn_asset(unspents, asset_id, fee)
 
         tx = Bitcoin::Protocol::Tx.new
         targets = unspents.select{|o|o.output.asset_id == asset_id}
 
-        if fee == :auto then
+        if fee == :auto
           # Calculate fees and otsuri (assume that one vout exists)
-          # See http://bitcoinfees.com/
-          tx_size = 148 * targets.size + 34 * 1 + 10
-          if efr < 0 then
-            # Negative efr means "estimatefee" of bitcoin-api returns false
-            # In this case, use default minimum fees rate (10_000 satoshis/KB)
-            efr = 10_000
-          end
-          # See Bitcoin::tx.calculate_minimum_fee
-          fee   = (1 + tx_size / 1_000) * efr
+          fee = calc_fee(targets.size, 1)
         end
         
         raise TransactionBuildError.new('There is no asset.') if targets.length == 0
@@ -201,9 +184,8 @@ module OpenAssets
       # @param[Array[OpenAssets::Transaction::TransferParameters]] asset_transfer_specs The parameters of the assets being transferred.
       # @param[Array[OpenAssets::Transaction::TransferParameters]] btc_transfer_specs The parameters of the bitcoins being transferred.
       # @param[Integer] fees The fees to include in the transaction.
-      # @param[Integer] efr The estimated fee rate (satoshis/KB).
       # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
-      def transfer(asset_transfer_specs, btc_transfer_specs, fees, efr)
+      def transfer(asset_transfer_specs, btc_transfer_specs, fees)
         inputs = []     # vin field
         outputs = []    # vout field
         asset_quantities = []
@@ -246,7 +228,7 @@ module OpenAssets
         # Calculate total amount of bitcoins to send
         btc_transfer_total_amount = btc_transfer_specs.inject(0) {|sum, b| sum + b.amount}
 
-        if fees == :auto then
+        if fees == :auto 
           fixed_fees = 0
         else
           fixed_fees = fees
@@ -263,19 +245,11 @@ module OpenAssets
           btc_excess += uncolored_amount
         end
 
-        if fees == :auto then
+        if fees == :auto
           # Calculate fees and otsuri (the numbers of vins and vouts are known)
           # +1 in the second term means "otsuri" vout, 
           # and outputs size means the number of vout witn asset_id
-          # See http://bitcoinfees.com/
-          tx_size = 148 * inputs.size + 34 * (outputs.size + btc_transfer_specs.size + 1) + 10
-          if efr < 0 then
-            # Negative efr means "estimatefee" of bitcoin-api returns false
-            # In this case, use default minimum fees rate (10_000 satoshis/KB)
-            efr = 10_000
-          end
-          # See Bitcoin::tx.calculate_minimum_fee
-          fees   = (1 + tx_size / 1_000) * efr
+          fees = calc_fee(inputs.size, outputs.size + btc_transfer_specs.size + 1)
         end
         
         otsuri = btc_excess - btc_transfer_total_amount - fees
@@ -324,6 +298,19 @@ module OpenAssets
         outputs.each{|o|tx.add_out(o)}
         
         tx
+      end
+      
+      # Calculate a transaction fee
+      # @param [Integer] inputs_num: The number of vin fields.
+      # @param [Integer] outputs_num: The number of vout fields.
+      # @return [Integer] A transaction fee.
+      def calc_fee(inputs_num, outputs_num) 
+        # See http://bitcoinfees.com/ 
+        tx_size = 148 * inputs_num + 34 * outputs_num + 10
+        # See Bitcoin::tx.calculate_minimum_fee
+        fee = (1 + tx_size / 1_000) * @efr
+        
+        fee
       end
 
     end

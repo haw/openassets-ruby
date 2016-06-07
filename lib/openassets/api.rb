@@ -99,9 +99,7 @@ module OpenAssets
       to = from if to.nil?
       colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
       issue_param = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount, output_qty)
-      # Estimate a transaction fee rate (satoshis/KB)
-      efr = coin_to_satoshi(provider.estimatefee(1).to_s).to_i
-      tx = create_tx_builder.issue_asset(issue_param, metadata, fees.nil? ? @config[:default_fees]: fees, efr)
+      tx = create_tx_builder.issue_asset(issue_param, metadata, fees.nil? ? @config[:default_fees]: fees)
       tx = process_transaction(tx, mode)
       tx
     end
@@ -119,9 +117,7 @@ module OpenAssets
     def send_asset(from, asset_id, amount, to, fees = nil, mode = 'broadcast', output_qty = 1)
       colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
       asset_transfer_spec = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount, output_qty)
-      # Estimate a transaction fee rate (satoshis/KB)
-      efr = coin_to_satoshi(provider.estimatefee(1).to_s).to_i
-      tx = create_tx_builder.transfer_asset(asset_id, asset_transfer_spec, from, fees.nil? ? @config[:default_fees]: fees, efr)
+      tx = create_tx_builder.transfer_asset(asset_id, asset_transfer_spec, from, fees.nil? ? @config[:default_fees]: fees)
       tx = process_transaction(tx, mode)
       tx
     end
@@ -139,9 +135,7 @@ module OpenAssets
       transfer_specs = send_asset_params.map{|param|
         [param.asset_id, OpenAssets::Transaction::TransferParameters.new(colored_outputs, param.to, from, param.amount)]
       }
-      # Estimate a transaction fee rate (satoshis/KB)
-      efr = coin_to_satoshi(provider.estimatefee(1).to_s).to_i
-      tx = create_tx_builder.transfer_assets(transfer_specs, from, fees.nil? ? @config[:default_fees]: fees, efr)
+      tx = create_tx_builder.transfer_assets(transfer_specs, from, fees.nil? ? @config[:default_fees]: fees)
       tx = process_transaction(tx, mode)
       tx
     end
@@ -161,9 +155,7 @@ module OpenAssets
       validate_address([from, to])
       colored_outputs = get_unspent_outputs([from])
       btc_transfer_spec = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount, output_qty)
-      # Estimate a transaction fee rate (satoshis/KB)
-      efr = coin_to_satoshi(provider.estimatefee(1).to_s).to_i
-      tx = create_tx_builder.transfer_btc(btc_transfer_spec, fees.nil? ? @config[:default_fees]: fees, efr)
+      tx = create_tx_builder.transfer_btc(btc_transfer_spec, fees.nil? ? @config[:default_fees]: fees)
       process_transaction(tx, mode)
     end
 
@@ -180,9 +172,7 @@ module OpenAssets
       btc_transfer_specs = send_params.map{|param|
         OpenAssets::Transaction::TransferParameters.new(colored_outputs, param.to, from, param.amount)
       }
-      # Estimate a transaction fee rate (satoshis/KB)
-      efr = coin_to_satoshi(provider.estimatefee(1).to_s).to_i
-      tx = create_tx_builder.transfer_btcs(btc_transfer_specs, fees.nil? ? @config[:default_fees]: fees, efr)
+      tx = create_tx_builder.transfer_btcs(btc_transfer_specs, fees.nil? ? @config[:default_fees]: fees)
       tx = process_transaction(tx, mode)
       tx
     end
@@ -197,9 +187,7 @@ module OpenAssets
     # 'unsigned' for getting the raw unsigned transaction without broadcasting"""='broadcast'
     def burn_asset(oa_address, asset_id, fees = nil, mode = 'broadcast')
       unspents = get_unspent_outputs([oa_address_to_address(oa_address)])
-      # Estimate a transaction fee rate (satoshis/KB)
-      efr = coin_to_satoshi(provider.estimatefee(1).to_s).to_i
-      tx = create_tx_builder.burn_asset(unspents, asset_id, fees.nil? ? @config[:default_fees]: fees, efr)
+      tx = create_tx_builder.burn_asset(unspents, asset_id, fees.nil? ? @config[:default_fees]: fees)
       process_transaction(tx, mode)
     end
 
@@ -376,7 +364,14 @@ module OpenAssets
     end
 
     def create_tx_builder
-      OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
+      # Estimate a transaction fee rate (satoshis/KB)
+      efr = coin_to_satoshi(provider.estimatefee(1).to_s).to_i
+      if efr < 0
+        # Negative efr means "estimatefee" of bitcoin-api returns false
+        # In this case, use default minimum fees rate (10_000 satoshis/KB)
+        efr = 10_000
+      end
+      OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit], efr)
     end
 
     def load_tx(txid)
