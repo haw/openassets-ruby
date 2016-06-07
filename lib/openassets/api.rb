@@ -99,7 +99,9 @@ module OpenAssets
       to = from if to.nil?
       colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
       issue_param = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount, output_qty)
-      tx = create_tx_builder.issue_asset(issue_param, metadata, fees.nil? ? @config[:default_fees]: fees)
+      # Estimate a transaction fee rate (satoshis/KB)
+      efr = coin_to_satoshi(provider.estimatefee(1).to_s).to_i
+      tx = create_tx_builder.issue_asset(issue_param, metadata, fees.nil? ? @config[:default_fees]: fees, efr)
       tx = process_transaction(tx, mode)
       tx
     end
@@ -195,7 +197,9 @@ module OpenAssets
     # 'unsigned' for getting the raw unsigned transaction without broadcasting"""='broadcast'
     def burn_asset(oa_address, asset_id, fees = nil, mode = 'broadcast')
       unspents = get_unspent_outputs([oa_address_to_address(oa_address)])
-      tx = create_tx_builder.burn_asset(unspents, asset_id, fees.nil? ? @config[:default_fees]: fees)
+      # Estimate a transaction fee rate (satoshis/KB)
+      efr = coin_to_satoshi(provider.estimatefee(1).to_s).to_i
+      tx = create_tx_builder.burn_asset(unspents, asset_id, fees.nil? ? @config[:default_fees]: fees, efr)
       process_transaction(tx, mode)
     end
 

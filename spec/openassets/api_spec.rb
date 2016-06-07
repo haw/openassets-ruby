@@ -86,7 +86,7 @@ describe OpenAssets::Api do
     it 'issue_asset' do
       address = 'akEJwzkzEFau4t2wjbXoMs7MwtZkB8xixmH'
       tx = subject.issue_asset(
-        address, 125, 'u=https://goo.gl/bmVEuw', address, nil, 'unsigned', 2)
+        address, 125, 'u=https://goo.gl/bmVEuw', address, 10_000, 'unsigned', 2)
       expect(tx.ver).to eq(1)
       expect(tx.lock_time).to eq(0)
       expect(tx.inputs.length).to eq(1)

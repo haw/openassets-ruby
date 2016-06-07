@@ -12,7 +12,7 @@ describe OpenAssets::Transaction::TransactionBuilder do
         unspent_outputs,
         'akD71LJfDrVkPUg7dSZq6acdeDqgmHjrc2Q',
         'akD71LJfDrVkPUg7dSZq6acdeDqgmHjrc2Q', 1000)
-    result = target.issue_asset(spec, 'metadata', 5)
+    result = target.issue_asset(spec, 'metadata', 5, 10_000)
     expect(result.in.length).to eq(2)
     expect(result.out.length).to eq(3)
     in0 = result.in[0]
@@ -134,7 +134,7 @@ describe OpenAssets::Transaction::TransactionBuilder do
     # おつり再計算＝100
     # おつり額がdust_limitより低いので再度UTXO収集
     # marker output
-    tx = builder.transfer_asset(to, spec, from, 10000, 0.1)
+    tx = builder.transfer_asset(to, spec, from, 10000, 10_000)
     expect(tx.in.length).to eq(4)
     expect(tx.out.length).to eq(5)
     payload = OpenAssets::Protocol::MarkerOutput.parse_script(tx.out[0].pk_script)
