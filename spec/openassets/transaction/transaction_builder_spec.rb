@@ -134,7 +134,7 @@ describe OpenAssets::Transaction::TransactionBuilder do
     # おつり再計算＝100
     # おつり額がdust_limitより低いので再度UTXO収集
     # marker output
-    tx = builder.transfer_asset(to, spec, from, 10000)
+    tx = builder.transfer_asset(to, spec, from, 10000, 0.1)
     expect(tx.in.length).to eq(4)
     expect(tx.out.length).to eq(5)
     payload = OpenAssets::Protocol::MarkerOutput.parse_script(tx.out[0].pk_script)

@@ -118,7 +118,7 @@ module OpenAssets
       colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
       asset_transfer_spec = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount, output_qty)
       # Estimate a transaction fee rate (satoshis/KB)
-      efr = coin_to_satoshi(provider.estimatefee(1))
+      efr = coin_to_satoshi(provider.estimatefee(1).to_s).to_i
       tx = create_tx_builder.transfer_asset(asset_id, asset_transfer_spec, from, fees.nil? ? @config[:default_fees]: fees, efr)
       tx = process_transaction(tx, mode)
       tx
@@ -138,7 +138,7 @@ module OpenAssets
         [param.asset_id, OpenAssets::Transaction::TransferParameters.new(colored_outputs, param.to, from, param.amount)]
       }
       # Estimate a transaction fee rate (satoshis/KB)
-      efr = coin_to_satoshi(provider.estimatefee(1))
+      efr = coin_to_satoshi(provider.estimatefee(1).to_s).to_i
       tx = create_tx_builder.transfer_assets(transfer_specs, from, fees.nil? ? @config[:default_fees]: fees, efr)
       tx = process_transaction(tx, mode)
       tx
@@ -160,7 +160,7 @@ module OpenAssets
       colored_outputs = get_unspent_outputs([from])
       btc_transfer_spec = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount, output_qty)
       # Estimate a transaction fee rate (satoshis/KB)
-      efr = coin_to_satoshi(provider.estimatefee(1))
+      efr = coin_to_satoshi(provider.estimatefee(1).to_s).to_i
       tx = create_tx_builder.transfer_btc(btc_transfer_spec, fees.nil? ? @config[:default_fees]: fees, efr)
       process_transaction(tx, mode)
     end
@@ -179,7 +179,7 @@ module OpenAssets
         OpenAssets::Transaction::TransferParameters.new(colored_outputs, param.to, from, param.amount)
       }
       # Estimate a transaction fee rate (satoshis/KB)
-      efr = coin_to_satoshi(provider.estimatefee(1))
+      efr = coin_to_satoshi(provider.estimatefee(1).to_s).to_i
       tx = create_tx_builder.transfer_btcs(btc_transfer_specs, fees.nil? ? @config[:default_fees]: fees, efr)
       tx = process_transaction(tx, mode)
       tx

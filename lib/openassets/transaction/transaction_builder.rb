@@ -225,12 +225,18 @@ module OpenAssets
         # Calculate total amount of bitcoins to send
         btc_transfer_total_amount = btc_transfer_specs.inject(0) {|sum, b| sum + b.amount}
 
-        if btc_excess < btc_transfer_total_amount
+        if fees == :auto then
+          fixed_fees = 0
+        else
+          fixed_fees = fees
+        end
+        
+        if btc_excess < btc_transfer_total_amount + fixed_fees
           # When there does not exist enough bitcoins to send in the inputs
           # assign new address (utxo) to the inputs (does not include output coins)
           # CREATING INPUT (if needed)
           uncolored_outputs, uncolored_amount =
-            TransactionBuilder.collect_uncolored_outputs(utxo, btc_transfer_total_amount - btc_excess)
+            TransactionBuilder.collect_uncolored_outputs(utxo, btc_transfer_total_amount + fixed_fees - btc_excess)
           utxo = utxo - uncolored_outputs
           inputs << uncolored_outputs
           btc_excess += uncolored_amount
@@ -242,28 +248,17 @@ module OpenAssets
           # and outputs size means the number of vout witn asset_id
           # See http://bitcoinfees.com/
           tx_size = 148 * inputs.size + 34 * (outputs.size + btc_transfer_specs.size + 1) + 10
-          
           if efr < 0 then
             # Negative efr means "estimatefee" of bitcoin-api returns false
             # In this case, use default minimum fees rate (10_000 satoshis/KB)
             efr = 10_000
           end
-          
+          # See Bitcoin::tx.calculate_minimum_fee
           fees   = (1 + tx_size / 1_000) * efr
-
-          p "inputs #{inputs.size}"
-          p "outputs #{outputs.size}"
-          p "btc_spec #{btc_transfer_specs.size}"
-          p "efr #{efr}"
-
-          p "tx_size #{tx_size}"
-          p "fees = #{fees}"
-
         end
         
         otsuri = btc_excess - btc_transfer_total_amount - fees
         
-        # otsuri = btc_excess - btc_transfer_total_amount - fees
         if otsuri > 0 && otsuri < @amount
           # When there exists otsuri, but it is smaller than @amount (default is 600 satoshis)
           # assign new address (utxo) to the input (does not include @amount - otsuri)
