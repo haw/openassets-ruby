@@ -86,7 +86,7 @@ describe OpenAssets::Api do
     it 'issue_asset' do
       address = 'akEJwzkzEFau4t2wjbXoMs7MwtZkB8xixmH'
       tx = subject.issue_asset(
-        address, 125, 'u=https://goo.gl/bmVEuw', address, 10_000, 'unsigned', 2)
+        address, 125, 'u=https://goo.gl/bmVEuw', address, nil, 'unsigned', 2)
       expect(tx.ver).to eq(1)
       expect(tx.lock_time).to eq(0)
       expect(tx.inputs.length).to eq(1)
@@ -277,13 +277,13 @@ describe OpenAssets::Api do
     it 'send_bitcoin' do
       address = '1HhJs3JgbiyxC8ktfi6nU4wTqVmrMtCVkG'
       # 26400 satoshiのUTXOを保持してるが、残り600✕2のOAのUTXOを保持してる
-      expect{subject.send_bitcoin(address, 16401, address, 10_000, 'unsigned')}.to raise_error(OpenAssets::Transaction::InsufficientFundsError)
-      tx = subject.send_bitcoin(address, 16400, address, 10_000, 'unsigned')
+      expect{subject.send_bitcoin(address, 16401, address, nil, 'unsigned')}.to raise_error(OpenAssets::Transaction::InsufficientFundsError)
+      tx = subject.send_bitcoin(address, 16400, address, nil, 'unsigned')
       expect(tx.inputs.length).to eq(1)
       expect(tx.outputs.length).to eq(1)
       expect(tx.outputs[0].value).to eq(16400)
 
-      tx = subject.send_bitcoin(address, 16400, address, 10_000, 'unsigned', 3)
+      tx = subject.send_bitcoin(address, 16400, address, nil, 'unsigned', 3)
       expect(tx.inputs.length).to eq(1)
       expect(tx.outputs.length).to eq(3)
       expect(tx.outputs[0].value).to eq(5466)
@@ -293,7 +293,7 @@ describe OpenAssets::Api do
       expect(tx.outputs[2].value).to eq(5468)
       expect(tx.outputs[2].parsed_script.to_string).to eq('OP_DUP OP_HASH160 b7218fe503cd18555255e5b13d4f07f3fd00d0c9 OP_EQUALVERIFY OP_CHECKSIG')
 
-      tx = subject.send_bitcoin(address, 13000, address, 10_000, 'unsigned', 3)
+      tx = subject.send_bitcoin(address, 13000, address, nil, 'unsigned', 3)
       expect(tx.inputs.length).to eq(1)
       expect(tx.outputs.length).to eq(4)
       expect(tx.outputs[0].value).to eq(3400)

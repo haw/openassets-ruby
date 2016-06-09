@@ -10,7 +10,7 @@ module OpenAssets
       # The estimated transaction fee rate (satoshis/KB).
       attr_accessor :efr
       
-      def initialize(amount = 600, efr = 10_000)
+      def initialize(amount = 600, efr = 10000)
         @amount = amount
         @efr = efr 
       end

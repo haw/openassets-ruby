@@ -103,12 +103,6 @@ describe OpenAssets::Api do
       params << OpenAssets::SendAssetParam.new('oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY', 50, to)
       params << OpenAssets::SendAssetParam.new('oUygwarZqNGrjDvcZUpZdvEc7es6dcs1vs', 4, to)
       tx = subject.send_assets(from, params, 10000, 'unsignd')
-      
-      tx.inputs.each do |i|
-        p i.parsed_script.get_address
-        p i.parsed_script.methods
-      end
-      
       expect(tx.inputs.length).to eq(6)
       expect(tx.outputs.length).to eq(6)
       # marker output
@@ -177,33 +171,6 @@ describe OpenAssets::Api do
       expect(tx.outputs[2].value).to eq(1000)
     end
 
-    it 'calculate fees' do
-      from  = 'mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T'
-      to1   = 'mjLSaCyJHCSeh4MsiNGnF1RLqD9ySqnAQ1'
-      to2   = 'mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ'
-
-      params = []
-      params << OpenAssets::SendBitcoinParam.new(20000, to1)
-      params << OpenAssets::SendBitcoinParam.new(1000, to2)
-
-      tx = subject.send_bitcoins(from, params, :auto, 'unsignd')
-      estimatefee_btc = subject.provider.estimatefee(1);
-      estimatefee_satoshi = coin_to_satoshi(estimatefee_btc.to_s).to_i
-      
-      # actual value is 52061
-      expected_otsuri = 79000 - (1 + tx.to_payload.bytesize/1_000) * estimatefee_satoshi
-      
-      # output for otsuri mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T
-      expect(tx.outputs[0].parsed_script.get_address).to eq('mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T')
-      expect(tx.outputs[0].value).to eq(expected_otsuri)
-      # output for to_1 mjLSaCyJHCSeh4MsiNGnF1RLqD9ySqnAQ1
-      expect(tx.outputs[1].parsed_script.get_address).to eq('mjLSaCyJHCSeh4MsiNGnF1RLqD9ySqnAQ1')
-      expect(tx.outputs[1].value).to eq(20000)
-      # output for to_2 mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ
-      expect(tx.outputs[2].parsed_script.get_address).to eq('mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ')
-      expect(tx.outputs[2].value).to eq(1000)
-    end
-    
     it 'burn asset' do
       oa_address = 'bX2vhttomKj2fdd7SJV2nv8U4zDjusE5Y4B'
       btc_address = oa_address_to_address(oa_address)
@@ -254,6 +221,44 @@ describe OpenAssets::Api do
 
   end
 
+  context 'testnet-autofee', :network => :testnet do
+    subject {
+      testnet_mock = double('BitcoinCoreProviderTestnet Mock')
+      api = OpenAssets::Api.new({:cache => ':memory:', :network => 'testnet', :default_fees => :auto})
+      allow(testnet_mock).to receive(:list_unspent).and_return(TESTNET_BTC_UNSPENT)
+      setup_tx_load_mock(testnet_mock)
+      allow(api).to receive(:provider).and_return(testnet_mock)
+      api
+    }
+
+    it 'calculate fees' do
+      from  = 'mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T'
+      to1   = 'mjLSaCyJHCSeh4MsiNGnF1RLqD9ySqnAQ1'
+      to2   = 'mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ'
+
+      params = []
+      params << OpenAssets::SendBitcoinParam.new(20000, to1)
+      params << OpenAssets::SendBitcoinParam.new(1000, to2)
+
+      tx = subject.send_bitcoins(from, params, :auto, 'unsignd')
+      estimatefee_btc = subject.provider.estimatefee(1);
+      estimatefee_satoshi = coin_to_satoshi(estimatefee_btc.to_s).to_i
+
+      # actual value is 52061
+      expected_otsuri = 79000 - (1 + tx.to_payload.bytesize/1_000) * estimatefee_satoshi
+
+      # output for otsuri mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T
+      expect(tx.outputs[0].parsed_script.get_address).to eq('mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T')
+      expect(tx.outputs[0].value).to eq(expected_otsuri)
+      # output for to_1 mjLSaCyJHCSeh4MsiNGnF1RLqD9ySqnAQ1
+      expect(tx.outputs[1].parsed_script.get_address).to eq('mjLSaCyJHCSeh4MsiNGnF1RLqD9ySqnAQ1')
+      expect(tx.outputs[1].value).to eq(20000)
+      # output for to_2 mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ
+      expect(tx.outputs[2].parsed_script.get_address).to eq('mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ')
+      expect(tx.outputs[2].value).to eq(1000)
+    end
+  end
+  
   def filter_btc_unspent(btc_address = nil)
     return TESTNET_BTC_UNSPENT if btc_address.nil?
     TESTNET_BTC_UNSPENT.select{|u|u['address'] == btc_address}

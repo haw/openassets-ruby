@@ -17,7 +17,7 @@ module OpenAssets
     def initialize(config = nil)
       @config = {:network => 'mainnet',
                  :provider => 'bitcoind', :cache => 'cache.db',
-                 :dust_limit => 600, :default_fees => :auto, :min_confirmation => 1, :max_confirmation => 9999999,
+                 :dust_limit => 600, :default_fees => 10000, :min_confirmation => 1, :max_confirmation => 9999999,
                  :rpc => { :host => 'localhost', :port => 8332 , :user => '', :password => '', :schema => 'https'}}
       if config
         @config.update(config)
@@ -364,14 +364,20 @@ module OpenAssets
     end
 
     def create_tx_builder
-      # Estimate a transaction fee rate (satoshis/KB)
-      efr = coin_to_satoshi(provider.estimatefee(1).to_s).to_i
-      if efr < 0
-        # Negative efr means "estimatefee" of bitcoin-api returns false
-        # In this case, use default minimum fees rate (10_000 satoshis/KB)
-        efr = 10_000
+      if @config[:default_fees] == :auto
+        # Estimate a transaction fee rate (satoshis/KB) if fee is specified by :auto
+        efr = coin_to_satoshi(provider.estimatefee(1).to_s).to_i
+        if efr < 0
+          # Negative efr means "estimatefee" of bitcoin-api returns false
+          # In this case, use default minimum fees rate (10_000 satoshis/KB)
+          efr = 10_000
+        end
+        OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit], efr)
+      else
+        # If fee is specified by a fixed value (or the default value)
+        OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit])
       end
-      OpenAssets::Transaction::TransactionBuilder.new(@config[:dust_limit], efr)
+
     end
 
     def load_tx(txid)
