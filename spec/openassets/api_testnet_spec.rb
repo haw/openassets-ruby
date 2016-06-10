@@ -221,6 +221,44 @@ describe OpenAssets::Api do
 
   end
 
+  context 'testnet-autofee', :network => :testnet do
+    subject {
+      testnet_mock = double('BitcoinCoreProviderTestnet Mock')
+      api = OpenAssets::Api.new({:cache => ':memory:', :network => 'testnet', :default_fees => :auto})
+      allow(testnet_mock).to receive(:list_unspent).and_return(TESTNET_BTC_UNSPENT)
+      setup_tx_load_mock(testnet_mock)
+      allow(api).to receive(:provider).and_return(testnet_mock)
+      api
+    }
+
+    it 'calculate fees' do
+      from  = 'mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T'
+      to1   = 'mjLSaCyJHCSeh4MsiNGnF1RLqD9ySqnAQ1'
+      to2   = 'mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ'
+
+      params = []
+      params << OpenAssets::SendBitcoinParam.new(20000, to1)
+      params << OpenAssets::SendBitcoinParam.new(1000, to2)
+
+      tx = subject.send_bitcoins(from, params, :auto, 'unsignd')
+      estimatefee_btc = subject.provider.estimatefee(1);
+      estimatefee_satoshi = coin_to_satoshi(estimatefee_btc.to_s).to_i
+
+      # actual value is 52061
+      expected_otsuri = 79000 - (1 + tx.to_payload.bytesize/1_000) * estimatefee_satoshi
+
+      # output for otsuri mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T
+      expect(tx.outputs[0].parsed_script.get_address).to eq('mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T')
+      expect(tx.outputs[0].value).to eq(expected_otsuri)
+      # output for to_1 mjLSaCyJHCSeh4MsiNGnF1RLqD9ySqnAQ1
+      expect(tx.outputs[1].parsed_script.get_address).to eq('mjLSaCyJHCSeh4MsiNGnF1RLqD9ySqnAQ1')
+      expect(tx.outputs[1].value).to eq(20000)
+      # output for to_2 mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ
+      expect(tx.outputs[2].parsed_script.get_address).to eq('mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ')
+      expect(tx.outputs[2].value).to eq(1000)
+    end
+  end
+  
   def filter_btc_unspent(btc_address = nil)
     return TESTNET_BTC_UNSPENT if btc_address.nil?
     TESTNET_BTC_UNSPENT.select{|u|u['address'] == btc_address}
@@ -252,6 +290,7 @@ describe OpenAssets::Api do
     allow(btc_provider_mock).to receive(:get_transaction).with('7dd8296f38db7148d81fa88114becd96fd5064113bea0bcf1c24809ea863ee5a', 0).and_return('01000000032faa228eeb2aa59b652f9e90020224482a93e56650505323de8f8f8f1de83d8b020000006a473044022063a8bc218fc1309428f65f222272215a739ba6ec3ef4b4602b22da9eb2ce6ed202207f8e0e60d418a8fa66d4608ff13829df6d40b7cbd52223390678aebeb37063b601210372107bf36f6c980bf5070e7004c743396bde827c5d735a9fcbcb35f215f23173ffffffffc1531abc3a82f6ac4f9b0c9dbd821b8626f335d4fa89c16100b3748a28a1d429020000006a4730440220674c828a08ab9545d3e82fa3720b3d66ceaed4e5fd241a27dd1f54fd126b325b022077debe1ebc3395a9283587f0b074dc1f8ce1b0483775180ecfccf990ae8d0f5f01210372107bf36f6c980bf5070e7004c743396bde827c5d735a9fcbcb35f215f23173ffffffff6bfed6ec52a26110a2bfdf65ffd18196a3913e7bb03629e6b9be1ff02ad7d07f020000006a47304402202a227da68fa66ed75886baee16eb565740473f699c6a5bd900aea610d27f63c202207d61b50e80b5f1a3fce481e59c733aaf8cc0624f8a5380d44a46d1143f704bc801210372107bf36f6c980bf5070e7004c743396bde827c5d735a9fcbcb35f215f23173ffffffff0196e20500000000001976a91429e38883cd397cf8f53d1676abd6dcad25cc134888ac00000000')
     # addr = mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ
     allow(btc_provider_mock).to receive(:get_transaction).with('f889c52a3367f636b9b680e84b22ea42a22b1ca41f9f59cb541c44ed3798a36c', 0).and_return('0100000004147baa40b3426ee6d55e6697fc3f2500c891f0619284713875b05d87143e8fe7000000006b483045022100bdf97b349f300b46aa0b624f7f90fa8085623805585b53739e7ab70cbe6d0a5e02203d6a116128683009b25efc09893f14b2604e8777e04cefece62766d45888c9c401210323df5c63ab7a9186ecfdbc07ee9acc5cb4129c65622d8c436dc2ed2d625cd143ffffffff1f332638e05adfcd7628d018733a6bbf70bb7ee2b6f7c15f5437b918be2270f7000000006b4830450221009a6ffa886f1f53d53123e594324f21f0af149da95db63c942e2844c3eb836a6602203ddcda271c0fa96a2457cc34736f2254cd1d996e3926ec378b6a2f88a8ccf2a201210323df5c63ab7a9186ecfdbc07ee9acc5cb4129c65622d8c436dc2ed2d625cd143ffffffffac93eb66ea41c7e1f186e2a7505adbe9c45ca924876118a3957a93ad43c32623010000006b4830450221009313374d4391ff442c44bfc3e4ff62874069d3eb5c992688607ab6f59c852c5802203a4cb9027262bbc11c576792c1e49248ae859a069a5a16d6e403f837c821c5eb01210323df5c63ab7a9186ecfdbc07ee9acc5cb4129c65622d8c436dc2ed2d625cd143ffffffff3672675c2dd1d92d0848d954d7b6b3da9d48ce61115db1bed1369d2e024e7cea010000006b483045022100adb92a6c865ba59627af9dfe7dfedd7d2620035c023b9fc8dbda843adf99881702204f6c59d78d8615c5cff7e388f43b4fbd763797fc2dc1f38fd6c70bd3634ada0801210323df5c63ab7a9186ecfdbc07ee9acc5cb4129c65622d8c436dc2ed2d625cd143ffffffff0600000000000000000e6a0c4f41010004c20332c203320058020000000000001976a91453ad0e81bd931dac736ad913915d11c3be0c0b2388ac58020000000000001976a91453ad0e81bd931dac736ad913915d11c3be0c0b2388ac58020000000000001976a9143894aaab84a2c8a2f29c085573bb8aae2a0f94e288ac58020000000000001976a91460c707f73615f6263761bf20522f0ed54e1b2e0488acb8770700000000001976a9144f756b9ed6608e5d66ee92b761cf99641940cee688ac00000000')
+    allow(btc_provider_mock).to receive(:estimatefee).and_return(0.00026939)
   end
 
   TESTNET_BTC_UNSPENT = [

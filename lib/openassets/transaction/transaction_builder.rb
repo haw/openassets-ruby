@@ -7,8 +7,12 @@ module OpenAssets
       # The minimum allowed output value.
       attr_accessor :amount
 
-      def initialize(amount = 600)
+      # The estimated transaction fee rate (satoshis/KB).
+      attr_accessor :efr
+      
+      def initialize(amount = 600, efr = 10000)
         @amount = amount
+        @efr = efr 
       end
 
       # Creates a transaction for issuing an asset.
@@ -17,6 +21,12 @@ module OpenAssets
       # @param [Integer] fees The fees to include in the transaction.
       # @return[Bitcoin:Protocol:Tx] An unsigned transaction for issuing asset.
       def issue_asset(issue_spec, metadata, fees)
+        
+        if fees == :auto
+          # Calculate fees (assume that one vin and four vouts are wrote)
+          fees = calc_fee(1, 4)
+        end
+        
         inputs, total_amount =
             TransactionBuilder.collect_uncolored_outputs(issue_spec.unspent_outputs, 2 * @amount + fees)
         tx = Bitcoin::Protocol::Tx.new
@@ -50,7 +60,12 @@ module OpenAssets
             asset_transfer_spec.unspent_outputs, nil, oa_address_to_address(btc_change_script), 0)
         transfer([[asset_id, asset_transfer_spec]], [btc_transfer_spec], fees)
       end
-
+      
+      # Creates a transaction for sending assets to many.
+      # @param[Array[OpenAssets::Transaction::TransferParameters]] asset_transfer_spec The parameters of the asset being transferred.
+      # @param[String] btc_change_script The script where to send bitcoin change, if any.
+      # @param[Integer] fees The fees to include in the transaction.
+      # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
       def transfer_assets(transfer_specs, btc_change_script, fees)
         btc_transfer_spec = OpenAssets::Transaction::TransferParameters.new(
             transfer_specs[0][1].unspent_outputs, nil, oa_address_to_address(btc_change_script), 0)
@@ -72,12 +87,18 @@ module OpenAssets
       def transfer_btcs(btc_transfer_specs, fees)
         transfer([], btc_transfer_specs, fees)
       end
-
-
+      
       # Create a transaction for burn asset
       def burn_asset(unspents, asset_id, fee)
+
         tx = Bitcoin::Protocol::Tx.new
         targets = unspents.select{|o|o.output.asset_id == asset_id}
+
+        if fee == :auto
+          # Calculate fees and otsuri (assume that one vout exists)
+          fee = calc_fee(targets.size, 1)
+        end
+        
         raise TransactionBuildError.new('There is no asset.') if targets.length == 0
         total_amount = targets.inject(0){|sum, o|o.output.value + sum}
         otsuri = total_amount - fee
@@ -207,18 +228,32 @@ module OpenAssets
         # Calculate total amount of bitcoins to send
         btc_transfer_total_amount = btc_transfer_specs.inject(0) {|sum, b| sum + b.amount}
 
-        if btc_excess < btc_transfer_total_amount + fees
+        if fees == :auto 
+          fixed_fees = 0
+        else
+          fixed_fees = fees
+        end
+        
+        if btc_excess < btc_transfer_total_amount + fixed_fees
           # When there does not exist enough bitcoins to send in the inputs
           # assign new address (utxo) to the inputs (does not include output coins)
           # CREATING INPUT (if needed)
           uncolored_outputs, uncolored_amount =
-              TransactionBuilder.collect_uncolored_outputs(utxo, btc_transfer_total_amount + fees - btc_excess)
+            TransactionBuilder.collect_uncolored_outputs(utxo, btc_transfer_total_amount + fixed_fees - btc_excess)
           utxo = utxo - uncolored_outputs
           inputs << uncolored_outputs
           btc_excess += uncolored_amount
         end
 
+        if fees == :auto
+          # Calculate fees and otsuri (the numbers of vins and vouts are known)
+          # +1 in the second term means "otsuri" vout, 
+          # and outputs size means the number of vout witn asset_id
+          fees = calc_fee(inputs.size, outputs.size + btc_transfer_specs.size + 1)
+        end
+        
         otsuri = btc_excess - btc_transfer_total_amount - fees
+        
         if otsuri > 0 && otsuri < @amount
           # When there exists otsuri, but it is smaller than @amount (default is 600 satoshis)
           # assign new address (utxo) to the input (does not include @amount - otsuri)
@@ -261,8 +296,21 @@ module OpenAssets
         }
 
         outputs.each{|o|tx.add_out(o)}
-
+        
         tx
+      end
+      
+      # Calculate a transaction fee
+      # @param [Integer] inputs_num: The number of vin fields.
+      # @param [Integer] outputs_num: The number of vout fields.
+      # @return [Integer] A transaction fee.
+      def calc_fee(inputs_num, outputs_num) 
+        # See http://bitcoinfees.com/ 
+        tx_size = 148 * inputs_num + 34 * outputs_num + 10
+        # See Bitcoin::tx.calculate_minimum_fee
+        fee = (1 + tx_size / 1_000) * @efr
+        
+        fee
       end
 
     end
