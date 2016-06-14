@@ -1,0 +1,9 @@
+language: ruby
+rvm:
+  - 2.3.0
+  - 2.2.2
+
+bundler_args: --jobs=2
+
+script:
+  - bundle exec rake spec
