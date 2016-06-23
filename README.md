@@ -18,7 +18,7 @@ require 'openassets'
 api = OpenAssets::Api.new({:network => 'mainnet',
                      :provider => 'bitcoind', :cache => 'cache.db',
                      :dust_limit => 600, :default_fees => 10000, :min_confirmation => 1, :max_confirmation => 9999999,
-                     :rpc => {:user => 'xxx', :password => 'xxx', :schema => 'http', :port => 8332, :host => 'localhost'}})                      
+                     :rpc => {:user => 'xxx', :password => 'xxx', :schema => 'http', :port => 8332, :host => 'localhost', :timeout => 60, :open_timeout => 60}})
 ```
 
 * **use testnet**  
@@ -29,7 +29,7 @@ require 'openassets'
 api = OpenAssets::Api.new({:network => 'testnet',
                      :provider => 'bitcoind', :cache => 'testnet.db',
                      :dust_limit => 600, :default_fees => 10000, :min_confirmation => 1, :max_confirmation => 9999999,
-                     :rpc => {:user => 'xxx', :password => 'xxx', :schema => 'http', :port => 18332, :host => 'localhost'}})                      
+                     :rpc => {:user => 'xxx', :password => 'xxx', :schema => 'http', :port => 18332, :host => 'localhost', :timeout => 60, :open_timeout => 60}})
 ```
 
 The configuration options are as follows:

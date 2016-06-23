@@ -64,6 +64,12 @@ module OpenAssets
         request('sendrawtransaction', tx)
       end
 
+      # Adds an address or pubkey script to the wallet without the associated private key, allowing you to watch for transactions affecting that address or pubkey script without being able to spend any of its outputs.
+      # @param [String] address Either a P2PKH or P2SH address encoded in base58check, or a pubkey script encoded as hex.
+      def import_address(address)
+        request('importaddress', address)
+      end
+
       def method_missing(method, *params)
         super unless RPC_API.include?(method)
         request(method, *params)
@@ -105,11 +111,15 @@ module OpenAssets
           :params => params,
           :id => 'jsonrpc'
         }
-        RestClient.post(server_url, data.to_json, content_type: :json) do |respdata, request, result|
+        post(server_url, @config[:timeout], @config[:open_timeout], data.to_json, content_type: :json) do |respdata, request, result|
           response = JSON.parse(respdata.gsub(/\\u([\da-fA-F]{4})/) { [$1].pack('H*').unpack('n*').pack('U*').encode('ISO-8859-1').force_encoding('UTF-8') })
           raise ApiError, response['error'] if response['error']
           response['result']
         end
+      end
+
+      def post(url, timeout, open_timeout, payload, headers={}, &block)
+        RestClient::Request.execute(:method => :post, :url => url, :timeout => timeout, :open_timeout => open_timeout, :payload => payload, :headers => headers, &block)
       end
 
     end
