@@ -9,6 +9,8 @@ describe OpenAssets::Api do
     expect(api.is_testnet?).to be false
     expect(api.config[:rpc][:host]).to eq('localhost')
     expect(api.config[:rpc][:port]).to eq(8332)
+    expect(api.config[:rpc][:timeout]).to eq(60)
+    expect(api.config[:rpc][:open_timeout]).to eq(60)
     expect(api.config[:min_confirmation]).to eq(1)
     expect(api.config[:max_confirmation]).to eq(9999999)
     expect(api.config[:cache]).to eq('cache.db')
