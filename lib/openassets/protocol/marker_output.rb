@@ -27,10 +27,12 @@ module OpenAssets
       # @return [String] The serialized payload.
       def to_payload
         payload = [OAP_MARKER, VERSION]
-        payload << Bitcoin::Protocol.pack_var_int(@asset_quantities.length).unpack("H*")
+        asset_quantity_count = Bitcoin::Protocol.pack_var_int(@asset_quantities.length).unpack("H*")
+        payload << sort_count(asset_quantity_count[0])
         @asset_quantities.map{|q|payload << encode_leb128(q)}
         @metadata ||= ''
-        payload << Bitcoin::Protocol.pack_var_int(@metadata.length).unpack("H*")
+        metadata_length = Bitcoin::Protocol.pack_var_int(@metadata.length).unpack("H*")
+        payload << sort_count(metadata_length[0])
         tmp = []
         @metadata.bytes{|b| tmp << b.to_s(16)}
         payload << tmp.join
@@ -75,6 +77,27 @@ module OpenAssets
             [(bytes[1]+bytes[2]+bytes[3]+bytes[4]).to_i(16),payload[10..-1]]
           else
             [bytes[0].to_i(16),payload[2..-1]]
+        end
+      end
+
+      def sort_count(count)
+        bytes = to_bytes(count)
+        case bytes[0]
+          when "fd" then
+            tmp         = count[2..3]
+            count[2..3] = count[4..5]
+            count[4..5] = tmp
+            count
+          when "fe" then
+            tmp_1       = count[2..3]
+            tmp_2       = count[4..5]
+            count[2..3] = count[8..9]
+            count[8..9] = tmp_1
+            count[4..5] = count[6..7]
+            count[6..7] = tmp_2
+            count
+          else
+            count
         end
       end
 
