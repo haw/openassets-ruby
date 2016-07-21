@@ -120,9 +120,34 @@ module OpenAssets
       pubkey_hash_to_asset_id(pubkey_hash)
     end
 
+    # read variable integer
+    # @param [String] data reading data
+    # @param [Integer] offset the position when reading from data.
+    # @return [[Integer, Integer]]  decoded integer value and the reading byte length.
+    # https://en.bitcoin.it/wiki/Protocol_documentation#Variable_length_integer
+    def read_var_integer(data, offset = 0)
+      raise ArgumentError, "data is nil." unless data
+      bytes = [data].pack('H*').bytes[offset..(offset + 9)] # 9 is variable integer max storage length.
+      first_byte = bytes[0]
+      if first_byte < 0xfd
+        [first_byte, offset + 1]
+      elsif first_byte == 0xfd
+        [calc_var_integer_val(bytes[1..2]), offset + 3]
+      elsif first_byte == 0xfe
+        [calc_var_integer_val(bytes[1..4]), offset + 5]
+      elsif first_byte == 0xff
+        [calc_var_integer_val(bytes[1..8]), offset + 9]
+      end
+    end
+
     private
     def oa_version_byte
       Bitcoin.network[:address_version] == "6f" ? OA_VERSION_BYTE_TESTNET : OA_VERSION_BYTE
     end
+
+    def calc_var_integer_val(byte_array)
+      byte_array.each_with_index.inject(0){|sum, pair| pair[1] == 0 ? pair[0] : sum + pair[0]*(256**pair[1])}
+    end
+    
   end
 end

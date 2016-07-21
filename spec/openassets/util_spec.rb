@@ -60,4 +60,17 @@ describe OpenAssets::Util do
     expect(util.coin_to_satoshi('0.00100000')).to eq(100000)
   end
 
+  it 'variable integer' do
+    expect(util.read_var_integer("fd0000").first).to eq(0)
+    expect(util.read_var_integer("fd1100").first).to eq(17)
+
+    expect(util.read_var_integer("fe00000000").first).to eq(0)
+    expect(util.read_var_integer("fe11000000").first).to eq(17)
+    expect(util.read_var_integer("fe11220000").first).to eq(8721)
+
+    expect(util.read_var_integer("ff0000000000000000").first).to eq(0)
+    expect(util.read_var_integer("ff1100000000000000").first).to eq(17)
+    expect(util.read_var_integer("ff1122000000000000").first).to eq(8721)
+    expect(util.read_var_integer("ff1122334400000000").first).to eq(1144201745)
+  end
 end
