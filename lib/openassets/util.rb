@@ -140,6 +140,25 @@ module OpenAssets
       end
     end
 
+    # read leb128 value
+    # @param [String] data reading data
+    # @param [Integer] offset start position when reading from data.
+    # @return [[Integer, Integer]]  decoded integer value and the reading byte length.
+    def read_leb128(data, offset = 0)
+      bytes = [data].pack('H*').bytes
+      result = 0
+      shift = 0
+      while true
+        return [nil, offset] if bytes.length < 1 + offset
+        byte = bytes[offset..(offset + 1)][0]
+        result |= (byte & 0x7f) << shift
+        break if byte & 0x80 == 0
+        shift += 7
+        offset += 1
+      end
+      [result, offset + 1]
+    end
+
     private
     def oa_version_byte
       Bitcoin.network[:address_version] == "6f" ? OA_VERSION_BYTE_TESTNET : OA_VERSION_BYTE

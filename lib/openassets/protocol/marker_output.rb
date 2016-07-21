@@ -58,7 +58,25 @@ module OpenAssets
       def self.parse_script(output_script)
         data = Bitcoin::Script.new(output_script).get_op_return_data
         return data if data.nil?
-        data.start_with?(OAP_MARKER) ? data : nil
+        # check open assets marker
+        return nil unless data.start_with?(OAP_MARKER + VERSION)
+        # check asset quantity
+        offset = [OAP_MARKER + VERSION].pack('H*').length
+        count, offset = read_var_integer(data, offset)
+        return nil unless count
+        # check metadata
+        count.times do
+          quantity, length = read_leb128(data, offset)
+          return nil if quantity.nil? || (length - offset) > 9
+          offset = length
+        end
+        # check metadata
+        length, offset = read_var_integer(data, offset)
+        return nil unless length
+        puts [data].pack('H*').bytes.length
+        puts length + offset
+        return nil if [data].pack('H*').bytes.length < length + offset
+        data
       end
 
       # Creates an output script containing an OP_RETURN and a PUSHDATA from payload.

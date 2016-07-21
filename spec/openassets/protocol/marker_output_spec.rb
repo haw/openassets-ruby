@@ -43,13 +43,35 @@ describe OpenAssets::Protocol::MarkerOutput do
     expect(marker_output.metadata).to eq('u=https://cpr.sm/5YgSU1Pg-q')
   end
 
-  it 'parse output_script' do
-    # OP_RETURN deadbeef (normal bitcoin op_return)
-    no_payload = OpenAssets::Protocol::MarkerOutput.parse_script(Bitcoin::Script.new(['6a04deadbeef'].pack("H*")).to_payload)
-    expect(no_payload).to be_nil
-    # OP_RETURN 4f41010002014400 (colored coin marker output)
-    payload = OpenAssets::Protocol::MarkerOutput.parse_script(Bitcoin::Script.new(['6a084f41010002014400'].pack("H*")).to_payload)
-    expect(payload).to eq('4f41010002014400')
+  describe 'parse_script' do
+    context 'valid script' do
+      subject{
+        # OP_RETURN 4f41010002014400 (colored coin marker output)
+        OpenAssets::Protocol::MarkerOutput.parse_script(Bitcoin::Script.new(['6a084f41010002014400'].pack("H*")).to_payload)
+      }
+      it do
+        expect(subject).to eq('4f41010002014400')
+      end
+    end
+
+    context 'not start oap marker' do
+      subject{
+        # OP_RETURN deadbeef (normal bitcoin op_return)
+        OpenAssets::Protocol::MarkerOutput.parse_script(Bitcoin::Script.new(['6a04deadbeef'].pack("H*")).to_payload)
+      }
+      it do
+        expect(subject).to be_nil
+      end
+    end
+
+    context 'invalid varint' do
+      subject{
+        OpenAssets::Protocol::MarkerOutput.parse_script(Bitcoin::Script.new(['6a224f41010001ee05753d68747470733a2f2f6370722e736d2f6d694c5a50484779782d'].pack("H*")).to_payload)
+      }
+      it do
+        expect(subject).to be_nil
+      end
+    end
   end
 
   it 'build script' do
