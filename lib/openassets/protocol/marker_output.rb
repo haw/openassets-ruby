@@ -73,8 +73,6 @@ module OpenAssets
         # check metadata
         length, offset = read_var_integer(data, offset)
         return nil unless length
-        puts [data].pack('H*').bytes.length
-        puts length + offset
         return nil if [data].pack('H*').bytes.length < length + offset
         data
       end
