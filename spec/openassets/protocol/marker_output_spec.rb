@@ -65,11 +65,9 @@ describe OpenAssets::Protocol::MarkerOutput do
     end
 
     context 'invalid varint' do
-      subject{
-        OpenAssets::Protocol::MarkerOutput.parse_script(Bitcoin::Script.new(['6a224f41010001ee05753d68747470733a2f2f6370722e736d2f6d694c5a50484779782d'].pack("H*")).to_payload)
-      }
       it do
-        expect(subject).to be_nil
+        expect(OpenAssets::Protocol::MarkerOutput.parse_script(Bitcoin::Script.new(['6a224f41010001ee05753d68747470733a2f2f6370722e736d2f6d694c5a50484779782d'].pack("H*")).to_payload)).to be_nil
+        expect(OpenAssets::Protocol::MarkerOutput.parse_script(Bitcoin::Script.new(['6a094f41010002ac02c21c'].pack('H*')).to_payload)).to be_nil
       end
     end
   end

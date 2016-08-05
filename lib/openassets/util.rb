@@ -127,7 +127,9 @@ module OpenAssets
     # https://en.bitcoin.it/wiki/Protocol_documentation#Variable_length_integer
     def read_var_integer(data, offset = 0)
       raise ArgumentError, "data is nil." unless data
-      bytes = [data].pack('H*').bytes[offset..(offset + 9)] # 9 is variable integer max storage length.
+      packed = [data].pack('H*')
+      return [nil, 0] if packed.bytesize < 1+offset
+      bytes = packed.bytes[offset..(offset + 9)] # 9 is variable integer max storage length.
       first_byte = bytes[0]
       if first_byte < 0xfd
         [first_byte, offset + 1]
