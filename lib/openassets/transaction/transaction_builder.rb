@@ -193,28 +193,30 @@ module OpenAssets
         # Only when assets are transferred
         asset_based_specs = {}
         asset_transfer_specs.each{|asset_id, transfer_spec|
-          asset_based_specs[asset_id] = [] unless asset_based_specs.has_key?(asset_id)
-          asset_based_specs[asset_id] << transfer_spec
+          asset_based_specs[asset_id] = {} unless asset_based_specs.has_key?(asset_id)
+          asset_based_specs[asset_id][transfer_spec.change_script] = [] unless asset_based_specs[asset_id].has_key?(transfer_spec.change_script)
+          asset_based_specs[asset_id][transfer_spec.change_script] << transfer_spec
         }
 
-        asset_based_specs.each{|asset_id, transfer_specs|
-          transfer_amount = transfer_specs.inject(0){|sum, s| sum + s.amount}
-          colored_outputs, total_amount = TransactionBuilder.collect_colored_outputs(transfer_specs[0].unspent_outputs, asset_id, transfer_amount)
-          inputs = inputs + colored_outputs
-          transfer_specs.each{|spec|
-            # add asset transfer output
-            spec.split_output_amount.each {|amount|
-              outputs << create_colored_output(oa_address_to_address(spec.to_script))
-              asset_quantities << amount
+        asset_based_specs.each{|asset_id, address_based_specs|
+          address_based_specs.values.each{|transfer_specs|
+            transfer_amount = transfer_specs.inject(0){|sum, s| sum + s.amount}
+            colored_outputs, total_amount = TransactionBuilder.collect_colored_outputs(transfer_specs[0].unspent_outputs, asset_id, transfer_amount)
+            inputs = inputs + colored_outputs
+            transfer_specs.each{|spec|
+              # add asset transfer output
+              spec.split_output_amount.each {|amount|
+                outputs << create_colored_output(oa_address_to_address(spec.to_script))
+                asset_quantities << amount
+              }
             }
+            # add the rest of the asset to the origin address
+            if total_amount > transfer_amount
+              outputs << create_colored_output(oa_address_to_address(transfer_specs[0].change_script))
+              asset_quantities << (total_amount - transfer_amount)
+            end
           }
-          # add the rest of the asset to the origin address
-          if total_amount > transfer_amount
-            outputs << create_colored_output(oa_address_to_address(transfer_specs[0].change_script))
-            asset_quantities << (total_amount - transfer_amount)
-          end
         }
-
         # End of asset settings
 
         ## For bitcoins transfer
