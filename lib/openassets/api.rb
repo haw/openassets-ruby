@@ -125,19 +125,22 @@ module OpenAssets
     end
 
     # Creates a transaction for sending multiple asset from an address to another.
-    # @param[String] from The open asset address to send the asset from.
-    # @param[Array[OpenAssets::SendAssetParam]] send_asset_params The send Asset information(asset_id, amount, to).
+    # @param[String] from The open asset address to send the asset from when send_asset_param hasn't from.
+    # to send the bitcoins from, if needed. where to send bitcoin change, if any.
+    # @param[Array[OpenAssets::SendAssetParam]] send_asset_params The send Asset information(asset_id, amount, to, from).
     # @param[Integer] fees The fess in satoshis for the transaction.
     # @param[String] mode 'broadcast' (default) for signing and broadcasting the transaction,
     # 'signed' for signing the transaction without broadcasting,
     # 'unsigned' for getting the raw unsigned transaction without broadcasting"""='broadcast'
     # @return[Bitcoin::Protocol:Tx] The resulting transaction.
     def send_assets(from, send_asset_params, fees = nil, mode = 'broadcast')
-      colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
-      transfer_specs = send_asset_params.map{|param|
-        [param.asset_id, OpenAssets::Transaction::TransferParameters.new(colored_outputs, param.to, from, param.amount)]
+      transfer_specs = send_asset_params.map{ |param|
+        colored_outputs = get_unspent_outputs([oa_address_to_address(param.from || from)])
+        [param.asset_id, OpenAssets::Transaction::TransferParameters.new(colored_outputs, param.to, param.from || from, param.amount)]
       }
-      tx = create_tx_builder.transfer_assets(transfer_specs, from, fees.nil? ? @config[:default_fees]: fees)
+      btc_transfer_spec = OpenAssets::Transaction::TransferParameters.new(
+          get_unspent_outputs([oa_address_to_address(from)]), nil, oa_address_to_address(from), 0)
+      tx = create_tx_builder.transfer_assets(transfer_specs, btc_transfer_spec, fees.nil? ? @config[:default_fees]: fees)
       tx = process_transaction(tx, mode)
       tx
     end
