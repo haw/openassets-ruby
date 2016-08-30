@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe OpenAssets::Transaction::TransactionBuilder do
+  include OpenAssets::Util
 
   it 'issue asset success' do
     unspent_outputs = gen_outputs(
@@ -144,6 +145,35 @@ describe OpenAssets::Transaction::TransactionBuilder do
     expect(tx.out[2].value).to eq(600)
     expect(tx.out[3].value).to eq(600)
     expect(tx.out[4].value).to eq(900)
+  end
+
+  it 'multiple address inputs transfer' do
+    from = %w(1DLSeqWwHJj3XrmsXQ5QzZZ4LDgp4gRvF7 1HhgpWTatNTb4UK4mm23QVpZKLm1GQTfkX)
+    to = '1HXEqrZxXy5nw7Us8ozFZ1Vwx37dGFL5wC'
+    change = '1F2AQr6oqNtcJQ6p9SiCLQTrHuM9en44H8'
+    asset_id = 'AVQ1hnBhEyaNPk6sS2kpmav2YkyXqrwoUT'
+
+    unspent_outputs_1 = gen_outputs([[1_000, 'source', asset_id, 500, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8220']])
+    unspent_outputs_2 = gen_outputs([[1_000, 'source', asset_id, 500, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8221']])
+    unspent_outputs_3 = gen_outputs([[3_000, 'source', nil, 0, '8a7e2adf117199f93c8515266497d2b9954f3f3dea0f043e06c19ad2b21b8222']])
+
+    builder = OpenAssets::Transaction::TransactionBuilder.new(1_000)
+    asset_transfer_specs = [
+      [asset_id, OpenAssets::Transaction::TransferParameters.new(unspent_outputs_1, address_to_oa_address(to), address_to_oa_address(from[0]), 100)],
+      [asset_id, OpenAssets::Transaction::TransferParameters.new(unspent_outputs_2, address_to_oa_address(to), address_to_oa_address(from[1]), 100)]
+    ]
+    btc_transfer_specs = [OpenAssets::Transaction::TransferParameters.new(unspent_outputs_3, nil, change, 0)]
+    tx = builder.send(:transfer, asset_transfer_specs, btc_transfer_specs, 0)
+
+    payload = OpenAssets::Protocol::MarkerOutput.parse_script(tx.out[0].pk_script)
+    marker_output = OpenAssets::Protocol::MarkerOutput.deserialize_payload(payload)
+    expect(marker_output.asset_quantities).to eq([100,400,100,400])
+    expect(tx.out[1].parsed_script.get_address).to eq(to)
+    expect(tx.out[2].parsed_script.get_address).to eq(from[0])
+    expect(tx.out[3].parsed_script.get_address).to eq(to)
+    expect(tx.out[4].parsed_script.get_address).to eq(from[1])
+    expect(tx.out[5].parsed_script.get_address).to eq(change)
+    expect(tx.out[5].value).to eq(1000)
   end
 
   # generate outputs
