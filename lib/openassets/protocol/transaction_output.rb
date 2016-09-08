@@ -120,7 +120,10 @@ module OpenAssets
       end
 
       def load_asset_definition(url)
-        @@definition_cache[url] = AssetDefinition.parse_url(metadata_url) unless @@definition_cache.has_key?(url)
+        unless @@definition_cache.has_key?(url)
+          loader = AssetDefinitionLoader.new(metadata_url)
+          @@definition_cache[url] = loader.load_definition
+        end
         @@definition_cache[url]
       end
     end
