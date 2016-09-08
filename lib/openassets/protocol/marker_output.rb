@@ -43,6 +43,7 @@ module OpenAssets
       # @param [String] payload The Open Assets Payload.
       # @return [OpenAssets::Protocol::MarkerOutput] The marker output object.
       def self.deserialize_payload(payload)
+        return nil unless valid?(payload)
         payload = payload[8..-1] # exclude OAP_MARKER,VERSION
         asset_quantity, payload = parse_asset_qty(payload)
         list = to_bytes(payload).map{|x|(x.to_i(16)>=128 ? x : x+"|")}.join.split('|')[0..(asset_quantity - 1)].join
@@ -57,24 +58,7 @@ module OpenAssets
       # @return [String] The byte string of the marker output payload if the output fits the pattern, nil otherwise.
       def self.parse_script(output_script)
         data = Bitcoin::Script.new(output_script).get_op_return_data
-        return data if data.nil?
-        # check open assets marker
-        return nil unless data.start_with?(OAP_MARKER + VERSION)
-        # check asset quantity
-        offset = [OAP_MARKER + VERSION].pack('H*').length
-        count, offset = read_var_integer(data, offset)
-        return nil unless count
-        # check metadata
-        count.times do
-          quantity, length = read_leb128(data, offset)
-          return nil if quantity.nil? || (length - offset) > 9
-          offset = length
-        end
-        # check metadata
-        length, offset = read_var_integer(data, offset)
-        return nil unless length
-        return nil if [data].pack('H*').bytes.length < length + offset
-        data
+        return data if valid?(data)
       end
 
       # Creates an output script containing an OP_RETURN and a PUSHDATA from payload.
@@ -115,6 +99,29 @@ module OpenAssets
           else
             count
         end
+      end
+
+      # validate marker output format
+      # @param[String] data marker output data with start with 4f41
+      def self.valid?(data)
+        return false if data.nil?
+        # check open assets marker
+        return false unless data.start_with?(OAP_MARKER + VERSION)
+        # check asset quantity
+        offset = [OAP_MARKER + VERSION].pack('H*').length
+        count, offset = read_var_integer(data, offset)
+        return false unless count
+        # check metadata
+        count.times do
+          quantity, length = read_leb128(data, offset)
+          return false if quantity.nil? || (length - offset) > 9
+          offset = length
+        end
+        # check metadata
+        length, offset = read_var_integer(data, offset)
+        return false unless length
+        return false if [data].pack('H*').bytes.length < length + offset
+        true
       end
 
     end
