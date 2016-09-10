@@ -234,7 +234,7 @@ describe OpenAssets::Api do
       context 'cache none' do
         subject{
           testnet_mock = double('BitcoinCoreProviderTestnet Mock')
-          api = OpenAssets::Api.new({:cache => :none, :network => 'testnet'})
+          api = OpenAssets::Api.new({:cache => 'none', :network => 'testnet'})
           allow(testnet_mock).to receive(:list_unspent).and_return(TESTNET_BTC_UNSPENT)
           setup_tx_load_mock(testnet_mock)
           allow(api).to receive(:provider).and_return(testnet_mock)
