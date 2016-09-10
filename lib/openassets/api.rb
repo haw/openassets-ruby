@@ -28,8 +28,10 @@ module OpenAssets
       else
         raise OpenAssets::Error, 'specified unsupported provider.'
       end
-      @tx_cache = Cache::TransactionCache.new(@config[:cache])
-      @output_cache = Cache::OutputCache.new(@config[:cache])
+      unless @config[:cache] == :none
+        @tx_cache = Cache::TransactionCache.new(@config[:cache])
+        @output_cache = Cache::OutputCache.new(@config[:cache])
+      end
       change_network
     end
 
@@ -209,12 +211,14 @@ module OpenAssets
     end
 
     def get_output(txid, output_index)
-      cached = output_cache.get(txid, output_index)
-      return cached unless cached.nil?
+      if output_cache
+        cached = output_cache.get(txid, output_index)
+        return cached unless cached.nil?
+      end
       decode_tx = load_cached_tx(txid)
       tx = Bitcoin::Protocol::Tx.new(decode_tx.htb)
       colored_outputs = get_color_outputs_from_tx(tx)
-      colored_outputs.each_with_index { |o, index| output_cache.put(txid, index, o)}
+      colored_outputs.each_with_index { |o, index| output_cache.put(txid, index, o)} if output_cache
       colored_outputs[output_index]
     end
 
@@ -387,6 +391,7 @@ module OpenAssets
     end
 
     def load_cached_tx(txid)
+      return load_tx(txid) unless tx_cache
       decode_tx = tx_cache.get(txid)
       if decode_tx.nil?
         decode_tx = load_tx(txid)

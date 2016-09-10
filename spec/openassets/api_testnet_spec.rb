@@ -201,22 +201,64 @@ describe OpenAssets::Api do
       expect{subject.burn_asset(oa_address, 'oZuo5eABTxR3fjQT9Dqi17jjqZsQpCXBE6', 10000, 'unsignd')}.to raise_error(OpenAssets::Transaction::TransactionBuildError)
     end
 
-    it 'cached tx' do
-      txid = 'e1dcdb553d40ec35aac0a5b9bc2cce0112dd10c869a887b52b3b58071bb29f3c'
-      out_index = 1
-      expect(subject.provider).to receive(:get_transaction).with(txid, 0).once
-      subject.get_output(txid, out_index)
-      subject.get_output(txid, out_index)
+    describe 'cached tx' do
 
-      get_output_tx = '5004b6e4108ff2e39112e7b9fa596f225086373d33a1839af3e027a1cd259872'
-      expect(subject.provider).to receive(:get_transaction).with(get_output_tx, 0).twice
-      subject.get_outputs_from_txid(get_output_tx)
-      subject.get_outputs_from_txid(get_output_tx)
+      context 'cache memory' do
+        subject {
+          testnet_mock = double('BitcoinCoreProviderTestnet Mock')
+          api = OpenAssets::Api.new({:cache => ':memory:', :network => 'testnet'})
+          allow(testnet_mock).to receive(:list_unspent).and_return(TESTNET_BTC_UNSPENT)
+          setup_tx_load_mock(testnet_mock)
+          allow(api).to receive(:provider).and_return(testnet_mock)
+          api
+        }
+        it do
+          txid = 'e1dcdb553d40ec35aac0a5b9bc2cce0112dd10c869a887b52b3b58071bb29f3c'
+          out_index = 1
+          expect(subject.provider).to receive(:get_transaction).with(txid, 0).once
+          subject.get_output(txid, out_index)
+          subject.get_output(txid, out_index)
 
-      get_output_tx_cache = '9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5'
-      expect(subject.provider).to receive(:get_transaction).with(get_output_tx_cache, 0).once
-      subject.get_outputs_from_txid(get_output_tx_cache, true)
-      subject.get_outputs_from_txid(get_output_tx_cache, true)
+          get_output_tx = '5004b6e4108ff2e39112e7b9fa596f225086373d33a1839af3e027a1cd259872'
+          expect(subject.provider).to receive(:get_transaction).with(get_output_tx, 0).twice
+          subject.get_outputs_from_txid(get_output_tx)
+          subject.get_outputs_from_txid(get_output_tx)
+
+          get_output_tx_cache = '9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5'
+          expect(subject.provider).to receive(:get_transaction).with(get_output_tx_cache, 0).once
+          subject.get_outputs_from_txid(get_output_tx_cache, true)
+          subject.get_outputs_from_txid(get_output_tx_cache, true)
+        end
+      end
+
+      context 'cache none' do
+        subject{
+          testnet_mock = double('BitcoinCoreProviderTestnet Mock')
+          api = OpenAssets::Api.new({:cache => :none, :network => 'testnet'})
+          allow(testnet_mock).to receive(:list_unspent).and_return(TESTNET_BTC_UNSPENT)
+          setup_tx_load_mock(testnet_mock)
+          allow(api).to receive(:provider).and_return(testnet_mock)
+          api
+        }
+        it do
+          txid = 'e1dcdb553d40ec35aac0a5b9bc2cce0112dd10c869a887b52b3b58071bb29f3c'
+          out_index = 1
+          expect(subject.provider).to receive(:get_transaction).with(txid, 0).twice
+          subject.get_output(txid, out_index)
+          subject.get_output(txid, out_index)
+
+          get_output_tx = '5004b6e4108ff2e39112e7b9fa596f225086373d33a1839af3e027a1cd259872'
+          expect(subject.provider).to receive(:get_transaction).with(get_output_tx, 0).twice
+          subject.get_outputs_from_txid(get_output_tx)
+          subject.get_outputs_from_txid(get_output_tx)
+
+          get_output_tx_cache = '9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5'
+          expect(subject.provider).to receive(:get_transaction).with(get_output_tx_cache, 0).twice
+          subject.get_outputs_from_txid(get_output_tx_cache, true)
+          subject.get_outputs_from_txid(get_output_tx_cache, true)
+        end
+      end
+
     end
 
   end
