@@ -205,18 +205,31 @@ Get tx outputs. (use for debug)
   ``` 
   
 * **send_assets**  
-Creates a transaction for sending **multiple** asset from the open asset address to another.
+Creates a transaction for sending **multiple** asset from the open asset address(es) to another.  
+`<from open asset address>` is used to send bitcoins **if** needed, and receive bitcoin change **if** any.
   ```ruby
   # send assets
   # api.send_assets(<from open asset address>, <The array of send Asset information(see OpenAssets::SendAssetParam).>, <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>, <mode=('broadcast', 'signed', 'unsigned')>, <output_qty default value is 1.>)
 
   # example
-  from = address_to_oa_address('mrxpeizRrF8ymNx5FrvcGGZVecZjtUFVP3')
-  to = address_to_oa_address('n4MEsSUN8GktDFZzU3V55mP3jWGMN7e4wE')
+  from = api.address_to_oa_address('mrxpeizRrF8ymNx5FrvcGGZVecZjtUFVP3')
+  to = api.address_to_oa_address('n4MEsSUN8GktDFZzU3V55mP3jWGMN7e4wE')
   params = []
   params << OpenAssets::SendAssetParam.new('oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY', 50, to)
   params << OpenAssets::SendAssetParam.new('oUygwarZqNGrjDvcZUpZdvEc7es6dcs1vs', 4, to)
   tx = api.send_assets(from, params)
+  
+  # send assets from multiple addresses.
+  change_address = 'mwxeANpckdbdgZCpUMTceQhbbhLPJiqpfD'
+  from = [
+    api.address_to_oa_address("mrxpeizRrF8ymNx5FrvcGGZVecZjtUFVP3"),
+    api.address_to_oa_address("mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T")
+  ]
+  to = api.address_to_oa_address('n4MEsSUN8GktDFZzU3V55mP3jWGMN7e4wE')
+  params = []
+  params << OpenAssets::SendAssetParam.new('oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY', 100, to, from[0])
+  params << OpenAssets::SendAssetParam.new('oUygwarZqNGrjDvcZUpZdvEc7es6dcs1vs', 100, to, from[1])
+  tx = api.send_assets(change_address, params)
   ```
 
 * **send_bitcoins**  

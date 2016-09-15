@@ -66,9 +66,7 @@ module OpenAssets
       # @param[String] btc_change_script The script where to send bitcoin change, if any.
       # @param[Integer] fees The fees to include in the transaction.
       # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
-      def transfer_assets(transfer_specs, btc_change_script, fees)
-        btc_transfer_spec = OpenAssets::Transaction::TransferParameters.new(
-            transfer_specs[0][1].unspent_outputs, nil, oa_address_to_address(btc_change_script), 0)
+      def transfer_assets(transfer_specs, btc_transfer_spec, fees)
         transfer(transfer_specs, [btc_transfer_spec], fees)
       end
 

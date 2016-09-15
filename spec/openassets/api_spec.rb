@@ -276,6 +276,50 @@ describe OpenAssets::Api do
 
     end
 
+    it 'send_assets' do
+      asset_id = 'AWo3R89p5REmoSyMWB8AeUmud8456bRxZL'
+      from = 'akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6'
+      to = %w(akP4AgdxY5zsfSxM6Jach3YQGZE7vM1o8si akEJwzkzEFau4t2wjbXoMs7MwtZkB8xixmH)
+      params = [
+        OpenAssets::SendAssetParam.new(asset_id, 10, to[0]),
+        OpenAssets::SendAssetParam.new(asset_id, 10, to[1])
+      ]
+      tx = subject.send_assets(from, params, 10000, 'unsigned')
+
+      expect(tx.ver).to eq(1)
+      expect(tx.lock_time).to eq(0)
+      marker_output_payload = OpenAssets::Protocol::MarkerOutput.parse_script(tx.outputs[0].pk_script)
+      marker_output = OpenAssets::Protocol::MarkerOutput.deserialize_payload(marker_output_payload)
+      expect(tx.outputs.length).to eq(5)
+      expect(marker_output.asset_quantities).to eq([10, 10, 4])
+      expect(tx.out[1].parsed_script.get_address).to eq(oa_address_to_address to[0])
+      expect(tx.out[2].parsed_script.get_address).to eq(oa_address_to_address to[1])
+      expect(tx.out[3].parsed_script.get_address).to eq(oa_address_to_address from)
+      expect(tx.out[4].parsed_script.get_address).to eq(oa_address_to_address from)
+
+      # multiple from addresses
+      from = %w(akTfC7D825Cse4NvFiLCy7vr3B6x2Mpq8t6 akXDPMMHHBrUrd1fM756M1GSB8viVAwMyBk)
+      to = 'akP4AgdxY5zsfSxM6Jach3YQGZE7vM1o8si'
+      change = to
+      params = [
+        OpenAssets::SendAssetParam.new(asset_id, 10, to, from[0]),
+        OpenAssets::SendAssetParam.new(asset_id, 15, to, from[1])
+      ]
+      tx = subject.send_assets(change, params, 10000, 'unsigned')
+
+      expect(tx.ver).to eq(1)
+      expect(tx.lock_time).to eq(0)
+      marker_output_payload = OpenAssets::Protocol::MarkerOutput.parse_script(tx.outputs[0].pk_script)
+      marker_output = OpenAssets::Protocol::MarkerOutput.deserialize_payload(marker_output_payload)
+      expect(tx.outputs.length).to eq(6)
+      expect(marker_output.asset_quantities).to eq([10, 14, 15, 9])
+      expect(tx.out[1].parsed_script.get_address).to eq(oa_address_to_address to)
+      expect(tx.out[2].parsed_script.get_address).to eq(oa_address_to_address from[0])
+      expect(tx.out[3].parsed_script.get_address).to eq(oa_address_to_address to)
+      expect(tx.out[4].parsed_script.get_address).to eq(oa_address_to_address from[1])
+      expect(tx.out[5].parsed_script.get_address).to eq(oa_address_to_address change)
+    end
+
     it 'send_bitcoin' do
       address = '1HhJs3JgbiyxC8ktfi6nU4wTqVmrMtCVkG'
       # 26400 satoshiのUTXOを保持してるが、残り600✕2のOAのUTXOを保持してる
