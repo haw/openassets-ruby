@@ -27,6 +27,8 @@ describe OpenAssets::Api do
       expect(list[0]['asset_amount']).to eq('547')
       expect(list[0]['account']).to eq('')
       expect(list[0]['proof_of_authenticity']).to eq(false)
+      expect(list[0]['spendable']).to eq(true)
+      expect(list[0]['solvable']).to eq(true)
 
       expect(list[7]['asset_id']).to eq('oNJgtrSSRzsU9k8Gnozy8pARhrwjKRoX5m')
       expect(list[7]['proof_of_authenticity']).to eq(true)
@@ -343,7 +345,8 @@ describe OpenAssets::Api do
        "scriptPubKey" => "76a9148130f96080e598cc4e210067eb54403074aa1a8d88ac",
        "amount" => 0.00000600,
        "confirmations" => 1,
-       "spendable" => true
+       "spendable" => true,
+       "solvable" => true
       },
       {"txid" => "6887dd16b7ad2847bd4546211665199e05711c3acd1a67da879506adb5486910",
        "vout" => 1,
@@ -352,7 +355,8 @@ describe OpenAssets::Api do
        "scriptPubKey" => "",
        "amount" => 0.00000600,
        "confirmations" => 1,
-       "spendable" => true
+       "spendable" => true,
+       "solvable" => true
       },
       {"txid" => "6887dd16b7ad2847bd4546211665199e05711c3acd1a67da879506adb5486910",
         "vout" => 2,
@@ -361,7 +365,8 @@ describe OpenAssets::Api do
         "scriptPubKey" => "7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6",
         "amount" => 0.00000600,
         "confirmations" => 1,
-        "spendable" => true
+        "spendable" => true,
+        "solvable" => true
       },
       {"txid" => "6887dd16b7ad2847bd4546211665199e05711c3acd1a67da879506adb5486910",
        "vout" => 3,
@@ -370,7 +375,8 @@ describe OpenAssets::Api do
        "scriptPubKey" => "7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6",
        "amount" => 0.00000600,
        "confirmations" => 1,
-       "spendable" => true
+       "spendable" => true,
+       "solvable" => true
       },
       {"txid" => "9ece6cdda95805e47667f0b389ee3c0c29efd5929bc372e68a34ac1ecbb92d6f",
         "vout" => 1,
@@ -379,7 +385,8 @@ describe OpenAssets::Api do
        "scriptPubKey" => "7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6",
        "amount" => 0.00000600,
        "confirmations" => 1,
-       "spendable" => true
+       "spendable" => true,
+       "solvable" => true
       },
       {"txid" => "9ece6cdda95805e47667f0b389ee3c0c29efd5929bc372e68a34ac1ecbb92d6f",
         "vout" => 2,
@@ -388,7 +395,8 @@ describe OpenAssets::Api do
        "scriptPubKey" => "7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6",
        "amount" => 0.00000600,
        "confirmations" => 1,
-       "spendable" => true
+       "spendable" => true,
+       "solvable" => true
       },
       {"txid" => "308ea73b45bef1428acb41f996543d6ebd534dca8f5de965e7f00eae084aaa5c",
        "vout" => 1,
@@ -397,7 +405,8 @@ describe OpenAssets::Api do
        "scriptPubKey" => "d3c96dc04a62f488a3f1b588f74af136469c6fca",
        "amount" => 0.00000600,
        "confirmations" => 1,
-       "spendable" => true
+       "spendable" => true,
+       "solvable" => true
       },
       {
         "txid" => "5004b6e4108ff2e39112e7b9fa596f225086373d33a1839af3e027a1cd259872",
@@ -407,7 +416,8 @@ describe OpenAssets::Api do
         "script" => "76a914147b897573a9586f64320d29c7780f383d00f06d88ac",
         "amount" => 0.00000600,
         "account" => "proof-of-authenticity",
-        "spendable" => true
+        "spendable" => true,
+        "solvable" => true
       }
   ]
 

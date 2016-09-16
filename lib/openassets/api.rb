@@ -208,6 +208,8 @@ module OpenAssets
         output = OpenAssets::Transaction::SpendableOutput.new(
           OpenAssets::Transaction::OutPoint.new(item['txid'], item['vout']), output_result)
         output.confirmations = item['confirmations']
+        output.spendable = item['spendable']
+        output.solvable = item['solvable']
         output
       }
       result
