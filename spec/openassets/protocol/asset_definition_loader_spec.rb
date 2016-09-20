@@ -13,6 +13,15 @@ describe OpenAssets::Protocol::AssetDefinitionLoader do
       end
     end
 
+    context 'invalid scheme' do
+      subject{
+        OpenAssets::Protocol::AssetDefinitionLoader.new('<http://www.caiselian.com>')
+      }
+      it do
+        expect(subject.load_definition).to be_nil
+      end
+    end
+
   end
 
 end

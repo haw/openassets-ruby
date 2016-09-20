@@ -14,7 +14,7 @@ module OpenAssets
       # load Asset Definition File
       # @return[OpenAssets::Protocol::AssetDefinition] loaded asset definition object
       def load_definition
-        @loader.load
+        @loader.load if @loader
       end
 
     end
