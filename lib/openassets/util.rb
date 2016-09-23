@@ -49,18 +49,21 @@ module OpenAssets
 
     # LEB128 encode
     def encode_leb128(value)
-      d7=->n{(n>>7)==0 ? [n] : d7[n>>7]+[127 & n]}
-      msb=->a{a0=a[0].to_s(16);[(a[0]< 16 ? "0"+a0 : a0)]+a[1..-1].map{|x|(x|128).to_s(16)}}
-      leb128=->n{msb[d7[n]].reverse.join}
-      leb128[value]
+      LEB128.encode(value, false).read.bth
     end
 
     # LEB128 decode
     def decode_leb128(value)
-      mbs = to_bytes(value).map{|x|(x.to_i(16)>=128 ? x : x+"|")}.join.split('|')
-      num=->a{(a.size==1 ? a[0] : (num[a[0..-2]]<<7)|a[-1])}
-      r7=->n{to_bytes(n).map{|x|(x.to_i(16))&127}}
-      mbs.map{|x|num[r7[x].reverse]}
+      results = []
+      sio = StringIO.new
+      value.htb.each_byte{|b|
+        sio.putc(b)
+        if b < 128
+          results << LEB128.decode(sio, false)
+          sio = StringIO.new
+        end
+      }
+      results
     end
 
     def to_bytes(string)
