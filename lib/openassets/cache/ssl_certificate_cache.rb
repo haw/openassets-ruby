@@ -3,7 +3,7 @@ module OpenAssets
     class SSLCertificateCache < SQLiteBase
 
       def initialize
-        path = OpenAssets.configuration && OpenAssets.configuration[:cache] != 'none' ? OpenAssets.configuration[:cache] : ':memory:'
+        path = OpenAssets.configuration ? OpenAssets.configuration[:cache] : ':memory:'
         super(path)
       end
 

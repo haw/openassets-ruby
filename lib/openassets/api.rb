@@ -28,10 +28,8 @@ module OpenAssets
       else
         raise OpenAssets::Error, 'specified unsupported provider.'
       end
-      unless @config[:cache] == 'none'
-        @tx_cache = Cache::TransactionCache.new(@config[:cache])
-        @output_cache = Cache::OutputCache.new(@config[:cache])
-      end
+      @tx_cache = Cache::TransactionCache.new(@config[:cache])
+      @output_cache = Cache::OutputCache.new(@config[:cache])
       change_network
     end
 
