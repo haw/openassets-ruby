@@ -24,4 +24,22 @@ describe OpenAssets::Protocol::AssetDefinitionLoader do
 
   end
 
+  describe 'create_pointer_redeem_script' do
+    subject {
+      OpenAssets::Protocol::AssetDefinitionLoader.create_pointer_redeem_script('https://goo.gl/bmVEuw')
+    }
+    it do
+      expect(subject.chunks[0]).to eq('u=https://goo.gl/bmVEuw')
+    end
+  end
+
+  describe 'create_pointer_p2sh' do
+    subject {
+      OpenAssets::Protocol::AssetDefinitionLoader.create_pointer_p2sh('https://goo.gl/bmVEuw')
+    }
+    it do
+      expect(subject.is_p2sh?).to be true
+    end
+  end
+
 end
