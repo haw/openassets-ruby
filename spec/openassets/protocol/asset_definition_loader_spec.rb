@@ -57,13 +57,13 @@ describe OpenAssets::Protocol::AssetDefinitionLoader, :network => :testnet do
       tx.add_in(Bitcoin::Protocol::TxIn.from_hex_hash(issuance_tx.hash, 0))
       tx.add_out(Bitcoin::Protocol::TxOut.value_to_address(100, 'mmy7BEH1SUGAeSVUR22pt5hPaejo2645F1'))
 
-      key = Bitcoin::Key.from_base58('cPaJYBMDLjQp5gSUHnBfhX4Rgj95ekBS6oBttwQLw3qfsKKcDfuB')
       def_url = 'https://goo.gl/bmVEuw'
       to = 'bWwvzRQ6Lux9rWgeqTe91XwbxvFuxzK56cx'
 
       redeem_script = OpenAssets::Protocol::AssetDefinitionLoader.create_pointer_redeem_script(def_url, to)
-      sig_hash = tx.signature_hash_for_input(0, redeem_script.to_payload, Bitcoin::Script::SIGHASH_TYPE[:all])
-      sig = Bitcoin::Script.to_pubkey_script_sig(key.sign(sig_hash), key.pub.htb)
+      sigunature = '3045022100a48fedcab731c5cbd583a5aa482f3efdf73e855105f8c66e44a5852c4f7a54a802202fb7c9ecf223bf072f97c90cd21bcfc9600f4b51fcd08ab3080ff0ebdd39678d'
+      pubkey = '0292ee82d9add0512294723f2c363aee24efdeb3f258cdaf5118a4fcf5263e92c9'
+      sig = Bitcoin::Script.to_pubkey_script_sig(sigunature.htb, pubkey.htb)
       script_sig = Bitcoin::Script.new(sig + Bitcoin::Script.pack_pushdata(redeem_script.to_payload))
 
       tx.in[0].script_sig = script_sig.to_payload
