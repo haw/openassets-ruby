@@ -27,7 +27,6 @@ module OpenAssets
         asset_def = "u=#{url}".bytes.map{|b|b.to_s(16)}.join
         btc_addr = oa_address_to_address(to)
         script = Bitcoin::Script.from_string("#{asset_def}")
-        puts Bitcoin::Script.to_address_script(btc_addr).bth
         Bitcoin::Script.new(script.append_opcode(Bitcoin::Script::OP_DROP).to_payload + Bitcoin::Script.to_address_script(btc_addr))
       end
 
