@@ -63,7 +63,7 @@ module OpenAssets
       
       # Creates a transaction for sending assets to many.
       # @param[Array[OpenAssets::Transaction::TransferParameters]] asset_transfer_spec The parameters of the asset being transferred.
-      # @param[String] btc_change_script The script where to send bitcoin change, if any.
+      # @param[OpenAssets::Transaction::TransferParameters] btc_transfer_spec The script where to send bitcoin change, if any.
       # @param[Integer] fees The fees to include in the transaction.
       # @return[Bitcoin::Protocol:Tx] The resulting unsigned transaction.
       def transfer_assets(transfer_specs, btc_transfer_spec, fees)
