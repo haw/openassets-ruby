@@ -1,206 +1,243 @@
 require 'spec_helper'
 
-describe OpenAssets::Api do
+describe OpenAssets::Api, :network => :testnet do
 
   include OpenAssets::Util
+  extend OpenAssets::Util
 
-  context 'testnet', :network => :testnet do
-    subject {
-      testnet_mock = double('BitcoinCoreProviderTestnet Mock')
-      api = OpenAssets::Api.new({:cache => ':memory:', :network => 'testnet'})
-      allow(testnet_mock).to receive(:list_unspent).and_return(TESTNET_BTC_UNSPENT)
-      setup_tx_load_mock(testnet_mock)
-      allow(api).to receive(:provider).and_return(testnet_mock)
-      api
-    }
+  context 'testnet' do
 
-    it 'list_unspent' do
-      list = subject.list_unspent
-      expect(list[0]['txid']).to eq('e1dcdb553d40ec35aac0a5b9bc2cce0112dd10c869a887b52b3b58071bb29f3c')
-      expect(list[0]['asset_id']).to eq('oWLkUn44E45cnQtsP6x1wrvJ2iRx9XyFny')
-      expect(list[0]['script']).to eq('76a9148130f96080e598cc4e210067eb54403074aa1a8d88ac')
-      expect(list[0]['amount']).to eq('0.00000600')
-      expect(list[0]['confirmations']).to eq(1)
-      expect(list[0]['oa_address']).to eq('bX3FwNkYLUkW1n9CoMhtnjDHrBy96Dgz2gG')
-      expect(list[0]['address']).to eq('msJ48aj11GcKuu3SK5nc5MPGrMxvE1oR5Y')
-      expect(list[0]['asset_quantity']).to eq('547')
-      expect(list[0]['asset_amount']).to eq('547')
-      expect(list[0]['account']).to eq('')
-      expect(list[0]['proof_of_authenticity']).to eq(false)
-      expect(list[0]['spendable']).to eq(true)
-      expect(list[0]['solvable']).to eq(true)
+    describe 'list_unspent' do
+      subject{
+        create_api.list_unspent
+      }
+      it do
+        expect(subject[0]['txid']).to eq('e1dcdb553d40ec35aac0a5b9bc2cce0112dd10c869a887b52b3b58071bb29f3c')
+        expect(subject[0]['asset_id']).to eq('oWLkUn44E45cnQtsP6x1wrvJ2iRx9XyFny')
+        expect(subject[0]['script']).to eq('76a9148130f96080e598cc4e210067eb54403074aa1a8d88ac')
+        expect(subject[0]['amount']).to eq('0.00000600')
+        expect(subject[0]['confirmations']).to eq(1)
+        expect(subject[0]['oa_address']).to eq('bX3FwNkYLUkW1n9CoMhtnjDHrBy96Dgz2gG')
+        expect(subject[0]['address']).to eq('msJ48aj11GcKuu3SK5nc5MPGrMxvE1oR5Y')
+        expect(subject[0]['asset_quantity']).to eq('547')
+        expect(subject[0]['asset_amount']).to eq('547')
+        expect(subject[0]['account']).to eq('')
+        expect(subject[0]['proof_of_authenticity']).to eq(false)
+        expect(subject[0]['spendable']).to eq(true)
+        expect(subject[0]['solvable']).to eq(true)
 
-      expect(list[7]['asset_id']).to eq('oNJgtrSSRzsU9k8Gnozy8pARhrwjKRoX5m')
-      expect(list[7]['proof_of_authenticity']).to eq(true)
+        expect(subject[7]['asset_id']).to eq('oNJgtrSSRzsU9k8Gnozy8pARhrwjKRoX5m')
+        expect(subject[7]['proof_of_authenticity']).to eq(true)
+      end
     end
 
-    it 'get_balance' do
-      balances = subject.get_balance('bX3FwNkYLUkW1n9CoMhtnjDHrBy96Dgz2gG')
-      expect(balances[0]['value']).to eq('0.00000600')
-      expect(balances[0]['oa_address']).to eq('bX3FwNkYLUkW1n9CoMhtnjDHrBy96Dgz2gG')
-      expect(balances[0]['address']).to eq('msJ48aj11GcKuu3SK5nc5MPGrMxvE1oR5Y')
-      assets = balances[0]['assets']
-      expect(assets[0]['asset_id']).to eq('oWLkUn44E45cnQtsP6x1wrvJ2iRx9XyFny')
-      expect(assets[0]['quantity']).to eq('547')
-      expect(assets[0]['proof_of_authenticity']).to eq(false)
-      expect(balances[0]['account']).to eq('')
+    describe 'get_balance' do
+      context 'disable authenticity' do
+        subject{
+          create_api.get_balance('bX3FwNkYLUkW1n9CoMhtnjDHrBy96Dgz2gG')
+        }
+        it do
+          expect(subject[0]['value']).to eq('0.00000600')
+          expect(subject[0]['oa_address']).to eq('bX3FwNkYLUkW1n9CoMhtnjDHrBy96Dgz2gG')
+          expect(subject[0]['address']).to eq('msJ48aj11GcKuu3SK5nc5MPGrMxvE1oR5Y')
+          assets = subject[0]['assets']
+          expect(assets[0]['asset_id']).to eq('oWLkUn44E45cnQtsP6x1wrvJ2iRx9XyFny')
+          expect(assets[0]['quantity']).to eq('547')
+          expect(assets[0]['proof_of_authenticity']).to eq(false)
+          expect(subject[0]['account']).to eq('')
+        end
+      end
 
-      balances = subject.get_balance('bWsM93ZHn89GByRWrBDoWhFUeBMZEt9mFcT')
-      assets = balances[0]['assets']
-      expect(assets[0]['asset_id']).to eq('oNJgtrSSRzsU9k8Gnozy8pARhrwjKRoX5m')
-      expect(assets[0]['quantity']).to eq('777')
-      expect(assets[0]['proof_of_authenticity']).to eq(true)
+      context 'enable authenticity' do
+        subject{
+          create_api.get_balance('bWsM93ZHn89GByRWrBDoWhFUeBMZEt9mFcT')[0]['assets']
+        }
+        it do
+          expect(subject[0]['asset_id']).to eq('oNJgtrSSRzsU9k8Gnozy8pARhrwjKRoX5m')
+          expect(subject[0]['quantity']).to eq('777')
+          expect(subject[0]['proof_of_authenticity']).to eq(true)
+        end
+      end
     end
 
-    it 'multiple marker output exists in transaction' do
-      outputs = subject.get_outputs_from_txid('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
+    describe 'get_outputs_from_txid' do
+      subject{
+        create_api.get_outputs_from_txid('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
+      }
+      it do
+        expect(subject[0]['output_type']).to eq('marker')
 
-      expect(outputs[0]['output_type']).to eq('marker')
+        expect(subject[1]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5') # second marker output
+        expect(subject[1]['vout']).to eq(1)
+        expect(subject[1]['address']).to be nil
+        expect(subject[1]['oa_address']).to be nil
+        expect(subject[1]['script']).to eq('6a0a4f41010002c801e44b00')
+        expect(subject[1]['amount']).to eq('0.00000000')
+        expect(subject[1]['asset_id']).to be nil
+        expect(subject[1]['asset_quantity']).to eq('0')
+        expect(subject[1]['output_type']).to eq('marker')
 
-      expect(outputs[1]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5') # second marker output
-      expect(outputs[1]['vout']).to eq(1)
-      expect(outputs[1]['address']).to be nil
-      expect(outputs[1]['oa_address']).to be nil
-      expect(outputs[1]['script']).to eq('6a0a4f41010002c801e44b00')
-      expect(outputs[1]['amount']).to eq('0.00000000')
-      expect(outputs[1]['asset_id']).to be nil
-      expect(outputs[1]['asset_quantity']).to eq('0')
-      expect(outputs[1]['output_type']).to eq('marker')
+        expect(subject[2]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
+        expect(subject[2]['vout']).to eq(2)
+        expect(subject[2]['address']).to eq('n3RKjN5TRcNeTzDvdaApME6KMchht2oMTU')
+        expect(subject[2]['oa_address']).to eq(address_to_oa_address('n3RKjN5TRcNeTzDvdaApME6KMchht2oMTU'))
+        expect(subject[2]['script']).to eq('76a914f0422a68ea970a9b007924bc8173f25e862eba8588ac')
+        expect(subject[2]['amount']).to eq('0.00000600')
+        expect(subject[2]['asset_id']).to eq('oK31ByjFuNhfnFuRMmZgchsdiprYmRzuz5')
+        expect(subject[2]['asset_quantity']).to eq('100')
+        expect(subject[2]['output_type']).to eq('transfer')
 
-      expect(outputs[2]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
-      expect(outputs[2]['vout']).to eq(2)
-      expect(outputs[2]['address']).to eq('n3RKjN5TRcNeTzDvdaApME6KMchht2oMTU')
-      expect(outputs[2]['oa_address']).to eq(address_to_oa_address('n3RKjN5TRcNeTzDvdaApME6KMchht2oMTU'))
-      expect(outputs[2]['script']).to eq('76a914f0422a68ea970a9b007924bc8173f25e862eba8588ac')
-      expect(outputs[2]['amount']).to eq('0.00000600')
-      expect(outputs[2]['asset_id']).to eq('oK31ByjFuNhfnFuRMmZgchsdiprYmRzuz5')
-      expect(outputs[2]['asset_quantity']).to eq('100')
-      expect(outputs[2]['output_type']).to eq('transfer')
+        expect(subject[3]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
+        expect(subject[3]['vout']).to eq(3)
+        expect(subject[3]['address']).to eq('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4')
+        expect(subject[3]['oa_address']).to eq(address_to_oa_address('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4'))
+        expect(subject[3]['script']).to eq('76a91438a6ebdf20cae2c9287ea014464042112ea3dbfd88ac')
+        expect(subject[3]['amount']).to eq('0.00000600')
+        expect(subject[3]['asset_id']).to eq('oK31ByjFuNhfnFuRMmZgchsdiprYmRzuz5')
+        expect(subject[3]['asset_quantity']).to eq('9800')
+        expect(subject[3]['output_type']).to eq('transfer')
 
-      expect(outputs[3]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
-      expect(outputs[3]['vout']).to eq(3)
-      expect(outputs[3]['address']).to eq('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4')
-      expect(outputs[3]['oa_address']).to eq(address_to_oa_address('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4'))
-      expect(outputs[3]['script']).to eq('76a91438a6ebdf20cae2c9287ea014464042112ea3dbfd88ac')
-      expect(outputs[3]['amount']).to eq('0.00000600')
-      expect(outputs[3]['asset_id']).to eq('oK31ByjFuNhfnFuRMmZgchsdiprYmRzuz5')
-      expect(outputs[3]['asset_quantity']).to eq('9800')
-      expect(outputs[3]['output_type']).to eq('transfer')
-
-      expect(outputs[4]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
-      expect(outputs[4]['vout']).to eq(4)
-      expect(outputs[4]['address']).to eq('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4')
-      expect(outputs[4]['oa_address']).to eq(address_to_oa_address('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4'))
-      expect(outputs[4]['script']).to eq('76a91438a6ebdf20cae2c9287ea014464042112ea3dbfd88ac')
-      expect(outputs[4]['amount']).to eq('0.00468200')
-      expect(outputs[4]['asset_id']).to be nil
-      expect(outputs[4]['asset_quantity']).to eq('0')
-      expect(outputs[4]['output_type']).to eq('transfer')
+        expect(subject[4]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
+        expect(subject[4]['vout']).to eq(4)
+        expect(subject[4]['address']).to eq('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4')
+        expect(subject[4]['oa_address']).to eq(address_to_oa_address('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4'))
+        expect(subject[4]['script']).to eq('76a91438a6ebdf20cae2c9287ea014464042112ea3dbfd88ac')
+        expect(subject[4]['amount']).to eq('0.00468200')
+        expect(subject[4]['asset_id']).to be nil
+        expect(subject[4]['asset_quantity']).to eq('0')
+        expect(subject[4]['output_type']).to eq('transfer')
+      end
     end
 
-    it 'send multiple asset' do
-      from = address_to_oa_address('mrxpeizRrF8ymNx5FrvcGGZVecZjtUFVP3')
-      to = address_to_oa_address('n4MEsSUN8GktDFZzU3V55mP3jWGMN7e4wE')
-      params = []
-      params << OpenAssets::SendAssetParam.new('oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY', 50, to)
-      params << OpenAssets::SendAssetParam.new('oUygwarZqNGrjDvcZUpZdvEc7es6dcs1vs', 4, to)
-      tx = subject.send_assets(from, params, 10000, 'unsignd')
-      expect(tx.inputs.length).to eq(6)
-      expect(tx.outputs.length).to eq(6)
-      # marker output
-      marker_output_payload = OpenAssets::Protocol::MarkerOutput.parse_script(tx.outputs[0].pk_script)
-      marker_output = OpenAssets::Protocol::MarkerOutput.deserialize_payload(marker_output_payload)
-      expect(tx.outputs[0].value).to eq(0)
-      expect(marker_output.asset_quantities).to eq([50, 22, 4, 2])
-      # output for oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY
-      expect(tx.outputs[1].parsed_script.to_string).to eq('OP_DUP OP_HASH160 fa7491ee214ab15241a613fb5906f6df996bb08b OP_EQUALVERIFY OP_CHECKSIG')
-      expect(tx.outputs[2].parsed_script.to_string).to eq('OP_DUP OP_HASH160 7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6 OP_EQUALVERIFY OP_CHECKSIG')
-      # output for oUygwarZqNGrjDvcZUpZdvEc7es6dcs1vs
-      expect(tx.outputs[3].parsed_script.to_string).to eq('OP_DUP OP_HASH160 fa7491ee214ab15241a613fb5906f6df996bb08b OP_EQUALVERIFY OP_CHECKSIG')
-      expect(tx.outputs[4].parsed_script.to_string).to eq('OP_DUP OP_HASH160 7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6 OP_EQUALVERIFY OP_CHECKSIG')
-      # output for otsuri
-      expect(tx.outputs[5].parsed_script.to_string).to eq('OP_DUP OP_HASH160 7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6 OP_EQUALVERIFY OP_CHECKSIG')
-      expect(tx.outputs[5].value).to eq(90600)
+    describe 'send_assets' do
+      context 'send multiple asset' do
+        it do
+          from = address_to_oa_address('mrxpeizRrF8ymNx5FrvcGGZVecZjtUFVP3')
+          to = address_to_oa_address('n4MEsSUN8GktDFZzU3V55mP3jWGMN7e4wE')
+          params = []
+          params << OpenAssets::SendAssetParam.new('oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY', 50, to)
+          params << OpenAssets::SendAssetParam.new('oUygwarZqNGrjDvcZUpZdvEc7es6dcs1vs', 4, to)
+          tx = create_api.send_assets(from, params, 10000, 'unsignd')
+          expect(tx.inputs.length).to eq(6)
+          expect(tx.outputs.length).to eq(6)
+          # marker output
+          marker_output_payload = OpenAssets::Protocol::MarkerOutput.parse_script(tx.outputs[0].pk_script)
+          marker_output = OpenAssets::Protocol::MarkerOutput.deserialize_payload(marker_output_payload)
+          expect(tx.outputs[0].value).to eq(0)
+          expect(marker_output.asset_quantities).to eq([50, 22, 4, 2])
+          # output for oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY
+          expect(tx.outputs[1].parsed_script.to_string).to eq('OP_DUP OP_HASH160 fa7491ee214ab15241a613fb5906f6df996bb08b OP_EQUALVERIFY OP_CHECKSIG')
+          expect(tx.outputs[2].parsed_script.to_string).to eq('OP_DUP OP_HASH160 7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6 OP_EQUALVERIFY OP_CHECKSIG')
+          # output for oUygwarZqNGrjDvcZUpZdvEc7es6dcs1vs
+          expect(tx.outputs[3].parsed_script.to_string).to eq('OP_DUP OP_HASH160 fa7491ee214ab15241a613fb5906f6df996bb08b OP_EQUALVERIFY OP_CHECKSIG')
+          expect(tx.outputs[4].parsed_script.to_string).to eq('OP_DUP OP_HASH160 7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6 OP_EQUALVERIFY OP_CHECKSIG')
+          # output for otsuri
+          expect(tx.outputs[5].parsed_script.to_string).to eq('OP_DUP OP_HASH160 7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6 OP_EQUALVERIFY OP_CHECKSIG')
+          expect(tx.outputs[5].value).to eq(90600)
+        end
+      end
+
+      context 'send same asset using send_assets' do
+        it do
+          from = address_to_oa_address('mrxpeizRrF8ymNx5FrvcGGZVecZjtUFVP3')
+          to1 = address_to_oa_address('n4MEsSUN8GktDFZzU3V55mP3jWGMN7e4wE')
+          to2 = address_to_oa_address('msJ48aj11GcKuu3SK5nc5MPGrMxvE1oR5Y')
+          params = []
+          params << OpenAssets::SendAssetParam.new('oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY', 30, to1)
+          params << OpenAssets::SendAssetParam.new('oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY', 20, to2)
+          params << OpenAssets::SendAssetParam.new('oUygwarZqNGrjDvcZUpZdvEc7es6dcs1vs', 4, to1)
+          tx = create_api.send_assets(from, params, 10000, 'unsignd')
+          expect(tx.inputs.length).to eq(6)
+          expect(tx.outputs.length).to eq(7)
+          # marker output
+          marker_output_payload = OpenAssets::Protocol::MarkerOutput.parse_script(tx.outputs[0].pk_script)
+          marker_output = OpenAssets::Protocol::MarkerOutput.deserialize_payload(marker_output_payload)
+          expect(tx.outputs[0].value).to eq(0)
+          expect(marker_output.asset_quantities).to eq([30, 20, 22, 4, 2])
+          # output for oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY
+          expect(tx.outputs[1].parsed_script.to_string).to eq('OP_DUP OP_HASH160 fa7491ee214ab15241a613fb5906f6df996bb08b OP_EQUALVERIFY OP_CHECKSIG')
+          expect(tx.outputs[2].parsed_script.to_string).to eq('OP_DUP OP_HASH160 8130f96080e598cc4e210067eb54403074aa1a8d OP_EQUALVERIFY OP_CHECKSIG')
+          expect(tx.outputs[3].parsed_script.to_string).to eq('OP_DUP OP_HASH160 7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6 OP_EQUALVERIFY OP_CHECKSIG')
+          # output for oUygwarZqNGrjDvcZUpZdvEc7es6dcs1vs
+          expect(tx.outputs[4].parsed_script.to_string).to eq('OP_DUP OP_HASH160 fa7491ee214ab15241a613fb5906f6df996bb08b OP_EQUALVERIFY OP_CHECKSIG')
+          expect(tx.outputs[5].parsed_script.to_string).to eq('OP_DUP OP_HASH160 7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6 OP_EQUALVERIFY OP_CHECKSIG')
+          # output for otsuri
+          expect(tx.outputs[6].parsed_script.to_string).to eq('OP_DUP OP_HASH160 7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6 OP_EQUALVERIFY OP_CHECKSIG')
+          expect(tx.outputs[6].value).to eq(90000)
+        end
+      end
     end
 
-    it 'send same asset using send_assets' do
-      from = address_to_oa_address('mrxpeizRrF8ymNx5FrvcGGZVecZjtUFVP3')
-      to1 = address_to_oa_address('n4MEsSUN8GktDFZzU3V55mP3jWGMN7e4wE')
-      to2 = address_to_oa_address('msJ48aj11GcKuu3SK5nc5MPGrMxvE1oR5Y')
-      params = []
-      params << OpenAssets::SendAssetParam.new('oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY', 30, to1)
-      params << OpenAssets::SendAssetParam.new('oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY', 20, to2)
-      params << OpenAssets::SendAssetParam.new('oUygwarZqNGrjDvcZUpZdvEc7es6dcs1vs', 4, to1)
-      tx = subject.send_assets(from, params, 10000, 'unsignd')
-      expect(tx.inputs.length).to eq(6)
-      expect(tx.outputs.length).to eq(7)
-      # marker output
-      marker_output_payload = OpenAssets::Protocol::MarkerOutput.parse_script(tx.outputs[0].pk_script)
-      marker_output = OpenAssets::Protocol::MarkerOutput.deserialize_payload(marker_output_payload)
-      expect(tx.outputs[0].value).to eq(0)
-      expect(marker_output.asset_quantities).to eq([30, 20, 22, 4, 2])
-      # output for oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY
-      expect(tx.outputs[1].parsed_script.to_string).to eq('OP_DUP OP_HASH160 fa7491ee214ab15241a613fb5906f6df996bb08b OP_EQUALVERIFY OP_CHECKSIG')
-      expect(tx.outputs[2].parsed_script.to_string).to eq('OP_DUP OP_HASH160 8130f96080e598cc4e210067eb54403074aa1a8d OP_EQUALVERIFY OP_CHECKSIG')
-      expect(tx.outputs[3].parsed_script.to_string).to eq('OP_DUP OP_HASH160 7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6 OP_EQUALVERIFY OP_CHECKSIG')
-      # output for oUygwarZqNGrjDvcZUpZdvEc7es6dcs1vs
-      expect(tx.outputs[4].parsed_script.to_string).to eq('OP_DUP OP_HASH160 fa7491ee214ab15241a613fb5906f6df996bb08b OP_EQUALVERIFY OP_CHECKSIG')
-      expect(tx.outputs[5].parsed_script.to_string).to eq('OP_DUP OP_HASH160 7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6 OP_EQUALVERIFY OP_CHECKSIG')
-      # output for otsuri
-      expect(tx.outputs[6].parsed_script.to_string).to eq('OP_DUP OP_HASH160 7d8dd16cc3413a64a9964c91cb0ee9358ab1dff6 OP_EQUALVERIFY OP_CHECKSIG')
-      expect(tx.outputs[6].value).to eq(90000)
+    describe 'send bitcoin' do
+      subject{
+        from = 'mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T'
+        to1 = 'mjLSaCyJHCSeh4MsiNGnF1RLqD9ySqnAQ1'
+        to2 = 'mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ'
+        params = []
+        params << OpenAssets::SendBitcoinParam.new(20000, to1)
+        params << OpenAssets::SendBitcoinParam.new(1000, to2)
+        create_api.send_bitcoins(from, params, 10000, 'unsignd')
+      }
+      it 'send multiple bitcoins' do
+        expect(subject.inputs.length).to eq(1)
+        expect(subject.outputs.length).to eq(3)
+
+        # output for otsuri mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T
+        expect(subject.outputs[0].parsed_script.get_address).to eq('mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T')
+        expect(subject.outputs[0].value).to eq(69000)
+        # output for to_1 mjLSaCyJHCSeh4MsiNGnF1RLqD9ySqnAQ1
+        expect(subject.outputs[1].parsed_script.get_address).to eq('mjLSaCyJHCSeh4MsiNGnF1RLqD9ySqnAQ1')
+        expect(subject.outputs[1].value).to eq(20000)
+        # output for to_2 mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ
+        expect(subject.outputs[2].parsed_script.get_address).to eq('mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ')
+        expect(subject.outputs[2].value).to eq(1000)
+      end
     end
 
-    it 'send multiple bitcoins' do
-      from = 'mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T'
-      to1 = 'mjLSaCyJHCSeh4MsiNGnF1RLqD9ySqnAQ1'
-      to2 = 'mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ'
-      params = []
-      params << OpenAssets::SendBitcoinParam.new(20000, to1)
-      params << OpenAssets::SendBitcoinParam.new(1000, to2)
-      tx = subject.send_bitcoins(from, params, 10000, 'unsignd')
-      expect(tx.inputs.length).to eq(1)
-      expect(tx.outputs.length).to eq(3)
-
-      # output for otsuri mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T
-      expect(tx.outputs[0].parsed_script.get_address).to eq('mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T')
-      expect(tx.outputs[0].value).to eq(69000)
-      # output for to_1 mjLSaCyJHCSeh4MsiNGnF1RLqD9ySqnAQ1
-      expect(tx.outputs[1].parsed_script.get_address).to eq('mjLSaCyJHCSeh4MsiNGnF1RLqD9ySqnAQ1')
-      expect(tx.outputs[1].value).to eq(20000)
-      # output for to_2 mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ
-      expect(tx.outputs[2].parsed_script.get_address).to eq('mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ')
-      expect(tx.outputs[2].value).to eq(1000)
-    end
-
-    it 'burn asset' do
+    describe 'burn asset' do
       oa_address = 'bX2vhttomKj2fdd7SJV2nv8U4zDjusE5Y4B'
       btc_address = oa_address_to_address(oa_address)
       asset_id = 'oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY'
 
-      tx = subject.burn_asset(oa_address, asset_id, 20000, 'unsignd')
-      expect(tx.inputs.length).to eq(4)
-      expect(tx.inputs[0].prev_out_hash.reverse_hth).to eq('6887dd16b7ad2847bd4546211665199e05711c3acd1a67da879506adb5486910')
-      expect(tx.inputs[0].prev_out_index).to eq(1)
-      expect(tx.inputs[1].prev_out_hash.reverse_hth).to eq('6887dd16b7ad2847bd4546211665199e05711c3acd1a67da879506adb5486910')
-      expect(tx.inputs[1].prev_out_index).to eq(2)
-      expect(tx.inputs[2].prev_out_hash.reverse_hth).to eq('6887dd16b7ad2847bd4546211665199e05711c3acd1a67da879506adb5486910')
-      expect(tx.inputs[2].prev_out_index).to eq(3)
-      expect(tx.inputs[3].prev_out_hash.reverse_hth).to eq('308ea73b45bef1428acb41f996543d6ebd534dca8f5de965e7f00eae084aaa5c')
-      expect(tx.inputs[3].prev_out_index).to eq(1)
+      context 'normal burn' do
+        subject{
+          create_api.burn_asset(oa_address, asset_id, 20000, 'unsignd')
+        }
+        it do
+          expect(subject.inputs.length).to eq(4)
+          expect(subject.inputs[0].prev_out_hash.reverse_hth).to eq('6887dd16b7ad2847bd4546211665199e05711c3acd1a67da879506adb5486910')
+          expect(subject.inputs[0].prev_out_index).to eq(1)
+          expect(subject.inputs[1].prev_out_hash.reverse_hth).to eq('6887dd16b7ad2847bd4546211665199e05711c3acd1a67da879506adb5486910')
+          expect(subject.inputs[1].prev_out_index).to eq(2)
+          expect(subject.inputs[2].prev_out_hash.reverse_hth).to eq('6887dd16b7ad2847bd4546211665199e05711c3acd1a67da879506adb5486910')
+          expect(subject.inputs[2].prev_out_index).to eq(3)
+          expect(subject.inputs[3].prev_out_hash.reverse_hth).to eq('308ea73b45bef1428acb41f996543d6ebd534dca8f5de965e7f00eae084aaa5c')
+          expect(subject.inputs[3].prev_out_index).to eq(1)
 
-      expect(tx.outputs.length).to eq(1)
-      expect(tx.outputs[0].value).to eq(81800)
-      script = Bitcoin::Script.new(Bitcoin::Script.to_hash160_script(Bitcoin.hash160_from_address(btc_address)))
-      expect(tx.outputs[0].parsed_script.to_string).to eq(script.to_string)
+          expect(subject.outputs.length).to eq(1)
+          expect(subject.outputs[0].value).to eq(81800)
+          script = Bitcoin::Script.new(Bitcoin::Script.to_hash160_script(Bitcoin.hash160_from_address(btc_address)))
+          expect(subject.outputs[0].parsed_script.to_string).to eq(script.to_string)
+        end
+      end
 
-      # not have enough fee
-      expect{subject.burn_asset(oa_address, asset_id, 101201, 'unsignd')}.to raise_error(OpenAssets::Transaction::InsufficientFundsError)
-      # fee = utxo
-      subject.burn_asset(oa_address, asset_id, 101200, 'unsignd')
+      context 'not have enough fee' do
+        it do
+          expect{create_api.burn_asset(oa_address, asset_id, 101201, 'unsignd')}.to raise_error(OpenAssets::Transaction::InsufficientFundsError)
+        end
+      end
 
-      # not have asset
-      expect{subject.burn_asset(oa_address, 'oZuo5eABTxR3fjQT9Dqi17jjqZsQpCXBE6', 10000, 'unsignd')}.to raise_error(OpenAssets::Transaction::TransactionBuildError)
+      context 'fee = utxo' do
+        it do
+          create_api.burn_asset(oa_address, asset_id, 101200, 'unsignd')
+        end
+      end
+
+      context 'not have asset' do
+        it do
+          expect{create_api.burn_asset(oa_address, 'oZuo5eABTxR3fjQT9Dqi17jjqZsQpCXBE6', 10000, 'unsignd')}.to raise_error(OpenAssets::Transaction::TransactionBuildError)
+        end
+      end
     end
 
     describe 'cached tx' do
@@ -232,12 +269,10 @@ describe OpenAssets::Api do
           subject.get_outputs_from_txid(get_output_tx_cache, true)
         end
       end
-
     end
-
   end
 
-  context 'testnet-autofee', :network => :testnet do
+  describe 'calculate fees' do
     subject {
       testnet_mock = double('BitcoinCoreProviderTestnet Mock')
       api = OpenAssets::Api.new({:cache => ':memory:', :network => 'testnet', :default_fees => :auto})
@@ -246,8 +281,7 @@ describe OpenAssets::Api do
       allow(api).to receive(:provider).and_return(testnet_mock)
       api
     }
-
-    it 'calculate fees' do
+    it do
       from  = 'mvYbB238p3rFYFjM56cHhNNHeQb5ypQJ3T'
       to1   = 'mjLSaCyJHCSeh4MsiNGnF1RLqD9ySqnAQ1'
       to2   = 'mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ'
@@ -274,7 +308,16 @@ describe OpenAssets::Api do
       expect(tx.outputs[2].value).to eq(1000)
     end
   end
-  
+
+  def create_api
+    testnet_mock = double('BitcoinCoreProviderTestnet Mock')
+    api = OpenAssets::Api.new({:cache => ':memory:', :network => 'testnet'})
+    allow(testnet_mock).to receive(:list_unspent).and_return(TESTNET_BTC_UNSPENT)
+    setup_tx_load_mock(testnet_mock)
+    allow(api).to receive(:provider).and_return(testnet_mock)
+    api
+  end
+
   def filter_btc_unspent(btc_address = nil)
     return TESTNET_BTC_UNSPENT if btc_address.nil?
     TESTNET_BTC_UNSPENT.select{|u|u['address'] == btc_address}
