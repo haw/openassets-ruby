@@ -34,6 +34,10 @@ describe OpenAssets::Util do
       expect(util.pubkey_hash_to_asset_id('081522820f2ccef873e47ee62b31cb9e9267e725')).to eq('oWLkUn44E45cnQtsP6x1wrvJ2iRx9XyFny')
     end
 
+    it 'script_to_asset_id' do
+      expect(util.script_to_asset_id('a914f9d499817e88ef7b10a88673296c6d6df2f4292d87')).to eq('oMb2yzA542yQgwn8XtmGefTzBv5NJ2nDjh')
+    end
+
     it 'validate asset ID' do
       puts
       expect(util.valid_asset_id?('oWLkUn44E45cnQtsP6x1wrvJ2iRx9XyFny')).to be true

@@ -38,13 +38,20 @@ module OpenAssets
       pubkey_hash_to_asset_id(hash160(pub_key))
     end
 
-    def pubkey_hash_to_asset_id(hash)
+    def pubkey_hash_to_asset_id(pubkey_hash)
       # gen P2PKH script hash
       # P2PKH script = OP_DUP OP_HASH160 <PubKeyHash> OP_EQUALVERIFY OP_CHECKSIG
       # （76=OP_DUP, a9=OP_HASH160, 14=Bytes to push, 88=OP_EQUALVERIFY, ac=OP_CHECKSIG）
-      script = hash160(["76", "a9", "14", hash, "88", "ac"].join)
-      script = oa_version_byte.to_s(16) + script # add version byte to script hash
-      encode_base58(script + checksum(script)) # add checksum & encode
+      hash_to_asset_id(hash160(["76", "a9", "14", pubkey_hash, "88", "ac"].join))
+    end
+
+    def script_to_asset_id(script)
+      hash_to_asset_id(hash160(script))
+    end
+
+    def hash_to_asset_id(hash)
+      hash = oa_version_byte.to_s(16) + hash # add version byte to script hash
+      encode_base58(hash + checksum(hash)) # add checksum & encode
     end
 
     # LEB128 encode
