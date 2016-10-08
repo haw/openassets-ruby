@@ -112,12 +112,6 @@ module OpenAssets
       valid_address?(address)
     end
 
-    # generate Asset ID from bitcoin address.
-    def address_to_asset_id(btc_address)
-      pubkey_hash = hash160_from_address(btc_address)
-      pubkey_hash_to_asset_id(pubkey_hash)
-    end
-
     # read variable integer
     # @param [String] data reading data
     # @param [Integer] offset the position when reading from data.
