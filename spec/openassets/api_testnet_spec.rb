@@ -61,52 +61,66 @@ describe OpenAssets::Api, :network => :testnet do
     end
 
     describe 'get_outputs_from_txid' do
-      subject{
-        create_api.get_outputs_from_txid('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
-      }
-      it do
-        expect(subject[0]['output_type']).to eq('marker')
+      context 'standard tx' do
+        subject{
+          create_api.get_outputs_from_txid('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
+        }
+        it do
+          expect(subject[0]['output_type']).to eq('marker')
 
-        expect(subject[1]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5') # second marker output
-        expect(subject[1]['vout']).to eq(1)
-        expect(subject[1]['address']).to be nil
-        expect(subject[1]['oa_address']).to be nil
-        expect(subject[1]['script']).to eq('6a0a4f41010002c801e44b00')
-        expect(subject[1]['amount']).to eq('0.00000000')
-        expect(subject[1]['asset_id']).to be nil
-        expect(subject[1]['asset_quantity']).to eq('0')
-        expect(subject[1]['output_type']).to eq('marker')
+          expect(subject[1]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5') # second marker output
+          expect(subject[1]['vout']).to eq(1)
+          expect(subject[1]['address']).to be nil
+          expect(subject[1]['oa_address']).to be nil
+          expect(subject[1]['script']).to eq('6a0a4f41010002c801e44b00')
+          expect(subject[1]['amount']).to eq('0.00000000')
+          expect(subject[1]['asset_id']).to be nil
+          expect(subject[1]['asset_quantity']).to eq('0')
+          expect(subject[1]['output_type']).to eq('marker')
 
-        expect(subject[2]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
-        expect(subject[2]['vout']).to eq(2)
-        expect(subject[2]['address']).to eq('n3RKjN5TRcNeTzDvdaApME6KMchht2oMTU')
-        expect(subject[2]['oa_address']).to eq(address_to_oa_address('n3RKjN5TRcNeTzDvdaApME6KMchht2oMTU'))
-        expect(subject[2]['script']).to eq('76a914f0422a68ea970a9b007924bc8173f25e862eba8588ac')
-        expect(subject[2]['amount']).to eq('0.00000600')
-        expect(subject[2]['asset_id']).to eq('oK31ByjFuNhfnFuRMmZgchsdiprYmRzuz5')
-        expect(subject[2]['asset_quantity']).to eq('100')
-        expect(subject[2]['output_type']).to eq('transfer')
+          expect(subject[2]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
+          expect(subject[2]['vout']).to eq(2)
+          expect(subject[2]['address']).to eq('n3RKjN5TRcNeTzDvdaApME6KMchht2oMTU')
+          expect(subject[2]['oa_address']).to eq(address_to_oa_address('n3RKjN5TRcNeTzDvdaApME6KMchht2oMTU'))
+          expect(subject[2]['script']).to eq('76a914f0422a68ea970a9b007924bc8173f25e862eba8588ac')
+          expect(subject[2]['amount']).to eq('0.00000600')
+          expect(subject[2]['asset_id']).to eq('oK31ByjFuNhfnFuRMmZgchsdiprYmRzuz5')
+          expect(subject[2]['asset_quantity']).to eq('100')
+          expect(subject[2]['output_type']).to eq('transfer')
 
-        expect(subject[3]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
-        expect(subject[3]['vout']).to eq(3)
-        expect(subject[3]['address']).to eq('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4')
-        expect(subject[3]['oa_address']).to eq(address_to_oa_address('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4'))
-        expect(subject[3]['script']).to eq('76a91438a6ebdf20cae2c9287ea014464042112ea3dbfd88ac')
-        expect(subject[3]['amount']).to eq('0.00000600')
-        expect(subject[3]['asset_id']).to eq('oK31ByjFuNhfnFuRMmZgchsdiprYmRzuz5')
-        expect(subject[3]['asset_quantity']).to eq('9800')
-        expect(subject[3]['output_type']).to eq('transfer')
+          expect(subject[3]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
+          expect(subject[3]['vout']).to eq(3)
+          expect(subject[3]['address']).to eq('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4')
+          expect(subject[3]['oa_address']).to eq(address_to_oa_address('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4'))
+          expect(subject[3]['script']).to eq('76a91438a6ebdf20cae2c9287ea014464042112ea3dbfd88ac')
+          expect(subject[3]['amount']).to eq('0.00000600')
+          expect(subject[3]['asset_id']).to eq('oK31ByjFuNhfnFuRMmZgchsdiprYmRzuz5')
+          expect(subject[3]['asset_quantity']).to eq('9800')
+          expect(subject[3]['output_type']).to eq('transfer')
 
-        expect(subject[4]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
-        expect(subject[4]['vout']).to eq(4)
-        expect(subject[4]['address']).to eq('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4')
-        expect(subject[4]['oa_address']).to eq(address_to_oa_address('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4'))
-        expect(subject[4]['script']).to eq('76a91438a6ebdf20cae2c9287ea014464042112ea3dbfd88ac')
-        expect(subject[4]['amount']).to eq('0.00468200')
-        expect(subject[4]['asset_id']).to be nil
-        expect(subject[4]['asset_quantity']).to eq('0')
-        expect(subject[4]['output_type']).to eq('transfer')
+          expect(subject[4]['txid']).to eq('9efbf61ef4805708ecf8e31d982ab6de20b2d131ed9be00d2856a5fe5a8b3df5')
+          expect(subject[4]['vout']).to eq(4)
+          expect(subject[4]['address']).to eq('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4')
+          expect(subject[4]['oa_address']).to eq(address_to_oa_address('mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4'))
+          expect(subject[4]['script']).to eq('76a91438a6ebdf20cae2c9287ea014464042112ea3dbfd88ac')
+          expect(subject[4]['amount']).to eq('0.00468200')
+          expect(subject[4]['asset_id']).to be nil
+          expect(subject[4]['asset_quantity']).to eq('0')
+          expect(subject[4]['output_type']).to eq('transfer')
+        end
       end
+
+      context 'issuance tx with p2sh' do
+        subject{
+          create_api.get_outputs_from_txid('a98b000f28c9e8251925a1225832edf1c2992e103445b6b2cec3f5c0a81469e5')[0]
+        }
+        it do
+          expect(subject['output_type']).to eq('issuance')
+          expect(subject['asset_id']).to eq('oMb2yzA542yQgwn8XtmGefTzBv5NJ2nDjh')
+          expect(subject['asset_definition_url']).to eq('https://goo.gl/bmVEuw')
+        end
+      end
+
     end
 
     describe 'send_assets' do
@@ -350,6 +364,20 @@ describe OpenAssets::Api, :network => :testnet do
     # addr = mnm6Lik5HqjrBXZtbRgTio4VSY5FyoUfrJ
     allow(btc_provider_mock).to receive(:get_transaction).with('f889c52a3367f636b9b680e84b22ea42a22b1ca41f9f59cb541c44ed3798a36c', 0).and_return('0100000004147baa40b3426ee6d55e6697fc3f2500c891f0619284713875b05d87143e8fe7000000006b483045022100bdf97b349f300b46aa0b624f7f90fa8085623805585b53739e7ab70cbe6d0a5e02203d6a116128683009b25efc09893f14b2604e8777e04cefece62766d45888c9c401210323df5c63ab7a9186ecfdbc07ee9acc5cb4129c65622d8c436dc2ed2d625cd143ffffffff1f332638e05adfcd7628d018733a6bbf70bb7ee2b6f7c15f5437b918be2270f7000000006b4830450221009a6ffa886f1f53d53123e594324f21f0af149da95db63c942e2844c3eb836a6602203ddcda271c0fa96a2457cc34736f2254cd1d996e3926ec378b6a2f88a8ccf2a201210323df5c63ab7a9186ecfdbc07ee9acc5cb4129c65622d8c436dc2ed2d625cd143ffffffffac93eb66ea41c7e1f186e2a7505adbe9c45ca924876118a3957a93ad43c32623010000006b4830450221009313374d4391ff442c44bfc3e4ff62874069d3eb5c992688607ab6f59c852c5802203a4cb9027262bbc11c576792c1e49248ae859a069a5a16d6e403f837c821c5eb01210323df5c63ab7a9186ecfdbc07ee9acc5cb4129c65622d8c436dc2ed2d625cd143ffffffff3672675c2dd1d92d0848d954d7b6b3da9d48ce61115db1bed1369d2e024e7cea010000006b483045022100adb92a6c865ba59627af9dfe7dfedd7d2620035c023b9fc8dbda843adf99881702204f6c59d78d8615c5cff7e388f43b4fbd763797fc2dc1f38fd6c70bd3634ada0801210323df5c63ab7a9186ecfdbc07ee9acc5cb4129c65622d8c436dc2ed2d625cd143ffffffff0600000000000000000e6a0c4f41010004c20332c203320058020000000000001976a91453ad0e81bd931dac736ad913915d11c3be0c0b2388ac58020000000000001976a91453ad0e81bd931dac736ad913915d11c3be0c0b2388ac58020000000000001976a9143894aaab84a2c8a2f29c085573bb8aae2a0f94e288ac58020000000000001976a91460c707f73615f6263761bf20522f0ed54e1b2e0488acb8770700000000001976a9144f756b9ed6608e5d66ee92b761cf99641940cee688ac00000000')
     allow(btc_provider_mock).to receive(:estimatefee).and_return(0.00026939)
+    allow(btc_provider_mock).to receive(:get_transaction).with('4d2a27293ec0b268c0f21952a9c4760dac3b8999bffcbc59a2126d06344a26e2', 0).and_return('0100000001d6d88aff2cf0d2d03f58113ad7cd05dbabdf4e833c932007f3cef22c2b85a343020000006b483045022100c952402beeb36dc0a0065d154acc84b9c734250689badfd5daf8b5f2cadf89c7022044c80b4bd092af9d963342a21a8c6eced9dbf22319a7a8b186259219dc1de54001210292ee82d9add0512294723f2c363aee24efdeb3f258cdaf5118a4fcf5263e92c9ffffffff03580200000000000017a914c590a1c93975aec75157e33ad904a74d2934e9d58700000000000000000a6a084f41010001b32b0028870000000000001976a91446c2fbfbecc99a63148fa076de58cf29b0bcf0b088ac00000000')
+    allow(btc_provider_mock).to receive(:get_transaction).with('43a3852b2cf2cef30720933c834edfabdb05cdd73a11583fd0d2f02cff8ad8d6', 0).and_return('01000000013ec08e09fc2f1dd5af32950ffc23f598d487f38684932183c3c22025e3f06bd7020000006a473044022017b2301284b7df7184f82f9324dbe8ff4ce8f4296fc88879a68bbd74ed18d4020220766894d515acf4bae87973897ce2eecadd4b4a2e1b54c571f2548e5f69c68bdc01210292ee82d9add0512294723f2c363aee24efdeb3f258cdaf5118a4fcf5263e92c9ffffffff03580200000000000017a914c590a1c93975aec75157e33ad904a74d2934e9d58700000000000000000b6a094f41010001d086030090b00000000000001976a91446c2fbfbecc99a63148fa076de58cf29b0bcf0b088ac00000000')
+    allow(btc_provider_mock).to receive(:get_transaction).with('d76bf0e32520c2c38321938486f387d498f523fc0f9532afd51d2ffc098ec03e', 0).and_return('01000000010ae08e10dad8548a6e5eef11c5ff76f77ba865f186f6247d3d9502a59c37b588020000006b483045022100fc0d5caa16f3c21939a87b7724dca14c54b1be6a27b253bd1087009ec3873000022062a9b9e40028797526668cb07f91001f3d098461f0a610bd05db7888caac378a01210292ee82d9add0512294723f2c363aee24efdeb3f258cdaf5118a4fcf5263e92c9ffffffff03580200000000000017a914c590a1c93975aec75157e33ad904a74d2934e9d58700000000000000000b6a094f41010001d0860300f8d90000000000001976a91446c2fbfbecc99a63148fa076de58cf29b0bcf0b088ac00000000')
+    allow(btc_provider_mock).to receive(:get_transaction).with('88b5379ca502953d7d24f686f165a87bf776ffc511ef5e6e8a54d8da108ee00a', 0).and_return('0100000001092b14324c88f76e76ece107af1f38d96c675e0e5b40f456d8d20ebf9ab6aa45050000006b483045022100f9235046b7177c32f68a70926e0853d006cee621d2c4abe4594c33341cfa5b5c022033916fab71ea2b4cd95acd845af6082da2466fb96939b6c9e66641c8a68e0b2d01210292ee82d9add0512294723f2c363aee24efdeb3f258cdaf5118a4fcf5263e92c9ffffffff03580200000000000017a914789644ea7fcdefe94934cc9d13545e8b0fe2fc478700000000000000000b6a094f41010001d086030060030100000000001976a91446c2fbfbecc99a63148fa076de58cf29b0bcf0b088ac00000000')
+    allow(btc_provider_mock).to receive(:get_transaction).with('45aab69abf0ed2d856f4405b0e5e676cd9381faf07e1ec766ef7884c32142b09', 0).and_return('010000000329f810e2b6698a7664433ab2d05cfcbd3d28d53dbabc42eb4023bef941d8ab90000000006a4730440220212bf646d8750679512d5cf74cfe4c4d5adb98de070335e4442da12624df4752022044f4ec5809598b0c701009c40d494addb6a4d71ebbffb685e24efbd646bd2f1c02210292ee82d9add0512294723f2c363aee24efdeb3f258cdaf5118a4fcf5263e92c9ffffffff9ad57c0bfb3611b5ca7e0e2779fe07dcf01dbe9489076e33bbd5aed05d2921dd000000006a47304402201c5c32d83538cb002a282b7e877a527a84000507575c7af492356a29e74a506b02201a08c1d344887d00505652d6ba57241dee8892f3392f78d5f0331f551155642d0221035456a125cc30113748de2fff4a7bf93981876a690e1738fad91d14465be2c728ffffffff29f810e2b6698a7664433ab2d05cfcbd3d28d53dbabc42eb4023bef941d8ab90020000006a4730440220502133e0635b9f250254d80c9b2d196e4b53f89db83375c9210b5aebb396a493022004fe935cc38de3df4b53f407ecb45069a9a0a25111cddb326090ed557dff324302210292ee82d9add0512294723f2c363aee24efdeb3f258cdaf5118a4fcf5263e92c9ffffffff060000000000000000106a0e4f41010004ac02bc059003d8040058020000000000001976a914ce5807e32919e3e3df9806d03bd509207730e1a188ac58020000000000001976a91446c2fbfbecc99a63148fa076de58cf29b0bcf0b088ac58020000000000001976a91446c2fbfbecc99a63148fa076de58cf29b0bcf0b088ac58020000000000001976a914ce5807e32919e3e3df9806d03bd509207730e1a188acc82c0100000000001976a91446c2fbfbecc99a63148fa076de58cf29b0bcf0b088ac00000000')
+    allow(btc_provider_mock).to receive(:get_transaction).with('90abd841f9be2340eb42bcba3dd5283dbdfc5cd0b23a4364768a69b6e210f829', 0).and_return('010000000149c2928fed19a378e61b7327f4aa200e8de82fc47a538fb9458be922501f6ec6010000006a47304402203fd1e6a9d85112675fbbbf8bbe795467f97a04f5f473dd7b3acfa9c8d300b2460220273355e9e55ceb69625399fcf9f082fe73777876174d53d18ad8b3ade4ef948b01210292ee82d9add0512294723f2c363aee24efdeb3f258cdaf5118a4fcf5263e92c9ffffffff0358020000000000001976a91446c2fbfbecc99a63148fa076de58cf29b0bcf0b088ac00000000000000000a6a084f41010001e80700385d0100000000001976a91446c2fbfbecc99a63148fa076de58cf29b0bcf0b088ac00000000')
+    allow(btc_provider_mock).to receive(:get_transaction).with('c66e1f5022e98b45b98f537ac42fe88d0e20aaf427731be678a319ed8f92c249', 0).and_return('01000000013a588e87d23c73c1d0532b8968e6116f3288b76c4bea3b20b10d2bb7dd29fb3d000000006a47304402201b7bcb080673d5d13c773c1f3c89e0522aa65b692cd89fd10c783a602b161ec7022073822451b8b8aba4e0f05cf5bde8baa54239b0846734c1e710178a5b9280b7fd0121029b4d5e41a6cdc3625b3d971bba951d809dd6156dfb7c20dde35f05035c645d8cffffffff02309bdc02000000001976a91465259d8fad44dddf5d137c6fe4f77f5281b255ae88aca0860100000000001976a91446c2fbfbecc99a63148fa076de58cf29b0bcf0b088ac00000000')
+    allow(btc_provider_mock).to receive(:get_transaction).with('dd21295dd0aed5bb336e078994be1df0dc07fe79270e7ecab51136fb0b7cd59a', 0).and_return('01000000018e21aec0d7ad999c53f98de37725c0c3d3c36b24a7569051cb1c8996151a6819010000006b483045022100b4555aefc579317e9aa06f1fb1eaec01d5c4688e87ed8fc32b0ff2c3dfeba69002206556b1d8f0dd05be4435140b14cf2133f0dab662470f3a4eb6d754df4a5da4b80121035456a125cc30113748de2fff4a7bf93981876a690e1738fad91d14465be2c728ffffffff0358020000000000001976a914ce5807e32919e3e3df9806d03bd509207730e1a188ac00000000000000000a6a084f41010001e80700385d0100000000001976a914ce5807e32919e3e3df9806d03bd509207730e1a188ac00000000')
+    allow(btc_provider_mock).to receive(:get_transaction).with('19681a1596891ccb519056a7246bc3d3c3c02577e38df9539c99add7c0ae218e', 0).and_return('010000000149c2928fed19a378e61b7327f4aa200e8de82fc47a538fb9458be922501f6ec6000000006b483045022100a7f7e00c861b255030a9e98904cc82530f33ce42c004f0e895910a26a31e2a47022046aa4b5d8f54edcaea15c32b33199d05c1434c64de82ce86e74a237f21c6aa2b0121029b4d5e41a6cdc3625b3d971bba951d809dd6156dfb7c20dde35f05035c645d8cffffffff0280edda02000000001976a91465259d8fad44dddf5d137c6fe4f77f5281b255ae88aca0860100000000001976a914ce5807e32919e3e3df9806d03bd509207730e1a188ac00000000')
+    allow(btc_provider_mock).to receive(:get_transaction).with('6308f912ccf36057d020483dbe9392dda8d197e378f1709d5bf0291f8d83bcc7', 0).and_return('0100000002e2264a34066d12a259bcfcbf99893bac0d76c4a95219f2c068b2c03e29272a4d000000009e483045022100fba05ed2079938a9605dc3658535b4733babc25b4053077b4524c2fe95038c9302207fe541b0c8e7f3f39ab3ea5c127b409809000fd766794f2839454a29f873d32001210292ee82d9add0512294723f2c363aee24efdeb3f258cdaf5118a4fcf5263e92c93217753d68747470733a2f2f676f6f2e676c2f626d564575777576a91446c2fbfbecc99a63148fa076de58cf29b0bcf0b088acffffffffe2264a34066d12a259bcfcbf99893bac0d76c4a95219f2c068b2c03e29272a4d020000006a473044022051eb95a2feee909254333ec21821d59d0539f964f160edc90ababd8d5994b47602206751b7a26e69df07c6b53d6f790c6159999b1d6c1d8f7ecf1c8fb2f6175acba001210292ee82d9add0512294723f2c363aee24efdeb3f258cdaf5118a4fcf5263e92c9ffffffff0200000000000000000a6a084f41010001b32b0070620000000000001976a91446c2fbfbecc99a63148fa076de58cf29b0bcf0b088ac00000000')
+
+    allow(btc_provider_mock).to receive(:get_transaction).with('a98b000f28c9e8251925a1225832edf1c2992e103445b6b2cec3f5c0a81469e5', 0).and_return('01000000014448068bab11df9c16dbf18c297d667cd2b2952767dd2f6cf2968798d925e2b7010000009d47304402202254f7da7c3fe2bf2a4dd2c3e255aa3ad61415550f648b564aea335f8fcd3d92022062eab5c01a5e33eb726f976ebd3b35d3991f8a45da56d64e1cd3fd5178f8c9a6012102effb2edfcf826d43027feae226143bdac058ad2e87b7cec26f97af2d357ddefa3217753d68747470733a2f2f676f6f2e676c2f626d564575777576a9148911455a265235b2d356a1324af000d4dae0326288acffffffff0358020000000000001976a914a4fdb3ce954a3cbb49fdfc9df1712bf72749c9e788ac00000000000000000b6a094f410100019f8d0600e8990000000000001976a914a4fdb3ce954a3cbb49fdfc9df1712bf72749c9e788ac00000000')
+    allow(btc_provider_mock).to receive(:get_transaction).with('b7e225d9988796f26c2fdd672795b2d27c667d298cf1db169cdf11ab8b064844', 0).and_return('0100000001a02830eee235f0cbdfe0b38b706c914a3a429a315603832eb18d1c791dc5b83a010000006b4830450221008a9daf031fc026ff558f6f94913f50df91b122a155a698dabfb6c1ccb4cfa18e022069c8451d7d42b6f938e5dc9b5c319350ac58c7070dd8799db3320c5ccaad8035012102effb2edfcf826d43027feae226143bdac058ad2e87b7cec26f97af2d357ddefaffffffff0220c74e01000000001976a9148911455a265235b2d356a1324af000d4dae0326288ac50c300000000000017a914f9d499817e88ef7b10a88673296c6d6df2f4292d8700000000')
+
   end
 
   TESTNET_BTC_UNSPENT = [

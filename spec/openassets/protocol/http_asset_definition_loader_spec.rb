@@ -9,7 +9,7 @@ describe OpenAssets::Protocol::HttpAssetDefinitionLoader do
         OpenAssets::Protocol::HttpAssetDefinitionLoader.new('http://goo.gl/fS4mEj').load
       }
       it do
-        expect(subject.asset_ids.length).to eq(3)
+        expect(subject.asset_ids.length).to eq(4)
         expect(subject.asset_ids[0]).to eq('AGHhobo7pVQN5fZWqv3rhdc324ryT7qVTB')
         expect(subject.name_short).to eq('HAWSCoin')
         expect(subject.name).to eq('MHAWS Coin')

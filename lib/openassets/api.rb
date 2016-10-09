@@ -231,10 +231,8 @@ module OpenAssets
           marker_output_payload = OpenAssets::Protocol::MarkerOutput.parse_script(out.pk_script)
           unless marker_output_payload.nil?
             marker_output = OpenAssets::Protocol::MarkerOutput.deserialize_payload(marker_output_payload)
-            inputs = tx.inputs.map {|input|
-              get_output(input.previous_output, input.prev_out_index)
-            }
-            asset_ids = compute_asset_ids(inputs, i, tx.outputs, marker_output.asset_quantities)
+            prev_outs = tx.inputs.map {|input|get_output(input.previous_output, input.prev_out_index)}
+            asset_ids = compute_asset_ids(prev_outs, i, tx, marker_output.asset_quantities)
             return asset_ids unless asset_ids.nil?
           end
         }
@@ -261,18 +259,23 @@ module OpenAssets
     end
 
     private
-    # @param [Array[OpenAssets::Protocol::TransactionOutput] inputs The outputs referenced by the inputs of the transaction.
+    # @param [Array[OpenAssets::Protocol::TransactionOutput] prev_outs The outputs referenced by the inputs of the transaction.
     # @param [Integer] marker_output_index The position of the marker output in the transaction.
-    # @param [Array[Bitcoin::Protocol::TxOut]] outputs The outputs of the transaction.
+    # @param [Bitcoin::Protocol::Tx] tx The transaction.
     # @param [Array[OpenAssets::Protocol::TransactionOutput]] asset_quantities The list of asset quantities of the outputs.
-    def compute_asset_ids(inputs, marker_output_index, outputs, asset_quantities)
-      return nil if asset_quantities.length > outputs.length - 1 || inputs.length == 0
+    def compute_asset_ids(prev_outs, marker_output_index, tx, asset_quantities)
+      outputs = tx.outputs
+      return nil if asset_quantities.length > outputs.length - 1 || prev_outs.length == 0
       result = []
 
       marker_output = outputs[marker_output_index]
 
       # Add the issuance outputs
-      issuance_asset_id = pubkey_hash_to_asset_id(inputs[0].script.get_hash160)
+      if prev_outs[0].script.is_p2sh?
+        issuance_asset_id = script_to_asset_id(prev_outs[0].script.to_payload.bth)
+      else
+        issuance_asset_id = pubkey_hash_to_asset_id(prev_outs[0].script.get_hash160)
+      end
 
       for i in (0..marker_output_index-1)
         value = outputs[i].value
@@ -280,12 +283,11 @@ module OpenAssets
         if i < asset_quantities.length && asset_quantities[i] > 0
           payload = OpenAssets::Protocol::MarkerOutput.parse_script(marker_output.parsed_script.to_payload)
           metadata = OpenAssets::Protocol::MarkerOutput.deserialize_payload(payload).metadata
-          if metadata.nil?
-            output = OpenAssets::Protocol::TransactionOutput.new(value, script, issuance_asset_id, asset_quantities[i], OpenAssets::Protocol::OutputType::ISSUANCE)
-          else
-            output = OpenAssets::Protocol::TransactionOutput.new(
-                value, script, issuance_asset_id, asset_quantities[i], OpenAssets::Protocol::OutputType::ISSUANCE, metadata)
+          if prev_outs[0].script.is_p2sh?
+            metadata = parse_issuance_p2sh_pointer(tx.in[0].script_sig)
           end
+          metadata = '' unless metadata
+          output = OpenAssets::Protocol::TransactionOutput.new(value, script, issuance_asset_id, asset_quantities[i], OpenAssets::Protocol::OutputType::ISSUANCE, metadata)
         else
           output = OpenAssets::Protocol::TransactionOutput.new(value, script, nil, 0, OpenAssets::Protocol::OutputType::ISSUANCE)
         end
@@ -309,14 +311,13 @@ module OpenAssets
       remove_outputs.each{|o|outputs.delete(o)}
 
       # Add the transfer outputs
-      input_enum = inputs.each
+      input_enum = prev_outs.each
       input_units_left = 0
       index = 0
       for i in (marker_output_index + 1)..(outputs.length-1)
         output_asset_quantity = (i <= asset_quantities.length) ? asset_quantities[i-1] : 0
         output_units_left = output_asset_quantity
-        asset_id = nil
-        metadata = nil
+        asset_id,metadata = nil
         while output_units_left > 0
           index += 1
           if input_units_left == 0
@@ -401,6 +402,15 @@ module OpenAssets
         tx_cache.put(txid, decode_tx)
       end
       decode_tx
+    end
+
+    # parse issuance p2sh which contains asset definition pointer
+    def parse_issuance_p2sh_pointer(script_sig)
+      script = Bitcoin::Script.new(script_sig).chunks.last
+      redeem_script = Bitcoin::Script.new(script)
+      return nil unless redeem_script.chunks[1] == Bitcoin::Script::OP_DROP
+      asset_def = to_bytes(redeem_script.chunks[0].bth)[0..-1].map{|x|x.to_i(16).chr}.join
+      asset_def && asset_def.start_with?('u=') ? asset_def : nil
     end
 
   end
