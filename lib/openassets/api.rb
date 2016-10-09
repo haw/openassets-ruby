@@ -271,11 +271,7 @@ module OpenAssets
       marker_output = outputs[marker_output_index]
 
       # Add the issuance outputs
-      if prev_outs[0].script.is_p2sh?
-        issuance_asset_id = script_to_asset_id(prev_outs[0].script.to_payload.bth)
-      else
-        issuance_asset_id = pubkey_hash_to_asset_id(prev_outs[0].script.get_hash160)
-      end
+      issuance_asset_id = script_to_asset_id(prev_outs[0].script.to_payload.bth)
 
       for i in (0..marker_output_index-1)
         value = outputs[i].value
