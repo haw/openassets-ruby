@@ -279,7 +279,7 @@ module OpenAssets
         if i < asset_quantities.length && asset_quantities[i] > 0
           payload = OpenAssets::Protocol::MarkerOutput.parse_script(marker_output.parsed_script.to_payload)
           metadata = OpenAssets::Protocol::MarkerOutput.deserialize_payload(payload).metadata
-          if prev_outs[0].script.is_p2sh?
+          if (metadata.nil? || metadata.length == 0) && prev_outs[0].script.is_p2sh?
             metadata = parse_issuance_p2sh_pointer(tx.in[0].script_sig)
           end
           metadata = '' unless metadata
