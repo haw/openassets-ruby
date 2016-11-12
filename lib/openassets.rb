@@ -1,5 +1,6 @@
 require 'bitcoin'
 require 'leb128'
+require 'patch'
 module OpenAssets
 
   autoload :Protocol, 'openassets/protocol'
