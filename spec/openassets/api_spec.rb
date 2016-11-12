@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe OpenAssets::Api do
+describe 'OpenAssets::Api use mainnet' do
 
   include OpenAssets::Util
 

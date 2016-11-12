@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe OpenAssets::Api, :network => :testnet do
+describe 'OpenAssets::Api use testnet', :network => :testnet do
 
   include OpenAssets::Util
   extend OpenAssets::Util
