@@ -8,10 +8,10 @@ class Bitcoin::Protocol::Tx
     @ver, @lock_time, @in, @out, @scripts, @witness = 1, 0, [], [], [], Bitcoin::Protocol::TxWitness.new
     @enable_bitcoinconsensus = !!ENV['USE_BITCOINCONSENSUS']
     if data
-      begin
-        parse_data_from_io(data) # parse no witness data
-      rescue StandardError
+      if witness_tx?(data)
         parse_witness_data_from_io(data) # parse witness data
+      else
+        parse_data_from_io(data) # parse no witness data
       end
     end
   end
@@ -71,6 +71,16 @@ class Bitcoin::Protocol::Tx
     payload = [@ver].pack("V") << [0].pack("c") << [1].pack("c") << Bitcoin::Protocol.pack_var_int(@in.size) << pin <<
         Bitcoin::Protocol.pack_var_int(@out.size) << pout << @witness.to_payload << [@lock_time].pack("V")
     payload
+  end
+
+  # Checks witness transaction data.
+  # see https://github.com/bitcoin/bips/blob/master/bip-0144.mediawiki
+  def witness_tx?(data)
+    buf = data.is_a?(String) ? StringIO.new(data) : data
+    buf.read(4) # read nVersion
+    marker = buf.read(1).unpack("c").first
+    flag = buf.read(1).unpack("c").first
+    marker == 0 && flag == 1
   end
 
 end
