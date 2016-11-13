@@ -52,6 +52,26 @@ describe 'Segwit Support', :network => :testnet do
         end
       end
 
+      context 'P2WSH' do
+        subject{
+          Bitcoin::Protocol::Tx.new('020000000001014b70b8cefc0ac50c91d5ead6eec62562bcd4071fc619c0c8c9c6366b3d9ffa640000000000ffffffff02ab3000000000000017a914d79474e32296aa5fa77d6af9b315438ba5afe91687580f01000000000017a914c5417a549b212544bf1dca1334068088146e939d8704004730440220502b870ceb03299f77c4be3c7e3a6b1da3a57a002a5a945aec115ce53506724702205384541b7d0f327c9b78c0bba62d55e9c276541b9475da9cafb4c2922caf712001483045022100dd6b68dfe33bbc6b0d86c6de8cca4076941b0f08a51ee7b8dd095a26b8fac13802207089920ab05d95c5a59926d25eec82fb8eeaccadbcfeb2b634567fa324f1ff6601475221029637f03d60bfba178ecdb21ba25e8682a980e486112166be74c30d313c9e7b072103bf4c91ddadf7e4cfd271f8e68c607d764f07b0f87b38aac830b47157d34e680b52ae00000000'.htb)
+        }
+        it do
+          expect(subject.hash).to eq('fe21fa5bf1500b959f839cfe885fc16a55a1cfebcd6da9ff14ac2eb6cd13d55f')
+          expect(subject.witness_hash).to eq('e1d60b7b6c95f2343841e9a6a6c41a05c5776e7dd85bf678325b7242056ce068')
+          expect(subject.in.length).to eq(1)
+          expect(subject.out.length).to eq(2)
+          expect(subject.witness.tx_in_wit.length).to eq(1)
+          expect(subject.witness.tx_in_wit[0].stack.length).to eq (4)
+          expect(subject.witness.tx_in_wit[0].stack[0]).to eq('')
+          expect(subject.witness.tx_in_wit[0].stack[1]).to eq('30440220502b870ceb03299f77c4be3c7e3a6b1da3a57a002a5a945aec115ce53506724702205384541b7d0f327c9b78c0bba62d55e9c276541b9475da9cafb4c2922caf712001')
+          expect(subject.witness.tx_in_wit[0].stack[2]).to eq('3045022100dd6b68dfe33bbc6b0d86c6de8cca4076941b0f08a51ee7b8dd095a26b8fac13802207089920ab05d95c5a59926d25eec82fb8eeaccadbcfeb2b634567fa324f1ff6601')
+          expect(subject.witness.tx_in_wit[0].stack[3]).to eq('5221029637f03d60bfba178ecdb21ba25e8682a980e486112166be74c30d313c9e7b072103bf4c91ddadf7e4cfd271f8e68c607d764f07b0f87b38aac830b47157d34e680b52ae')
+          expect(subject.in[0].script_length).to eq(0)
+          expect(subject.in[0].script_sig.bth).to eq('')
+        end
+
+      end
     end
 
   end
