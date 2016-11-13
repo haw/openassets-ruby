@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "rest-client", "~>1.8.0"
   spec.add_runtime_dependency "httpclient"
   spec.add_runtime_dependency "sqlite3"
-  spec.add_runtime_dependency "leb128", '0.1.1'
+  spec.add_runtime_dependency "leb128", '~> 1.0.0'
   spec.add_development_dependency "bundler", "~> 1.9"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec"

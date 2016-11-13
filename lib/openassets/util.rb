@@ -56,7 +56,7 @@ module OpenAssets
 
     # LEB128 encode
     def encode_leb128(value)
-      LEB128.encode(value, false).read.bth
+      LEB128.encode_unsigned(value).read.bth
     end
 
     # LEB128 decode
@@ -66,7 +66,7 @@ module OpenAssets
       value.htb.each_byte{|b|
         sio.putc(b)
         if b < 128
-          results << LEB128.decode(sio, false)
+          results << LEB128.decode_unsigned(sio)
           sio = StringIO.new
         end
       }
