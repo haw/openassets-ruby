@@ -69,6 +69,8 @@ describe 'Segwit Support', :network => :testnet do
           expect(subject.witness.tx_in_wit[0].stack[3]).to eq('5221029637f03d60bfba178ecdb21ba25e8682a980e486112166be74c30d313c9e7b072103bf4c91ddadf7e4cfd271f8e68c607d764f07b0f87b38aac830b47157d34e680b52ae')
           expect(subject.in[0].script_length).to eq(0)
           expect(subject.in[0].script_sig.bth).to eq('')
+          expect(subject.out[0].parsed_script.type).to eq(:p2sh)
+          expect(subject.out[0].parsed_script.is_standard?).to be true
         end
 
       end

@@ -24,8 +24,11 @@ module SegwitScript
       return :witness_v0_keyhash if is_witness_v0_keyhash?
       return :witness_v0_scripthash if is_witness_v0_scripthash?
       :unknown
+    else
+      base
     end
   end
+
 end
 
 class Bitcoin::Script
