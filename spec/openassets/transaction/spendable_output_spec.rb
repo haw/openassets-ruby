@@ -19,6 +19,7 @@ describe OpenAssets::Transaction::SpendableOutput, :network => :testnet do
                                   'address' => 'mkgW6hNYBctmqDtTTsTJrsf2Gh2NPtoCU4',
                                   'oa_address' => 'bWvePLsBsf6nThU3pWVZVWjZbcJCYQxHCpE',
                                   'script' => '76a91438a6ebdf20cae2c9287ea014464042112ea3dbfd88ac',
+                                  'script_type' => 'pubkeyhash',
                                   'amount' => '0.00000600',
                                   'confirmations' => 20842,
                                   'asset_id' => 'oK31ByjFuNhfnFuRMmZgchsdiprYmRzuz5',

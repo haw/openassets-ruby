@@ -59,6 +59,7 @@ module OpenAssets
             'address' =>  address,
             'oa_address' => oa_address,
             'script' => @script.to_payload.bth,
+            'script_type' => script_type,
             'amount' => satoshi_to_coin(@value),
             'asset_id' => @asset_id,
             'asset_quantity' => @asset_quantity.to_s,
@@ -86,6 +87,30 @@ module OpenAssets
           a.map{|btc_address| address_to_oa_address(btc_address)}
         else
           address_to_oa_address(a)
+        end
+      end
+
+      # get pubkey script type
+      def script_type
+        case @script.type
+          when :hash160
+            'pubkeyhash'
+          when :pubkey
+            'pubkey'
+          when :multisig
+            'multisig'
+          when :p2sh
+            'scripthash'
+          when :op_return
+            'nulldata'
+          when :witness_v0_keyhash
+            'witness_v0_keyhash'
+          when :witness_v0_scripthash
+            'witness_v0_scripthash'
+          when :unknown
+            'nonstandard'
+          else
+            'nonstandard'
         end
       end
 
