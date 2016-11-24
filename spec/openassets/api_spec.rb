@@ -383,6 +383,29 @@ describe 'OpenAssets::Api use mainnet' do
 
   end
 
+  describe 'parse_issuance_p2sh_pointer' do
+
+    context 'valid p2sh pointer' do
+      subject{
+        api = OpenAssets::Api.new
+        api.send(:parse_issuance_p2sh_pointer, '47304402202254f7da7c3fe2bf2a4dd2c3e255aa3ad61415550f648b564aea335f8fcd3d92022062eab5c01a5e33eb726f976ebd3b35d3991f8a45da56d64e1cd3fd5178f8c9a6012102effb2edfcf826d43027feae226143bdac058ad2e87b7cec26f97af2d357ddefa3217753d68747470733a2f2f676f6f2e676c2f626d564575777576a9148911455a265235b2d356a1324af000d4dae0326288ac'.htb)
+      }
+      it do
+        expect(subject).to eq('u=https://goo.gl/bmVEuw')
+      end
+    end
+
+    context 'invalid p2sh pointer' do
+      subject{
+        api = OpenAssets::Api.new
+        api.send(:parse_issuance_p2sh_pointer, '47304402203ab5ed931276e28a09cfef2cf824ee8a07659eb22751eee0500df8bb7b57f90f02206a36cbb627035391d762104ede2e613311ea2acbb49554e2f7f5ed49d328558d012102ed63c39d95a9a577403cd8517a0a6a70f5f21444741fd58b928195879ce10fd41b517576a9144dc66e4e0adef395980d547db19918773763f02388ac'.htb)
+      }
+      it do
+        expect(subject).to be nil
+      end
+    end
+  end
+
   def filter_btc_unspent(btc_address = nil)
     return BTC_UNSPENT if btc_address.nil?
     BTC_UNSPENT.select{|u|u['address'] == btc_address}

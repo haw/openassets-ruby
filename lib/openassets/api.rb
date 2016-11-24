@@ -405,7 +405,7 @@ module OpenAssets
       script = Bitcoin::Script.new(script_sig).chunks.last
       redeem_script = Bitcoin::Script.new(script)
       return nil unless redeem_script.chunks[1] == Bitcoin::Script::OP_DROP
-      asset_def = to_bytes(redeem_script.chunks[0].bth)[0..-1].map{|x|x.to_i(16).chr}.join
+      asset_def = to_bytes(redeem_script.chunks[0].to_s.bth)[0..-1].map{|x|x.to_i(16).chr}.join
       asset_def && asset_def.start_with?('u=') ? asset_def : nil
     end
 
