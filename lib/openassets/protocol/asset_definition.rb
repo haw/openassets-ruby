@@ -97,7 +97,9 @@ module OpenAssets
         cache = OpenAssets::Cache::SSLCertificateCache.new
         subject = cache.get(asset_definition_url)
         if subject.nil?
-          response = HTTPClient.new.get(asset_definition_url, :follow_redirect => true)
+          client = HTTPClient.new
+          client.redirect_uri_callback = ->(uri, res) {res.header['location'][0]}
+          response = client.get(asset_definition_url, :follow_redirect => true)
           cert = response.peer_cert
           unless cert.nil?
             subjects = cert.subject.to_a
