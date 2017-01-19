@@ -35,7 +35,7 @@ api = OpenAssets::Api.new({
 ```
 
 * **use testnet**
-change :network and :port(depends on your server setting).
+Change `network` and `port` depending on your server setting.
 ```ruby
 require 'openassets'
 
@@ -60,13 +60,13 @@ api = OpenAssets::Api.new({
 
 The configuration options are as follows:
 
-|option|describe|default|
+|option|description|default|
 |---|---|---|
 |**network**|The using network. "mainnet" or "testnet" or "regtest" |mainnet|
-|**provider**|The RPC server. Specify possible now only "bitcoind".|bitcoind|
-|**cache**|The path to the database file. If you want to use in-memory database, specify ':memory:'. |cache.db|
-|**dust_limit**|The amount of Bitcoin, which is set to the each output of the Open Assets Protocol(issue or transfer).|600 (satoshi)|
-|**default_fees**|The default transaction fee in satoshi. If you want to use auto fee settings, specify ':auto'. (used by issue_asset and send_asset, send_bitcoin )|10000 (satoshi)|
+|**provider**|The RPC server. "bitcoind" is the only option for now.|bitcoind|
+|**cache**|The path to the database file. Specify ':memory: to use in-memory database.|cache.db|
+|**dust_limit**|The amount of Bitcoin, which is set to the each output of the Open Assets Protocol (issue or transfer).|600 (satoshi)|
+|**default_fees**|The default transaction fee in satoshi. Specify ':auto' to use auto fee settings. (used by issue_asset and send_asset, send_bitcoin )|10000 (satoshi)|
 |**min_confirmation**|The minimum number of confirmations the transaction containing an output that used to get UTXO.|1|
 |**max_confirmation**|The maximum number of confirmations the transaction containing an output that used to get UTXO.|9999999|
 |**rpc**|The access information to the RPC server of Bitcoin Core.|N/A|
