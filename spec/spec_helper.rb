@@ -7,6 +7,10 @@ RSpec.configure do |config|
   config.before(:each) do |example|
     if example.metadata[:network] == :testnet
       Bitcoin.network = :testnet3
+    elsif example.metadata[:network] == :litecoin
+      Bitcoin.network = :litecoin
+    elsif example.metadata[:network] == :litecoin_testnet
+      Bitcoin.network = :litecoin_testnet
     else
       Bitcoin.network = :bitcoin
     end
