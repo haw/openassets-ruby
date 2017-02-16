@@ -362,6 +362,10 @@ module OpenAssets
           Bitcoin.network = :testnet3
         when 'regtest'
           Bitcoin.network = :regtest
+        when 'litecoin'
+          Bitcoin.network = :litecoin
+        when 'litecoin_testnet'
+          Bitcoin.network = :litecoin_testnet
         else
           Bitcoin.network = :bitcoin
       end
