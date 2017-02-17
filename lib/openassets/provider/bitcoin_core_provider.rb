@@ -10,16 +10,18 @@ module OpenAssets
           :addmultisigaddress, :addnode, :backupwallet, :createmultisig, :createrawtransaction, :decoderawtransaction,
           :decodescript, :dumpprivkey, :dumpwallet, :encryptwallet, :estimatefee, :estimatepriority, :generate,
           :getaccountaddress, :getaccount, :getaddednodeinfo, :getaddressesbyaccount, :getbalance, :getbestblockhash,
-          :getblock, :getblockchaininfo, :getblockcount, :getblockhash, :getchaintips, :getconnectioncount, :getdifficulty,
+          :getblock, :getblockchaininfo, :getblockcount, :getblockhash, :getblockheader, :getchaintips, :getconnectioncount, :getdifficulty,
+          :getmempoolancestors, :getmempooldescendants, :getmempoolentry, :clearbanned, :disconnectnode,
           :getgenerate, :gethashespersec, :getinfo, :getmempoolinfo, :getmininginfo, :getnettotals, :getnetworkhashps,
           :getnetworkinfo, :getnewaddress, :getpeerinfo, :getrawchangeaddress, :getrawmempool, :getrawtransaction,
           :getreceivedbyaccount, :getreceivedbyaddress, :gettransaction, :gettxout, :gettxoutproof, :gettxoutsetinfo,
-          :getunconfirmedbalance, :getwalletinfo, :getwork, :help, :importaddress, :importprivkey, :importwallet,
+          :getunconfirmedbalance, :getwalletinfo, :getwork, :help, :importaddress, :importprivkey, :importwallet, :importpubkey,
           :keypoolrefill, :listaccounts, :listaddressgroupings, :listlockunspent, :listreceivedbyaccount, :listreceivedbyaddress,
           :listsinceblock, :listtransactions, :listunspent, :lockunspent, :move, :ping, :prioritisetransaction, :sendfrom,
           :sendmany, :sendrawtransaction, :sendtoaddress, :setaccount, :setgenerate, :settxfee, :signmessage, :signrawtransaction,
           :stop, :submitblock, :validateaddress, :verifychain, :verifymessage, :verifytxoutproof, :walletlock, :walletpassphrase,
-          :walletpassphrasechange
+          :walletpassphrasechange, :listbanned, :setban, :fundrawtransaction, :estimatesmartfee, :estimatesmartpriority,
+          :signmessagewithprivkey, :abandontransaction, :addwitnessaddress, :importprunedfunds, :importpubkey, :removeprunedfunds
       ]
 
       attr_reader :config
