@@ -114,6 +114,7 @@ module OpenAssets
           :id => 'jsonrpc'
         }
         post(server_url, @config[:timeout], @config[:open_timeout], data.to_json, content_type: :json) do |respdata, request, result|
+          raise ApiError, result.message unless result.kind_of?(Net::HTTPSuccess)
           response = JSON.parse(respdata.gsub(/\\u([\da-fA-F]{4})/) { [$1].pack('H*').unpack('n*').pack('U*').encode('ISO-8859-1').force_encoding('UTF-8') })
           raise ApiError, response['error'] if response['error']
           response['result']
