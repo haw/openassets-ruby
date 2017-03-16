@@ -309,7 +309,8 @@ This API is to burn the asset by spending the all UTXO of specified asset as Bit
   # api.burn_asset(<from open asset address>,
   #                <asset ID>,
   #                <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>,
-  #                <mode=('broadcast', 'signed', 'unsigned')>, <output_qty default value is 1.>)
+  #                <mode=('broadcast', 'signed', 'unsigned')>,
+  #                <output_qty default value is 1.>)
 
   # example
   oa_address = 'bX2vhttomKj2fdd7SJV2nv8U4zDjusE5Y4B'
