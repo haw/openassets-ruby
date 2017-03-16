@@ -170,7 +170,13 @@ Returns the balance in both bitcoin and colored coin assets for all of the addre
 Creates a transaction for issuing an asset.
   ```ruby
   # issue asset
-  # api.issue_asset(<issuer open asset address>, <issuing asset quantity>, <metadata>, <to open asset address>, <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>, <mode=('broadcast', 'signed', 'unsigned')>, <output_qty default value is 1.>)
+  # api.issue_asset(<issuer open asset address>,
+  #                 <issuing asset quantity>,
+  #                 <metadata>,
+  #                 <to open asset address>,
+  #                 <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>,
+  #                 <mode=('broadcast', 'signed', 'unsigned')>,
+  #                 <output_qty default value is 1.>)
 
   # example
   address = 'akEJwzkzEFau4t2wjbXoMs7MwtZkB8xixmH'
@@ -183,7 +189,13 @@ Ex, amount = 125 and output_qty = 2, the marker output asset quantity is [62, 63
 Creates a transaction for sending an asset from the open asset address to another.
   ```ruby
   # send asset
-  # api.send_asset(<from open asset address>, <asset ID>, <asset quantity>, <to open asset address>, <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>, <mode=('broadcast', 'signed', 'unsigned')>, <output_qty default value is 1.>)
+  # api.send_asset(<from open asset address>,
+  #                <asset ID>,
+  #                <asset quantity>,
+  #                <to open asset address>,
+  #                <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>,
+  #                <mode=('broadcast', 'signed', 'unsigned')>,
+  #                <output_qty default value is 1.>)
 
   # example
   from = 'akXDPMMHHBrUrd1fM756M1GSB8viVAwMyBk'
@@ -198,7 +210,12 @@ Creates a transaction for sending bitcoins from an address to another.
 This transaction inputs use only uncolored outputs.
   ```ruby
   # send bitcoin
-  # api.send_bitcoin(<from btc address>, <amount (satoshi)>, <to btc address>, <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>, <mode=('broadcast', 'signed', 'unsigned')>, <output_qty default value is 1.>)
+  # api.send_bitcoin(<from btc address>,
+  #                  <amount (satoshi)>,
+  #                  <to btc address>,
+  #                  <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>,
+  #                  <mode=('broadcast', 'signed', 'unsigned')>,
+  #                  <output_qty default value is 1.>)
 
   # example
   from = '14M4kbAtn71P1nnNYuhBDFTNYxa19t1XP6'
@@ -235,7 +252,11 @@ Creates a transaction for sending **multiple** asset from the open asset address
 `<from open asset address>` is used to send bitcoins **if** needed, and receive bitcoin change **if** any.
   ```ruby
   # send assets
-  # api.send_assets(<from open asset address>, <The array of send Asset information(see OpenAssets::SendAssetParam).>, <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>, <mode=('broadcast', 'signed', 'unsigned')>, <output_qty default value is 1.>)
+  # api.send_assets(<from open asset address>,
+  #                 <The array of send Asset information(see OpenAssets::SendAssetParam).>,
+  #                 <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>,
+  #                 <mode=('broadcast', 'signed', 'unsigned')>,
+  #                 <output_qty default value is 1.>)
 
   # example
   from = api.address_to_oa_address('mrxpeizRrF8ymNx5FrvcGGZVecZjtUFVP3')
@@ -263,7 +284,11 @@ Creates a transaction for sending **multiple** bitcoins from an address to other
 This transaction inputs use only uncolored outputs.
   ```ruby
   # send bitcoins
-  # api.send_bitcoins(<from btc address>, <The array of send bitcoin information(see OpenAssets::SendBitcoinParam).>, <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>, <mode=('broadcast', 'signed', 'unsigned')>, <output_qty default value is 1.>)
+  # api.send_bitcoins(<from btc address>,
+  #                   <The array of send bitcoin information(see OpenAssets::SendBitcoinParam).>,
+  #                   <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>,
+  #                   <mode=('broadcast', 'signed', 'unsigned')>,
+  #                   <output_qty default value is 1.>)
 
   # example
   from = 'mrxpeizRrF8ymNx5FrvcGGZVecZjtUFVP3'
@@ -281,7 +306,10 @@ Creates a transaction for burn asset.
 This API is to burn the asset by spending the all UTXO of specified asset as Bitcoin.
   ```ruby
   # burn_asset
-  # api.burn_asset(<from open asset address>, <asset ID>,, <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>, <mode=('broadcast', 'signed', 'unsigned')>, <output_qty default value is 1.>)
+  # api.burn_asset(<from open asset address>,
+  #                <asset ID>,
+  #                <fees (The fess in satoshis for the transaction. use 10000 satoshi if specified nil)>,
+  #                <mode=('broadcast', 'signed', 'unsigned')>, <output_qty default value is 1.>)
 
   # example
   oa_address = 'bX2vhttomKj2fdd7SJV2nv8U4zDjusE5Y4B'
