@@ -19,4 +19,5 @@ module OpenAssets
     attr_accessor :configuration
   end
 
+  extend Util
 end
