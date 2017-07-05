@@ -1,6 +1,6 @@
 require 'bitcoin'
 require 'leb128'
-require 'segwit'
+
 module OpenAssets
 
   autoload :Protocol, 'openassets/protocol'
