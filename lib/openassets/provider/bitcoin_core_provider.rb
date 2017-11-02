@@ -6,28 +6,24 @@ module OpenAssets
     # The implementation of BlockChain provider using Bitcoin Core.
     class BitcoinCoreProvider < BlockChainProviderBase
 
-      RPC_API = [
-          :addmultisigaddress, :addnode, :backupwallet, :bumpfee, :createmultisig, :createrawtransaction, :decoderawtransaction,
-          :decodescript, :dumpprivkey, :dumpwallet, :encryptwallet, :estimatefee, :estimatepriority, :generate, :generatetoaddress,
-          :getaccountaddress, :getaccount, :getaddednodeinfo, :getaddressesbyaccount, :getbalance, :getbestblockhash,
-          :getblock, :getblockchaininfo, :getblockcount, :getblockhash, :getblockheader, :getchaintips, :getconnectioncount, :getdifficulty,
-          :getmempoolancestors, :getmempooldescendants, :getmempoolentry, :clearbanned, :disconnectnode,
-          :getgenerate, :gethashespersec, :getinfo, :getmempoolinfo, :getmininginfo, :getnettotals, :getnetworkhashps,
-          :getnetworkinfo, :getnewaddress, :getpeerinfo, :getrawchangeaddress, :getrawmempool, :getrawtransaction,
-          :getreceivedbyaccount, :getreceivedbyaddress, :gettransaction, :gettxout, :gettxoutproof, :gettxoutsetinfo, :preciousblock, :pruneblockchain,
-          :getunconfirmedbalance, :getwalletinfo, :importmulti, :getwork, :help, :importaddress, :importprivkey, :importwallet, :importpubkey,
-          :keypoolrefill, :listaccounts, :listaddressgroupings, :listlockunspent, :listreceivedbyaccount, :listreceivedbyaddress,
-          :listsinceblock, :listtransactions, :listunspent, :lockunspent, :move, :ping, :prioritisetransaction, :sendfrom,
-          :sendmany, :sendrawtransaction, :sendtoaddress, :setaccount, :setgenerate, :settxfee, :signmessage, :signrawtransaction,
-          :stop, :submitblock, :validateaddress, :verifychain, :verifymessage, :verifytxoutproof, :walletlock, :walletpassphrase,
-          :walletpassphrasechange, :listbanned, :setban, :setnetworkactive, :fundrawtransaction, :estimatesmartfee, :estimatesmartpriority,
-          :signmessagewithprivkey, :abandontransaction, :addwitnessaddress, :importprunedfunds, :importpubkey, :removeprunedfunds
-      ]
-
       attr_reader :config
 
       def initialize(config)
         @config = config
+
+        commands = request(:help).split("\n").inject([]) do |memo_ary, line|
+          if !line.empty? && !line.start_with?('==')
+            memo_ary << line.split(' ').first.to_sym
+          end
+          memo_ary
+        end
+        BitcoinCoreProvider.class_eval do
+          commands.each do |command|
+            define_method(command) do |*params|
+              request(command, *params)
+            end
+          end
+        end
       end
 
       # Get an array of unspent transaction outputs belonging to this wallet.
@@ -35,7 +31,7 @@ module OpenAssets
       # @param [Integer] min The minimum number of confirmations the transaction containing an output must have in order to be returned. Default is 1.
       # @param [Integer] max The maximum number of confirmations the transaction containing an output may have in order to be returned. Default is 9999999.
       def list_unspent(addresses = [], min = 1 , max = 9999999)
-        request('listunspent', min, max, addresses)
+        listunspent(min, max, addresses)
       end
 
       # Get raw transaction.
@@ -44,7 +40,7 @@ module OpenAssets
       # @return [String] (if verbose=0)—the serialized transaction. (if verbose=1)—the decoded transaction. (if transaction not found)—nil.
       def get_transaction(transaction_hash, verbose = 0)
         begin
-          request('getrawtransaction', transaction_hash, verbose)
+          getrawtransaction(transaction_hash, verbose)
         rescue OpenAssets::Provider::ApiError => e
           nil
         end
@@ -54,7 +50,7 @@ module OpenAssets
       # @param [String] tx The serialized format transaction.
       # @return [Bitcoin::Protocol::Tx] The signed transaction.
       def sign_transaction(tx)
-        signed_tx = request('signrawtransaction', tx)
+        signed_tx = signrawtransaction(tx)
         raise OpenAssets::Error, 'Could not sign the transaction.' unless signed_tx['complete']
         Bitcoin::Protocol::Tx.new(signed_tx['hex'].htb)
       end
@@ -63,18 +59,13 @@ module OpenAssets
       # @param [String] tx The serialized format transaction.
       # @return [String] The TXID or error message.
       def send_transaction(tx)
-        request('sendrawtransaction', tx)
+        sendrawtransaction(tx)
       end
 
       # Adds an address or pubkey script to the wallet without the associated private key, allowing you to watch for transactions affecting that address or pubkey script without being able to spend any of its outputs.
       # @param [String] address Either a P2PKH or P2SH address encoded in base58check, or a pubkey script encoded as hex.
       def import_address(address)
-        request('importaddress', address)
-      end
-
-      def method_missing(method, *params)
-        super unless RPC_API.include?(method)
-        request(method, *params)
+        importaddress(address)
       end
 
       private

@@ -43,3 +43,12 @@ def load_block_mock(provider_mock)
     allow(provider_mock).to receive(:getblock).with(block_hash).and_return(json)
   end
 end
+
+class OpenAssets::Provider::BitcoinCoreProvider
+  alias_method :original_request, :request
+
+  def request(command, *params)
+    return File.read("#{File.dirname(__FILE__)}/help-result.txt") if command == :help
+    original_request(command, *params)
+  end
+end
