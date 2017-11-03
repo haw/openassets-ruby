@@ -9,6 +9,9 @@ describe OpenAssets::Protocol::MarkerOutput do
     no_metadata_payload = OpenAssets::Protocol::MarkerOutput.new([10000], nil).to_payload
     expect(no_metadata_payload).to eq('4f41010001904e00')
 
+    binary_metadata_payload = OpenAssets::Protocol::MarkerOutput.new([10000], "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f").to_payload
+    expect(binary_metadata_payload).to eq('4f41010001904e10000102030405060708090a0b0c0d0e0f')
+
     asset_quantities = []
     252.times {asset_quantities << 4}
     payload_252 = OpenAssets::Protocol::MarkerOutput.new(asset_quantities, '').to_payload
