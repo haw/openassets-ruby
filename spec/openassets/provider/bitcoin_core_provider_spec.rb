@@ -51,9 +51,9 @@ describe OpenAssets::Provider::BitcoinCoreProvider do
       OpenAssets::Provider::BitcoinCoreProvider.new(config)
     end
 
-    context '#importaddress' do
-      context 'use node-level importaddress' do
-        it 'returns node-level importaddress' do
+    context '#import_address' do
+      context 'use node-level import_address' do
+        it 'returns node-level import_address' do
           expect(RestClient::Request).to receive(:execute).with(:method => :post, :url => "https://user:password@localhost:8332", :timeout => 60, :open_timeout => 60, :payload => "{\"method\":\"importaddress\",\"params\":[\"address\"],\"id\":\"jsonrpc\"}", :headers => {:content_type=>:json})
           provider_node_level.import_address(:address)
 
@@ -65,8 +65,8 @@ describe OpenAssets::Provider::BitcoinCoreProvider do
         end
       end
 
-      context 'use node-level importaddress with backward compatibility' do
-        it 'returns node-level importaddress' do
+      context 'use node-level import_address with backward compatibility' do
+        it 'returns node-level import_address' do
           expect(RestClient::Request).to receive(:execute).with(:method => :post, :url => "https://user:password@localhost:8332", :timeout => 60, :open_timeout => 60, :payload => "{\"method\":\"importaddress\",\"params\":[\"address\"],\"id\":\"jsonrpc\"}", :headers => {:content_type=>:json})
           provider_node_level_backward.import_address(:address)
 
@@ -78,8 +78,8 @@ describe OpenAssets::Provider::BitcoinCoreProvider do
         end
       end
 
-      context 'use wallet-level importaddress' do
-        it 'returns wallet-level importaddress' do
+      context 'use wallet-level import_address' do
+        it 'returns wallet-level import_address' do
           expect(RestClient::Request).to receive(:execute).with(:method => :post, :url => "https://user:password@localhost:8332/wallet/wallet.dat", :timeout => 60, :open_timeout => 60, :payload => "{\"method\":\"importaddress\",\"params\":[\"address\"],\"id\":\"jsonrpc\"}", :headers => {:content_type=>:json})
           provider_wallet_level.import_address(:address)
 
