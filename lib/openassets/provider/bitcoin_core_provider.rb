@@ -95,6 +95,9 @@ module OpenAssets
         url = "#{@config[:schema]}://"
         url.concat "#{@config[:user]}:#{@config[:password]}@"
         url.concat "#{@config[:host]}:#{@config[:port]}"
+        if !@config[:wallet].nil? && !@config[:wallet].empty?
+          url.concat "/wallet/#{@config[:wallet]}"
+        end
         url
       end
 
