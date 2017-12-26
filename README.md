@@ -101,6 +101,54 @@ The configuration options are as follows:
 |**max_confirmation**|The maximum number of confirmations the transaction containing an output that used to get UTXO.|9999999|
 |**rpc**|The access information to the RPC server of Bitcoin Core.|N/A|
 
+### Using the API with multi-wallet support
+
+To use the Bitcoin Core multi-wallet support ([version 0.15 onwards](https://github.com/bitcoin/bitcoin/blob/0.15/doc/release-notes/release-notes-0.15.0.md#multi-wallet-support)), you should use multiple instances of API, for example:
+
+```ruby
+@apis = Hash.new
+@apis[1] = OpenAssets::Api.new({
+            network:             'testnet',
+            provider:           'bitcoind',
+            cache:            'testnet.db',
+            dust_limit:                600,
+            default_fees:            10000,
+            min_confirmation:            1,
+            max_confirmation:      9999999,
+            rpc: {
+              user:                  'xxx',
+              password:              'xxx',
+              schema:               'http',
+              port:                  18332,
+              host:            'localhost',
+              wallet:      'wallet001.dat',
+              timeout:                  60,
+              open_timeout:             60 }
+          })
+@apis[2] = OpenAssets::Api.new({
+            network:             'testnet',
+            provider:           'bitcoind',
+            cache:            'testnet.db',
+            dust_limit:                600,
+            default_fees:            10000,
+            min_confirmation:            1,
+            max_confirmation:      9999999,
+            rpc: {
+              user:                  'xxx',
+              password:              'xxx',
+              schema:               'http',
+              port:                  18332,
+              host:            'localhost',
+              wallet:      'wallet002.dat',
+              timeout:                  60,
+              open_timeout:             60 }
+          })
+# More wallets perhaps...
+# Then call API selectively
+@apis[1].provider.list_unspent
+@apis[2].provider.list_unspent
+```
+
 ## API
 
 Currently openassets-ruby support the following API.
@@ -348,54 +396,6 @@ This API is to burn the asset by spending the all UTXO of specified asset as Bit
   ```
 
   **Note:** Burnt asset will be lost forever.
-
-### Using the API with multi-wallet support
-
-To use the Bitcoin Core multi-wallet support ([version 0.15 onwards](https://github.com/bitcoin/bitcoin/blob/0.15/doc/release-notes/release-notes-0.15.0.md#multi-wallet-support)), you should use multiple instances of API, for example:
-
-```ruby
-@apis = Hash.new
-@apis[1] = OpenAssets::Api.new({
-            network:             'testnet',
-            provider:           'bitcoind',
-            cache:            'testnet.db',
-            dust_limit:                600,
-            default_fees:            10000,
-            min_confirmation:            1,
-            max_confirmation:      9999999,
-            rpc: {
-              user:                  'xxx',
-              password:              'xxx',
-              schema:               'http',
-              port:                  18332,
-              host:            'localhost',
-              wallet:      'wallet001.dat',
-              timeout:                  60,
-              open_timeout:             60 }
-          })
-@apis[2] = OpenAssets::Api.new({
-            network:             'testnet',
-            provider:           'bitcoind',
-            cache:            'testnet.db',
-            dust_limit:                600,
-            default_fees:            10000,
-            min_confirmation:            1,
-            max_confirmation:      9999999,
-            rpc: {
-              user:                  'xxx',
-              password:              'xxx',
-              schema:               'http',
-              port:                  18332,
-              host:            'localhost',
-              wallet:      'wallet002.dat',
-              timeout:                  60,
-              open_timeout:             60 }
-          })
-# More wallets perhaps...
-# Then call API selectively
-@apis[1].provider.list_unspent
-@apis[2].provider.list_unspent
-```
 
 ## Command line interface
 
