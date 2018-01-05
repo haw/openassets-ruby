@@ -12,51 +12,81 @@ gem install openassets-ruby
 Initialize the connection information to the Bitcoin Core server.
 
 * **use mainnet**
-```ruby
-require 'openassets'
 
-api = OpenAssets::Api.new({
-    network:           'mainnet',
-    provider:         'bitcoind',
-    cache:            'cache.db',
-    dust_limit:              600,
-    default_fees:          10000,
-    min_confirmation:          1,
-    max_confirmation:    9999999,
-    rpc: {
-      user:                'xxx',
-      password:            'xxx',
-      schema:             'http',
-      port:                 8332,
-      host:          'localhost',
-      timeout:                60,
-      open_timeout:           60 }
-  })
-```
+  ```ruby
+  require 'openassets'
+
+  api = OpenAssets::Api.new({
+      network:           'mainnet',
+      provider:         'bitcoind',
+      cache:            'cache.db',
+      dust_limit:              600,
+      default_fees:          10000,
+      min_confirmation:          1,
+      max_confirmation:    9999999,
+      rpc: {
+        user:                'xxx',
+        password:            'xxx',
+        schema:             'http',
+        port:                 8332,
+        host:          'localhost',
+        timeout:                60,
+        open_timeout:           60 }
+    })
+  ```
 
 * **use testnet**
-Change `network` and `port` depending on your server setting.
-```ruby
-require 'openassets'
 
-api = OpenAssets::Api.new({
-    network:             'testnet',
-    provider:           'bitcoind',
-    cache:            'testnet.db',
-    dust_limit:                600,
-    default_fees:            10000,
-    min_confirmation:            1,
-    max_confirmation:      9999999,
-    rpc: {
-      user:                  'xxx',
-      password:              'xxx',
-      schema:               'http',
-      port:                  18332,
-      host:            'localhost',
-      timeout:                  60,
-      open_timeout:             60 }
-  })
-```
+  Change `network` and `port` depending on your server setting.
+
+  ```ruby
+  require 'openassets'
+
+  api = OpenAssets::Api.new({
+      network:             'testnet',
+      provider:           'bitcoind',
+      cache:            'testnet.db',
+      dust_limit:                600,
+      default_fees:            10000,
+      min_confirmation:            1,
+      max_confirmation:      9999999,
+      rpc: {
+        user:                  'xxx',
+        password:              'xxx',
+        schema:               'http',
+        port:                  18332,
+        host:            'localhost',
+        timeout:                  60,
+        open_timeout:             60 }
+    })
+  ```
+
+* **with [multi-wallet support](https://github.com/bitcoin/bitcoin/blob/0.15/doc/release-notes/release-notes-0.15.0.md#multi-wallet-support)**
+
+  From Bitcoin Core version 0.15 onwards, change `wallet` depending on wallet settings.
+
+  ```ruby
+  require 'openassets'
+
+  api = OpenAssets::Api.new({
+      network:             'testnet',
+      provider:           'bitcoind',
+      cache:            'testnet.db',
+      dust_limit:                600,
+      default_fees:            10000,
+      min_confirmation:            1,
+      max_confirmation:      9999999,
+      rpc: {
+        user:                  'xxx',
+        password:              'xxx',
+        schema:               'http',
+        port:                  18332,
+        host:            'localhost',
+        wallet:         'wallet.dat',
+        timeout:                  60,
+        open_timeout:             60 }
+    })
+  ```
 
 The configuration options are as follows:
 
@@ -64,12 +94,60 @@ The configuration options are as follows:
 |---|---|---|
 |**network**|The using network. "mainnet" or "testnet" or "regtest" or "litecoin" or "litecoin_testnet" |mainnet|
 |**provider**|The RPC server. "bitcoind" is the only option for now.|bitcoind|
-|**cache**|The path to the database file. Specify ':memory: to use in-memory database.|cache.db|
+|**cache**|The path to the database file. Specify `':memory:'` to use in-memory database.|cache.db|
 |**dust_limit**|The amount of Bitcoin, which is set to the each output of the Open Assets Protocol (issue or transfer).|600 (satoshi)|
-|**default_fees**|The default transaction fee in satoshi. Specify ':auto' to use auto fee settings. (used by issue_asset and send_asset, send_bitcoin )|10000 (satoshi)|
+|**default_fees**|The default transaction fee in satoshi. Specify `:auto` to use auto fee settings. (used by issue_asset and send_asset, send_bitcoin )|10000 (satoshi)|
 |**min_confirmation**|The minimum number of confirmations the transaction containing an output that used to get UTXO.|1|
 |**max_confirmation**|The maximum number of confirmations the transaction containing an output that used to get UTXO.|9999999|
 |**rpc**|The access information to the RPC server of Bitcoin Core.|N/A|
+
+### Using the API with multi-wallet support
+
+To use the Bitcoin Core multi-wallet support ([version 0.15 onwards](https://github.com/bitcoin/bitcoin/blob/0.15/doc/release-notes/release-notes-0.15.0.md#multi-wallet-support)), you should use multiple instances of API, for example:
+
+```ruby
+@apis = Hash.new
+@apis[1] = OpenAssets::Api.new({
+            network:             'testnet',
+            provider:           'bitcoind',
+            cache:            'testnet.db',
+            dust_limit:                600,
+            default_fees:            10000,
+            min_confirmation:            1,
+            max_confirmation:      9999999,
+            rpc: {
+              user:                  'xxx',
+              password:              'xxx',
+              schema:               'http',
+              port:                  18332,
+              host:            'localhost',
+              wallet:      'wallet001.dat',
+              timeout:                  60,
+              open_timeout:             60 }
+          })
+@apis[2] = OpenAssets::Api.new({
+            network:             'testnet',
+            provider:           'bitcoind',
+            cache:            'testnet.db',
+            dust_limit:                600,
+            default_fees:            10000,
+            min_confirmation:            1,
+            max_confirmation:      9999999,
+            rpc: {
+              user:                  'xxx',
+              password:              'xxx',
+              schema:               'http',
+              port:                  18332,
+              host:            'localhost',
+              wallet:      'wallet002.dat',
+              timeout:                  60,
+              open_timeout:             60 }
+          })
+# More wallets perhaps...
+# Then call API selectively
+@apis[1].provider.list_unspent
+@apis[2].provider.list_unspent
+```
 
 ## API
 
@@ -183,10 +261,10 @@ Creates a transaction for issuing an asset.
   api.issue_asset(address, 150, 'u=https://goo.gl/bmVEuw', address, nil, 'broadcast')
   ```
 If specified ``output_qty``, the issue output is divided by the number of output_qty.
-Ex, amount = 125 and output_qty = 2, the marker output asset quantity is [62, 63] and issue TxOut is two.
+For example, amount = 125 and output_qty = 2, the marker output asset quantity is [62, 63] and issue TxOut is two.
 
 * **send_asset**
-Creates a transaction for sending an asset from the open asset address to another.
+  Creates a transaction for sending an asset from the open asset address to another.
   ```ruby
   # send asset
   # api.send_asset(<from open asset address>,
@@ -316,7 +394,8 @@ This API is to burn the asset by spending the all UTXO of specified asset as Bit
   asset_id = 'oGu4VXx2TU97d9LmPP8PMCkHckkcPqC5RY'
   tx = api.burn_asset(oa_address, asset_id)
   ```
-**Note:** Burned asset will not be able to again get.
+
+  **Note:** Burnt asset will be lost forever.
 
 ## Command line interface
 
@@ -328,10 +407,10 @@ Openassets-ruby comes with a `openassets` command line interface that allows eas
 
     Options:
     -c path to config JSON which is passed to OpenAssets::Api.new - see Configuration for details
-    -e load conifg from ENV variables (look at the exe/openassets file for details)
+    -e load config from ENV variables (look at the exe/openassets file for details)
 
     commands:
-    * console runs an IRB console and gives you an initialized Api instance to interact with OpenAssets
+    * console runs an IRB console and gives you an initialized API instance to interact with OpenAssets
     * any method on the API instance, helpful for get_balance, list_unspent
 
 
