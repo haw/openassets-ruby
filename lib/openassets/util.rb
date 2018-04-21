@@ -15,12 +15,16 @@ module OpenAssets
     # @param [String] btc_address The Bitcoin address.
     # @return [String] The Open Assets Address.
     def address_to_oa_address(btc_address)
-      btc_hex = decode_base58(btc_address)
-      btc_hex = '0' +btc_hex if btc_hex.size==47
-      address = btc_hex[0..-9] # bitcoin address without checksum
-      named_addr = OA_NAMESPACE.to_s(16) + address
-      oa_checksum = checksum(named_addr)
-      encode_base58(named_addr + oa_checksum)
+      begin
+        btc_hex = decode_base58(btc_address)
+        btc_hex = '0' +btc_hex if btc_hex.size==47
+        address = btc_hex[0..-9] # bitcoin address without checksum
+        named_addr = OA_NAMESPACE.to_s(16) + address
+        oa_checksum = checksum(named_addr)
+        encode_base58(named_addr + oa_checksum)
+      rescue ArgumentError
+        nil # bech32 format fails to decode. TODO define OA address for segwit
+      end
     end
 
     # convert open assets address to bitcoin address
@@ -95,11 +99,7 @@ module OpenAssets
     # @param [Bitcoin::Script] script The output script.
     # @return [String] The Bitcoin address. if the script dose not contains address, return nil.
     def script_to_address(script)
-      return script.get_pubkey_address    if script.is_pubkey?
-      return script.get_hash160_address   if script.is_hash160?
-      return script.get_multisig_addresses  if script.is_multisig?
-      return script.get_p2sh_address      if script.is_p2sh?
-      nil
+      script.is_multisig? ? script.get_multisig_addresses : script.get_addresses.first
     end
 
     # validate bitcoin address

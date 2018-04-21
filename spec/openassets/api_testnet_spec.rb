@@ -28,6 +28,9 @@ describe 'OpenAssets::Api use testnet', :network => :testnet do
 
         expect(subject[7]['asset_id']).to eq('oNJgtrSSRzsU9k8Gnozy8pARhrwjKRoX5m')
         expect(subject[7]['proof_of_authenticity']).to eq(true)
+
+        # P2WPKH
+        expect(subject[8]['address']).to eq('tb1qtr8rf2esn3ej2yxu7j0e9qexttskc7p3yluywq')
       end
     end
 
@@ -237,13 +240,13 @@ describe 'OpenAssets::Api use testnet', :network => :testnet do
 
       context 'not have enough fee' do
         it do
-          expect{create_api.burn_asset(oa_address, asset_id, 101201, 'unsignd')}.to raise_error(OpenAssets::Transaction::InsufficientFundsError)
+          expect{create_api.burn_asset(oa_address, asset_id, 30100874, 'unsignd')}.to raise_error(OpenAssets::Transaction::InsufficientFundsError)
         end
       end
 
       context 'fee = utxo' do
         it do
-          create_api.burn_asset(oa_address, asset_id, 101200, 'unsignd')
+          create_api.burn_asset(oa_address, asset_id, 30100873, 'unsignd')
         end
       end
 
@@ -423,7 +426,20 @@ describe 'OpenAssets::Api use testnet', :network => :testnet do
         "account" => "proof-of-authenticity",
         "spendable" => true,
         "solvable" => true
+      },
+      {
+          "txid" => "a91ddd4d17b1c1cda9bcdb1ebb95ebeb375af3bea974c67b9470d176e850baba",
+          "vout" => 1,
+          "address" => "tb1qtr8rf2esn3ej2yxu7j0e9qexttskc7p3yluywq",
+          "account" => "",
+          "scriptPubKey" => "001458ce34ab309c732510dcf49f9283265ae16c7831",
+          "amount" => 0.29999673,
+          "confirmations" => 13260,
+          "spendable" => true,
+          "solvable" => true,
+          "safe" => true
       }
+
   ]
 
 end
