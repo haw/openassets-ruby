@@ -219,7 +219,6 @@ module OpenAssets
         cached = output_cache.get(txid, output_index)
         return cached unless cached.nil?
       end
-      puts "#{txid}:[#{output_index}]"
       decode_tx = load_cached_tx(txid)
       tx = Bitcoin::Protocol::Tx.new(decode_tx.htb)
       colored_outputs = get_color_outputs_from_tx(tx)
