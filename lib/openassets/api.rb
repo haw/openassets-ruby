@@ -74,7 +74,7 @@ module OpenAssets
         }
         {
             'address' => btc_address,
-            'oa_address' => btc_address.nil? ? nil : address_to_oa_address(btc_address),
+            'oa_address' => (btc_address.nil? || btc_address.is_a?(Array)) ? nil : address_to_oa_address(btc_address),
             'value' => satoshi_to_coin(v.inject(0) { |sum, o|sum +  o.value}),
             'assets' => assets,
             'account' => v[0].account
@@ -219,6 +219,7 @@ module OpenAssets
         cached = output_cache.get(txid, output_index)
         return cached unless cached.nil?
       end
+      puts "#{txid}:[#{output_index}]"
       decode_tx = load_cached_tx(txid)
       tx = Bitcoin::Protocol::Tx.new(decode_tx.htb)
       colored_outputs = get_color_outputs_from_tx(tx)
