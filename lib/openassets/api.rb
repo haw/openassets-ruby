@@ -227,7 +227,7 @@ module OpenAssets
     end
 
     def get_color_outputs_from_tx(tx)
-      unless tx.is_coinbase?
+      unless tx.coinbase?
         tx.outputs.each_with_index { |out, i|
           marker_output_payload = OpenAssets::Protocol::MarkerOutput.parse_script(out.pk_script)
           unless marker_output_payload.nil?
