@@ -69,13 +69,13 @@ describe OpenAssets::Protocol::AssetDefinition do
     definition = OpenAssets::Protocol::AssetDefinition.new
     definition.link_to_website = true
     definition.asset_definition_url = ssl_site
-    definition.issuer = 'Amazon.com Inc.'
+    definition.issuer = 'Amazon.com, Inc.'
     expect(definition.proof_of_authenticity).to eq(true)
 
     definition = OpenAssets::Protocol::AssetDefinition.new
     definition.link_to_website = true
     definition.asset_definition_url = ssl_site
-    definition.issuer = 'Amazon.com Inc.'
+    definition.issuer = 'Amazon.com, Inc.'
     expect(definition.proof_of_authenticity).to eq(true)
     definition.link_to_website = false
     expect(definition.proof_of_authenticity).to eq(false)
