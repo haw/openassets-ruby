@@ -44,11 +44,20 @@ def load_block_mock(provider_mock)
   end
 end
 
+def load_help(version)
+  File.read("#{File.dirname(__FILE__)}/fixtures/help-result-#{version}.txt")
+end
+
 class OpenAssets::Provider::BitcoinCoreProvider
   alias_method :original_request, :request
 
   def request(command, *params)
-    return File.read("#{File.dirname(__FILE__)}/help-result.txt") if command == :help
+    return load_help(core_version) if command == :help
     original_request(command, *params)
   end
+
+  def core_version
+    "0.16.0"
+  end
+
 end

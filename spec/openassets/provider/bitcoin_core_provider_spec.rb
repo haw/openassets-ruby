@@ -14,7 +14,7 @@ describe OpenAssets::Provider::BitcoinCoreProvider do
   describe 'implicitly defined methods' do
     context 'implicitly defined' do
       it 'returns help results' do
-        help_commands = File.read("#{File.dirname(__FILE__)}/../../help-result.txt").split("\n").inject([]) do |commands, line|
+        help_commands = load_help("0.16.0").split("\n").inject([]) do |commands, line|
           if !line.empty? && !line.start_with?('==')
             commands << line.split(' ').first.to_sym
           end
@@ -219,6 +219,31 @@ describe OpenAssets::Provider::BitcoinCoreProvider do
           provider_wallet_level.sign_transaction(:tx)
         end
       end
+
+      context 'version 0.16.0' do
+        it 'should call signrawtransaction' do
+          allow(rest_client_mock).to receive(:[]).and_return(true, '01000000000000000000')
+          expect(provider_wallet_level).to receive(:post).with("https://user:password@localhost:8332/wallet/wallet.dat", 60, 60, "{\"method\":\"signrawtransaction\",\"params\":[\"tx\"],\"id\":\"jsonrpc\"}", {:content_type=>:json}).and_return(rest_client_mock)
+          provider_wallet_level.sign_transaction(:tx)
+        end
+      end
+
+      context 'version 0.18.0' do
+
+        before {
+          allow_any_instance_of(OpenAssets::Provider::BitcoinCoreProvider).to receive(:core_version).and_return("0.18.0")
+        }
+
+        it 'should call signrawtransactionwithwallet' do
+          rest_client_mock = double('Rest Client 0.18.0')
+          allow(RestClient::Request).to receive(:execute).and_return(rest_client_mock)
+          provider = OpenAssets::Provider::BitcoinCoreProvider.new({schema: 'https', user: 'user', password: 'password', host: 'localhost', port: '8332', wallet: 'wallet.dat', timeout: 60, open_timeout: 60})
+          allow(rest_client_mock).to receive(:[]).and_return(true, '01000000000000000000')
+          expect(provider).to receive(:post).with("https://user:password@localhost:8332/wallet/wallet.dat", 60, 60, "{\"method\":\"signrawtransactionwithwallet\",\"params\":[\"tx\"],\"id\":\"jsonrpc\"}", {:content_type=>:json}).and_return(rest_client_mock)
+          provider.sign_transaction(:tx)
+        end
+      end
+
     end
 
     context '#send_transaction' do
