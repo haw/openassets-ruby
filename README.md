@@ -249,6 +249,7 @@ Creates a transaction for issuing an asset.
   ```ruby
   # issue asset
   # api.issue_asset(<issuer open asset address>,
+  #                 (if you connect Bitcoin Core 0.18.0 and over, You heve to need <issuer open private key>),
   #                 <issuing asset quantity>,
   #                 <metadata>,
   #                 <to open asset address>,
@@ -256,9 +257,9 @@ Creates a transaction for issuing an asset.
   #                 <mode=('broadcast', 'signed', 'unsigned')>,
   #                 <output_qty default value is 1.>)
 
-  # example
+  # example (Bitcoin Core 0.18.0 and over)
   address = 'akEJwzkzEFau4t2wjbXoMs7MwtZkB8xixmH'
-  api.issue_asset(address, 150, 'u=https://goo.gl/bmVEuw', address, nil, 'broadcast')
+  api.issue_asset(address, 150, priv_key, 'u=https://goo.gl/bmVEuw', address, nil, 'broadcast')
   ```
 If specified ``output_qty``, the issue output is divided by the number of output_qty.
 For example, amount = 125 and output_qty = 2, the marker output asset quantity is [62, 63] and issue TxOut is two.

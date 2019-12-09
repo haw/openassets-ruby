@@ -96,12 +96,12 @@ module OpenAssets
     # @param[Integer] output_qty The number of divides the issue output. Default value is 1.
     # Ex. amount = 125 and output_qty = 2, asset quantity = [62, 63] and issue TxOut is two.
     # @return[Bitcoin::Protocol::Tx] The Bitcoin::Protocol::Tx object.
-    def issue_asset(from, amount, metadata = nil, to = nil, fees = nil, mode = 'broadcast', output_qty = 1)
+    def issue_asset(from, priv_key, amount, metadata = nil, to = nil, fees = nil, mode = 'broadcast', output_qty = 1)
       to = from if to.nil?
       colored_outputs = get_unspent_outputs([oa_address_to_address(from)])
       issue_param = OpenAssets::Transaction::TransferParameters.new(colored_outputs, to, from, amount, output_qty)
-      tx = create_tx_builder.issue_asset(issue_param, metadata, fees.nil? ? @config[:default_fees]: fees)
-      tx = process_transaction(tx, mode)
+      tx = create_tx_builder.issue_asset(issue_param, metadata, fees.nil? ? @config[:default_fees] : fees)
+      tx = process_transaction(tx, mode, priv_key)
       tx
     end
 
@@ -227,7 +227,7 @@ module OpenAssets
     end
 
     def get_color_outputs_from_tx(tx)
-      unless tx.is_coinbase?
+      unless tx.coinbase?
         tx.outputs.each_with_index { |out, i|
           marker_output_payload = OpenAssets::Protocol::MarkerOutput.parse_script(out.pk_script)
           unless marker_output_payload.nil?
@@ -344,10 +344,10 @@ module OpenAssets
       result
     end
 
-    def process_transaction(tx, mode)
+    def process_transaction(tx, mode, priv_key)
       if mode == 'broadcast' || mode == 'signed'
         # sign the transaction
-        signed_tx = provider.sign_transaction(tx.to_payload.bth)
+        signed_tx = provider.sign_transaction(tx.to_payload.bth, priv_key)
         if mode == 'broadcast'
           puts provider.send_transaction(signed_tx.to_payload.bth)
         end
